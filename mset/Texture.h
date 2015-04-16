@@ -6,7 +6,7 @@
 @interface Texture : NSObject
 
 +(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale;
-
+-(void)setPixel:(uint)index rgba:(uint32_t)rgba;
 -(void)replace;
 
 @property (nonatomic, readonly) float width;

@@ -4,6 +4,12 @@
 //
 
 /*
+ * macros
+ */
+#define COLOUR_RGB(r, g, b) (((uint)(r) << 16) | ((uint)(g) << 8) | (uint)(b))
+#define COLOUR_RGBA(r, g, b, a) (((uint)(r) << 24) | ((uint)(g) << 16) | ((uint)(b) << 8) | (uint)(a))
+
+/*
  * types
  */
 typedef struct {

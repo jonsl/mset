@@ -33,19 +33,26 @@
         [self createGlTexture:_imageData width:width2 height:height2 numMipmaps:0];
 
         CGContextRelease(context);
-        free(_imageData);
 
         _width = width2;
         _height = height2;
         _scale = scale;
 
-        self.repeat = NO;
+        self.repeat = NO;   // invoke setter
     }
     return self;
 }
 
 -(void)dealloc {
     glDeleteTextures(1, &_name);
+    _name = 0;
+    free(_imageData);
+    _imageData = 0;
+}
+
+-(void)setPixel:(uint)index rgba:(uint32_t)rgba {
+    NSAssert(sizeof(uint32_t) == 4, @"invalid size");
+    ((uint32_t*) _imageData)[index] = rgba;
 }
 
 -(void)createGlTexture:(const void*)imgData width:(uint)width height:(uint)height numMipmaps:(uint)numMipmaps {

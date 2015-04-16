@@ -8,6 +8,7 @@
 
 #import "Mset.h"
 
+
 @interface GameViewController ()
 
 @property (strong, nonatomic) EAGLContext* context;
@@ -103,10 +104,12 @@
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    self.texture.imageData[0] = 0xff;
-    self.texture.imageData[1] = 0xff;
-    self.texture.imageData[2] = 0xff;
-    self.texture.imageData[3] = 0xff;
+    [self.texture setPixel:0 rgba:COLOUR_RGBA(0x10, 0x20, 0x30, 0x40)];
+
+//    self.texture.imageData[0] = 0xff;
+//    self.texture.imageData[1] = 0xff;
+//    self.texture.imageData[2] = 0xff;
+//    self.texture.imageData[3] = 0xff;
 
     [self.texture replace];
 

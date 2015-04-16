@@ -12,7 +12,6 @@
 @interface RendererState : NSObject
 
 +(RendererState*)rendererState;
-
 -(void)prepareState;
 
 @property (nonatomic, assign) GLKMatrix4 mvpMatrix;
