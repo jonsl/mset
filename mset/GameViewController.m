@@ -122,12 +122,10 @@ GLfloat gCubeVertexData[216] =
 
         Texture* tex = [Texture textureWithWidth:20 height:20 scale:1];
 
-        unsigned char* imageData = [tex rgba];
-
-        imageData[0] = 0xff;
-        imageData[1] = 0xff;
-        imageData[2] = 0xff;
-        imageData[3] = 0xff;
+        tex.rgba[0] = 0xff;
+        tex.rgba[1] = 0xff;
+        tex.rgba[2] = 0xff;
+        tex.rgba[3] = 0xff;
 
         [tex update];
 

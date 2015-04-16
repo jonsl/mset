@@ -13,6 +13,7 @@
 
 @property (nonatomic, readonly) float width;
 @property (nonatomic, readonly) float height;
+@property (nonatomic) unsigned char* rgba;
 @property (nonatomic, assign) BOOL repeat;
 
 @end
