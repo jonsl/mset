@@ -48,20 +48,6 @@
     glDeleteTextures(1, &_name);
 }
 
-+(uint)nextPowerOfTwo:(uint)value {
-    unsigned int v = value; // compute the next highest power of 2 of 32-bit v
-
-    v--;
-    v |= v >> 1;
-    v |= v >> 2;
-    v |= v >> 4;
-    v |= v >> 8;
-    v |= v >> 16;
-    v++;
-
-    return v;
-}
-
 -(void)createGlTexture:(const void*)imgData width:(uint)width height:(uint)height numMipmaps:(uint)numMipmaps {
     GLenum glTexType = GL_UNSIGNED_BYTE;
     GLenum glTexFormat = GL_RGBA;
@@ -108,6 +94,19 @@
     if (glError != GL_NO_ERROR) {
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
+}
+
++(uint)nextPowerOfTwo:(uint)value {
+    // REF: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+    unsigned int v = value;
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
 }
 
 @end
