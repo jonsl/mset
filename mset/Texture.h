@@ -8,12 +8,13 @@
 @interface Texture : NSObject
 
 +(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale;
--(unsigned char*)rgba;
--(void)update;
+-(void)replace;
 
 @property (nonatomic, readonly) float width;
 @property (nonatomic, readonly) float height;
-@property (nonatomic) unsigned char* rgba;
+@property (nonatomic, readonly) float scale;
+@property (nonatomic, readonly) uint name;
+@property (nonatomic) unsigned char* imageData;
 @property (nonatomic, assign) BOOL repeat;
 
 @end

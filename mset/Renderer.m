@@ -17,14 +17,14 @@
 @implementation Renderer {
     NSMutableDictionary *_programs;
 
-    GLKMatrix4 _mvpMatrix;
-
-    float _alpha;
-    BOOL _premultipliedAlpha;
-
     int _aPosition;
     int _aTexCoords;
 };
+
++(Renderer*)rendererWithImageWidth:(CGFloat)width height:(CGFloat)height
+{
+    return [[Renderer alloc] initWithImageWidth:width height:height];
+}
 
 -(instancetype)initWithImageWidth:(CGFloat)width height:(CGFloat)height
 {
@@ -36,23 +36,23 @@
     return self;
 }
 
--(void)prepareStateWithTexture:(uint)textureId
+-(void)prepareStateWithTexture:(Texture*)texture
 {
     if (!_program) {
         NSString *vertexShader = [self vertexShader];
         NSString *fragmentShader = [self fragmentShader];
-        _program = [[Program alloc] initWithVertexShader:vertexShader fragmentShader:fragmentShader];
+        _program = [Program programWithVertexShader:vertexShader fragmentShader:fragmentShader];
     }
 
     _aPosition  = [_program getTrait:@"aPosition"];
     _aTexCoords = [_program getTrait:@"aTexCoords"];
     _uMvpMatrix = [_program getTrait:@"uMvpMatrix"];
 
-    glUseProgram(_program.programId);
+    glUseProgram(_program.name);
     glUniformMatrix4fv(_uMvpMatrix, 1, NO, _mvpMatrix.m);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    glBindTexture(GL_TEXTURE_2D, texture.name);
 }
 
 -(NSString*)vertexShader

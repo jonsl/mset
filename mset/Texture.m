@@ -6,13 +6,7 @@
 #import "Texture.h"
 
 
-@implementation Texture {
-    float _width;
-    float _height;
-    float _scale;
-    uint _name;
-    unsigned char* _imageData;
-}
+@implementation Texture
 
 +(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale
 {
@@ -101,12 +95,7 @@
     }
 }
 
--(unsigned char*)rgba
-{
-    return _imageData;
-}
-
--(void)update
+-(void)replace
 {
     glBindTexture(GL_TEXTURE_2D, _name);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, _imageData);

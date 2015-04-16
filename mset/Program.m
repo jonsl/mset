@@ -15,6 +15,11 @@
 
 @implementation Program
 
++(Program*)programWithVertexShader:(NSString *)vertexShader fragmentShader:(NSString *)fragmentShader
+{
+    return [[Program alloc] initWithVertexShader:vertexShader fragmentShader:fragmentShader];
+}
+
 -(instancetype)initWithVertexShader:(NSString *)vertexShader fragmentShader:(NSString *)fragmentShader
 {
     if ((self = [super init]))
@@ -68,7 +73,7 @@
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    _programId = program;
+    _name = program;
 }
 
 -(uint)compileShader:(NSString *)source type:(GLenum)type
@@ -114,14 +119,14 @@
     char rawName[MAX_NAME_LENGTH];
 
     int numTraits = 0;
-    glGetProgramiv(_programId, GL_ACTIVE_UNIFORMS, &numTraits);
+    glGetProgramiv(_name, GL_ACTIVE_UNIFORMS, &numTraits);
     for (int i=0; i<numTraits; ++i) {
-        glGetActiveUniform(_programId, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
+        glGetActiveUniform(_name, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
         NSString *name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
         if (self.traitMap[name] == nil) {
-            self.traitMap[name] = @(glGetUniformLocation(_programId, rawName));
+            self.traitMap[name] = @(glGetUniformLocation(_name, rawName));
         } else {
-            [NSException raise:@"invalid trait name" format:@"shader name collision '%@' in program %d", name, _programId];
+            [NSException raise:@"invalid trait name" format:@"shader name collision '%@' in program %d", name, _name];
         }
     }
 }
@@ -132,14 +137,14 @@
     char rawName[MAX_NAME_LENGTH];
 
     int numTraits = 0;
-    glGetProgramiv(_programId, GL_ACTIVE_ATTRIBUTES, &numTraits);
+    glGetProgramiv(_name, GL_ACTIVE_ATTRIBUTES, &numTraits);
     for (int i=0; i<numTraits; ++i) {
-        glGetActiveAttrib(_programId, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
+        glGetActiveAttrib(_name, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
         NSString *name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
         if (self.traitMap[name] == nil) {
-            self.traitMap[name] = @(glGetAttribLocation(_programId, rawName));
+            self.traitMap[name] = @(glGetAttribLocation(_name, rawName));
         } else {
-            [NSException raise:@"invalid trait name" format:@"shader name collision '%@' in program %d", name, _programId];
+            [NSException raise:@"invalid trait name" format:@"shader name collision '%@' in program %d", name, _name];
         }
     }
 }

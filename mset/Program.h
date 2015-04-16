@@ -5,9 +5,9 @@
 
 @interface Program : NSObject
 
--(instancetype)initWithVertexShader:(NSString *)vertexShader fragmentShader:(NSString *)fragmentShader;
++(Program*)programWithVertexShader:(NSString *)vertexShader fragmentShader:(NSString *)fragmentShader;
 -(int)getTrait:(NSString*)name;
 
-@property (nonatomic, readonly) uint programId;
+@property (nonatomic, readonly) uint name;
 
 @end
