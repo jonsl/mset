@@ -10,12 +10,16 @@
 #define mset_Mset_h
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
 #import <OpenGLES/ES2/glext.h>
 
+#import "GameViewController.h"
 #import "NSExtensions.h"
+#import "Util.h"
 #import "Program.h"
 #import "Texture.h"
-#import "Renderer.h"
+#import "Quad.h"
+#import "RendererState.h"
 
 #endif

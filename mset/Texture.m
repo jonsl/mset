@@ -3,18 +3,16 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-#import "Texture.h"
+#import "Mset.h"
 
 
 @implementation Texture
 
-+(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale
-{
++(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale {
     return [[Texture alloc] initWithWidth:width height:height scale:scale];
 }
 
--(instancetype)initWithWidth:(float)width height:(float)height scale:(float)scale
-{
+-(instancetype)initWithWidth:(float)width height:(float)height scale:(float)scale {
     if ((self = [super init])) {
         // only textures with sidelengths that are powers of 2 support all OpenGL ES features.
         int width2 = [Texture nextPowerOfTwo:width * scale];
@@ -46,13 +44,11 @@
     return self;
 }
 
-- (void)dealloc
-{
+-(void)dealloc {
     glDeleteTextures(1, &_name);
 }
 
-+(uint)nextPowerOfTwo:(uint)value
-{
++(uint)nextPowerOfTwo:(uint)value {
     unsigned int v = value; // compute the next highest power of 2 of 32-bit v
 
     v--;
@@ -66,8 +62,7 @@
     return v;
 }
 
--(void)createGlTexture:(const void *)imgData width:(uint)width height:(uint)height numMipmaps:(uint)numMipmaps
-{
+-(void)createGlTexture:(const void*)imgData width:(uint)width height:(uint)height numMipmaps:(uint)numMipmaps {
     GLenum glTexType = GL_UNSIGNED_BYTE;
     GLenum glTexFormat = GL_RGBA;
     int bitsPerPixel = 32;
@@ -75,45 +70,43 @@
     glGenTextures(1, &_name);
     glBindTexture(GL_TEXTURE_2D, _name);
 
-    int levelWidth  = width;
+    int levelWidth = width;
     int levelHeight = height;
-    unsigned char *levelData = (unsigned char *)imgData;
+    unsigned char* levelData = (unsigned char*) imgData;
 
-    for (int level=0; level<=numMipmaps; ++level) {
+    for (int level = 0; level <= numMipmaps; ++level) {
         int size = levelWidth * levelHeight * bitsPerPixel / 8;
         glTexImage2D(GL_TEXTURE_2D, level, glTexFormat, levelWidth, levelHeight,
                 0, glTexFormat, glTexType, levelData);
         levelData += size;
-        levelWidth  /= 2;
+        levelWidth /= 2;
         levelHeight /= 2;
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
-        [NSException raise:@"invalid texture" format:@"glError is %d", glError];
+        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
 }
 
--(void)replace
-{
+-(void)replace {
     glBindTexture(GL_TEXTURE_2D, _name);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, _imageData);
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
-        [NSException raise:@"invalid update" format:@"glError is %d", glError];
+        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
 }
 
--(void)setRepeat:(BOOL)value
-{
+-(void)setRepeat:(BOOL)value {
     _repeat = value;
     glBindTexture(GL_TEXTURE_2D, _name);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
-        [NSException raise:@"invalid repeat" format:@"glError is %d", glError];
+        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
 }
 

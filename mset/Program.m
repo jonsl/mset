@@ -5,7 +5,7 @@
 
 #import "Mset.h"
 
-@interface Program()
+@interface Program ()
 
 @property (nonatomic, strong) NSString* vertexShader;
 @property (nonatomic, strong) NSString* fragmentShader;
@@ -15,15 +15,12 @@
 
 @implementation Program
 
-+(Program*)programWithVertexShader:(NSString *)vertexShader fragmentShader:(NSString *)fragmentShader
-{
++(Program*)programWithVertexShader:(NSString*)vertexShader fragmentShader:(NSString*)fragmentShader {
     return [[Program alloc] initWithVertexShader:vertexShader fragmentShader:fragmentShader];
 }
 
--(instancetype)initWithVertexShader:(NSString *)vertexShader fragmentShader:(NSString *)fragmentShader
-{
-    if ((self = [super init]))
-    {
+-(instancetype)initWithVertexShader:(NSString*)vertexShader fragmentShader:(NSString*)fragmentShader {
+    if ((self = [super init])) {
         self.vertexShader = vertexShader;
         self.fragmentShader = fragmentShader;
 
@@ -37,10 +34,14 @@
     return self;
 }
 
--(void)compile
-{
+-(void)dealloc {
+    glDeleteProgram(_name);
+    _name = 0;
+}
+
+-(void)compile {
     uint program = glCreateProgram();
-    uint vertexShader   = [self compileShader:self.vertexShader type:GL_VERTEX_SHADER];
+    uint vertexShader = [self compileShader:self.vertexShader type:GL_VERTEX_SHADER];
     uint fragmentShader = [self compileShader:self.fragmentShader type:GL_FRAGMENT_SHADER];
 
     glAttachShader(program, vertexShader);
@@ -58,7 +59,7 @@
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char *log = malloc(sizeof(char) * logLength);
+            char* log = malloc(sizeof(char) * logLength);
             glGetProgramInfoLog(program, logLength, NULL, log);
             NSLog(@"Error linking program: %s", log);
             free(log);
@@ -76,14 +77,13 @@
     _name = program;
 }
 
--(uint)compileShader:(NSString *)source type:(GLenum)type
-{
+-(uint)compileShader:(NSString*)source type:(GLenum)type {
     uint shader = glCreateShader(type);
     if (!shader) {
         return shader;
     }
 
-    const char *utfSource = [source UTF8String];
+    const char* utfSource = [source UTF8String];
 
     glShaderSource(shader, 1, &utfSource, NULL);
     glCompileShader(shader);
@@ -98,10 +98,9 @@
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char *log = malloc(sizeof(char) * logLength);
+            char* log = malloc(sizeof(char) * logLength);
             glGetShaderInfoLog(shader, logLength, NULL, log);
-            NSLog(@"Error compiling %@ shader: %s",
-                    type == GL_VERTEX_SHADER ? @"vertex" : @"fragment", log);
+            NSLog(@"Error compiling %@ shader: %s", type == GL_VERTEX_SHADER ? @"vertex" : @"fragment", log);
             free(log);
         }
 
@@ -113,44 +112,41 @@
     return shader;
 }
 
--(void)initialiseUniforms
-{
+-(void)initialiseUniforms {
     const int MAX_NAME_LENGTH = 64;
     char rawName[MAX_NAME_LENGTH];
 
     int numTraits = 0;
     glGetProgramiv(_name, GL_ACTIVE_UNIFORMS, &numTraits);
-    for (int i=0; i<numTraits; ++i) {
+    for (int i = 0; i < numTraits; ++i) {
         glGetActiveUniform(_name, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
-        NSString *name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
+        NSString* name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
         if (self.traitMap[name] == nil) {
             self.traitMap[name] = @(glGetUniformLocation(_name, rawName));
         } else {
-            [NSException raise:@"invalid trait name" format:@"shader name collision '%@' in program %d", name, _name];
+            [NSException raise:ExceptionLogicError format:@"shader name collision '%@' in program %d", name, _name];
         }
     }
 }
 
--(void)initialiseAttributes
-{
+-(void)initialiseAttributes {
     const int MAX_NAME_LENGTH = 64;
     char rawName[MAX_NAME_LENGTH];
 
     int numTraits = 0;
     glGetProgramiv(_name, GL_ACTIVE_ATTRIBUTES, &numTraits);
-    for (int i=0; i<numTraits; ++i) {
+    for (int i = 0; i < numTraits; ++i) {
         glGetActiveAttrib(_name, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
-        NSString *name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
+        NSString* name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
         if (self.traitMap[name] == nil) {
             self.traitMap[name] = @(glGetAttribLocation(_name, rawName));
         } else {
-            [NSException raise:@"invalid trait name" format:@"shader name collision '%@' in program %d", name, _name];
+            [NSException raise:ExceptionLogicError format:@"shader name collision '%@' in program %d", name, _name];
         }
     }
 }
 
--(int)getTrait:(NSString*)name
-{
+-(int)getTrait:(NSString*)name {
     if (self.traitMap[name]) {
         return [self.traitMap[name] intValue];
     }

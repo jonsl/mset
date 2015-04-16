@@ -8,6 +8,7 @@
 @interface Texture : NSObject
 
 +(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale;
+
 -(void)replace;
 
 @property (nonatomic, readonly) float width;

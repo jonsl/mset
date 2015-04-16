@@ -8,10 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
-@implementation NSMutableString(NSExtensions)
+@implementation NSMutableString (NSExtensions)
 
-- (void)appendLine:(NSString*)line
-{
+-(void)appendLine:(NSString*)line {
     [self appendFormat:@"%@\n", line];
 }
 

@@ -1,5 +1,5 @@
 //
-//  Renderer.h
+//  RendererState.h
 //  mandelbrot
 //
 //  Created by Jonathan Slater on 15/04/2015.
@@ -9,13 +9,16 @@
 @class Program;
 @class Texture;
 
-@interface Renderer : NSObject
+@interface RendererState : NSObject
 
-+(Renderer*)rendererWithImageWidth:(CGFloat)width height:(CGFloat)height;
--(void)prepareStateWithTexture:(Texture*)texture;
++(RendererState*)rendererState;
 
-@property (nonatomic, strong) Program* program;
+-(void)prepareState;
+
 @property (nonatomic, assign) GLKMatrix4 mvpMatrix;
+@property (nonatomic, readonly) int aPosition;
+@property (nonatomic, readonly) int aTexCoords;
 @property (nonatomic, readonly) int uMvpMatrix;
+@property (nonatomic, strong) Texture* texture;
 
 @end

@@ -12,8 +12,7 @@
 
 @implementation NSMutableString (SPNSExtensions)
 
-- (void)appendLine:(NSString*)line
-{
+-(void)appendLine:(NSString*)line {
     [self appendFormat:@"%@\n", line];
 }
 
