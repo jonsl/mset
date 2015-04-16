@@ -3,8 +3,6 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-#import "Mset.h"
-
 @interface Texture : NSObject
 
 +(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale;

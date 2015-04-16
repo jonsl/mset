@@ -6,8 +6,6 @@
 //  Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
 @implementation NSMutableString (NSExtensions)
 
 -(void)appendLine:(NSString*)line {

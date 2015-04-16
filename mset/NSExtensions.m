@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-#import "NSExtensions.h"
+#import "Mset.h"
 
 #pragma mark - NSMutableString
 
