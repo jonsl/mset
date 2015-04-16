@@ -109,7 +109,7 @@
 -(void)update
 {
     glBindTexture(GL_TEXTURE_2D, _name);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGB, GL_UNSIGNED_BYTE, _imageData);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, _imageData);
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
         [NSException raise:@"invalid texture" format:@"glError is %d", glError];
