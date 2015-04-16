@@ -27,9 +27,7 @@ typedef struct {
     BOOL _premultipliedAlpha;
 
     int _aPosition;
-    int _aColor;
     int _aTexCoords;
-    int _uAlpha;
 };
 
 -(instancetype)initWithImageWidth:(CGFloat)width height:(CGFloat)height
@@ -42,7 +40,7 @@ typedef struct {
     return self;
 }
 
-- (void)prepare:(uint)textureId
+-(void)prepareStateWithTexture:(uint)textureId
 {
     if (!_program) {
         NSString *vertexShader = [self vertexShader];
@@ -50,12 +48,9 @@ typedef struct {
         _program = [[Program alloc] initWithVertexShader:vertexShader fragmentShader:fragmentShader];
     }
 
-    // TODO: retrieve from _program
-    _aPosition  = 0;
-    _aColor     = 0;
-    _aTexCoords = 0;
-    _uMvpMatrix = 0;
-    _uAlpha     = 0;
+    _aPosition  = [_program getTrait:@"aPosition"];
+    _aTexCoords = [_program getTrait:@"aTexCoords"];
+    _uMvpMatrix = [_program getTrait:@"uMvpMatrix"];
 
     glUseProgram(_program.programId);
     glUniformMatrix4fv(_uMvpMatrix, 1, NO, _mvpMatrix.m);

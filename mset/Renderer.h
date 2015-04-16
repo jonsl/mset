@@ -11,6 +11,7 @@
 @interface Renderer : NSObject
 
 -(instancetype)initWithImageWidth:(CGFloat)width height:(CGFloat)height;
+-(void)prepareStateWithTexture:(uint)textureId;
 
 @property (nonatomic, strong) Program* program;
 @property (nonatomic, assign) GLKMatrix4 mvpMatrix;

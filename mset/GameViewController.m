@@ -6,8 +6,8 @@
 //  Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
+#import "Mset.h"
 #import "GameViewController.h"
-#import <OpenGLES/ES2/glext.h>
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -114,6 +114,21 @@ GLfloat gCubeVertexData[216] =
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     
     [self setupGL];
+
+    @try {
+        // test Renderer
+        Renderer* renderer = [[Renderer alloc] initWithImageWidth:1024 height:768];
+        [renderer prepareStateWithTexture:0];
+
+        [[Texture alloc] initWithWidth:20 height:20];
+
+    }
+    @catch (NSException* ex) {
+
+    }
+    @finally {
+
+    }
 }
 
 - (void)dealloc
