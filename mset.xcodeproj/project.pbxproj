@@ -14,7 +14,6 @@
 		1ABD28D71ADFB83B00ADBE75 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1ABD28D61ADFB83B00ADBE75 /* Images.xcassets */; };
 		1ABD28DA1ADFB83B00ADBE75 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1ABD28D81ADFB83B00ADBE75 /* LaunchScreen.xib */; };
 		1ABD28E61ADFB83B00ADBE75 /* msetTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28E51ADFB83B00ADBE75 /* msetTests.m */; };
-		1ABD28F71ADFBEFC00ADBE75 /* Complex.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28F01ADFBEFC00ADBE75 /* Complex.m */; };
 		1ABD28F81ADFBEFC00ADBE75 /* NSExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28F21ADFBEFC00ADBE75 /* NSExtensions.m */; };
 		1ABD28F91ADFBEFC00ADBE75 /* Program.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28F41ADFBEFC00ADBE75 /* Program.m */; };
 		1ABD28FA1ADFBEFC00ADBE75 /* Renderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28F61ADFBEFC00ADBE75 /* Renderer.m */; };
@@ -46,8 +45,6 @@
 		1ABD28DF1ADFB83B00ADBE75 /* msetTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = msetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1ABD28E41ADFB83B00ADBE75 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1ABD28E51ADFB83B00ADBE75 /* msetTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = msetTests.m; sourceTree = "<group>"; };
-		1ABD28EF1ADFBEFC00ADBE75 /* Complex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Complex.h; sourceTree = "<group>"; };
-		1ABD28F01ADFBEFC00ADBE75 /* Complex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Complex.m; sourceTree = "<group>"; };
 		1ABD28F11ADFBEFC00ADBE75 /* NSExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSExtensions.h; sourceTree = "<group>"; };
 		1ABD28F21ADFBEFC00ADBE75 /* NSExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSExtensions.m; sourceTree = "<group>"; };
 		1ABD28F31ADFBEFC00ADBE75 /* Program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Program.h; sourceTree = "<group>"; };
@@ -103,8 +100,6 @@
 			children = (
 				1ABD28C91ADFB83B00ADBE75 /* AppDelegate.h */,
 				1ABD28CA1ADFB83B00ADBE75 /* AppDelegate.m */,
-				1ABD28EF1ADFBEFC00ADBE75 /* Complex.h */,
-				1ABD28F01ADFBEFC00ADBE75 /* Complex.m */,
 				1ABD28D01ADFB83B00ADBE75 /* GameViewController.h */,
 				1ABD28D11ADFB83B00ADBE75 /* GameViewController.m */,
 				1ABD28D61ADFB83B00ADBE75 /* Images.xcassets */,
@@ -251,7 +246,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1ABD28F91ADFBEFC00ADBE75 /* Program.m in Sources */,
-				1ABD28F71ADFBEFC00ADBE75 /* Complex.m in Sources */,
 				1ABD28FA1ADFBEFC00ADBE75 /* Renderer.m in Sources */,
 				1ABD28F81ADFBEFC00ADBE75 /* NSExtensions.m in Sources */,
 				1ABD28CB1ADFB83B00ADBE75 /* AppDelegate.m in Sources */,

@@ -8,10 +8,6 @@
 
 #import "Mset.h"
 
-typedef struct {
-    unsigned char r, g, b;
-} rgb_t;
-
 @interface Renderer()
 
 @property (nonatomic, assign) CGPoint size;

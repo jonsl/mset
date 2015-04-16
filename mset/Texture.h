@@ -7,6 +7,6 @@
 
 @interface Texture : NSObject
 
--(instancetype)initWithWidth:(float)width height:(float)height;
++(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale;
 
 @end

@@ -120,8 +120,9 @@ GLfloat gCubeVertexData[216] =
         Renderer* renderer = [[Renderer alloc] initWithImageWidth:1024 height:768];
         [renderer prepareStateWithTexture:0];
 
-        [[Texture alloc] initWithWidth:20 height:20];
-
+        Texture* tex = [Texture textureWithWidth:20 height:20 scale:1];
+        
+        NSAssert(tex != nil, @"invalid test texture");
     }
     @catch (NSException* ex) {
 

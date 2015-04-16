@@ -48,13 +48,11 @@
     int linked = 0;
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
 
-    if (!linked)
-    {
+    if (!linked) {
         int logLength = 0;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
-        if (logLength)
-        {
+        if (logLength) {
             char *log = malloc(sizeof(char) * logLength);
             glGetProgramInfoLog(program, logLength, NULL, log);
             NSLog(@"Error linking program: %s", log);
@@ -76,7 +74,9 @@
 -(uint)compileShader:(NSString *)source type:(GLenum)type
 {
     uint shader = glCreateShader(type);
-    if (!shader) return shader;
+    if (!shader) {
+        return shader;
+    }
 
     const char *utfSource = [source UTF8String];
 
@@ -88,13 +88,11 @@
     int compiled = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 
-    if (!compiled)
-    {
+    if (!compiled) {
         int logLength = 0;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
-        if (logLength)
-        {
+        if (logLength) {
             char *log = malloc(sizeof(char) * logLength);
             glGetShaderInfoLog(shader, logLength, NULL, log);
             NSLog(@"Error compiling %@ shader: %s",
@@ -107,7 +105,6 @@
     }
 
 #endif
-
     return shader;
 }
 
