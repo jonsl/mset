@@ -112,7 +112,7 @@
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, _imageData);
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
-        [NSException raise:@"invalid texture" format:@"glError is %d", glError];
+        [NSException raise:@"invalid update" format:@"glError is %d", glError];
     }
 }
 
@@ -124,7 +124,7 @@
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
-        [NSException raise:@"invalid texture" format:@"glError is %d", glError];
+        [NSException raise:@"invalid repeat" format:@"glError is %d", glError];
     }
 }
 
