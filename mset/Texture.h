@@ -8,5 +8,11 @@
 @interface Texture : NSObject
 
 +(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale;
+-(unsigned char*)rgba;
+-(void)update;
+
+@property (nonatomic, readonly) float width;
+@property (nonatomic, readonly) float height;
+@property (nonatomic, assign) BOOL repeat;
 
 @end

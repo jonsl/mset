@@ -7,7 +7,11 @@
 
 
 @implementation Texture {
-
+    float _width;
+    float _height;
+    float _scale;
+    uint _name;
+    unsigned char* _imageData;
 }
 
 +(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale
@@ -19,29 +23,38 @@
 {
     if ((self = [super init])) {
         // only textures with sidelengths that are powers of 2 support all OpenGL ES features.
-        int legalWidth  = [Texture nextPowerOfTwo:width  * scale];
-        int legalHeight = [Texture nextPowerOfTwo:height * scale];
+        int width2 = [Texture nextPowerOfTwo:width * scale];
+        int height2 = [Texture nextPowerOfTwo:height * scale];
 
         CGColorSpaceRef cgColorSpace = CGColorSpaceCreateDeviceRGB();
         CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast;
         int bytesPerPixel = 4;
 
-        void *imageData = calloc(legalWidth * legalHeight * bytesPerPixel, 1);
-        CGContextRef context = CGBitmapContextCreate(imageData, legalWidth, legalHeight, 8,
-                bytesPerPixel * legalWidth, cgColorSpace,
-                bitmapInfo);
+        _imageData = calloc(width2 * height2 * bytesPerPixel, sizeof(unsigned char));
+        CGContextRef context = CGBitmapContextCreate(_imageData, width2, height2, 8, bytesPerPixel * width2, cgColorSpace, bitmapInfo);
         CGColorSpaceRelease(cgColorSpace);
 
         // UIKit referential is upside down - we flip it and apply the scale factor
-        CGContextTranslateCTM(context, 0.0f, legalHeight);
+        CGContextTranslateCTM(context, 0.0f, height2);
         CGContextScaleCTM(context, scale, -scale);
 
-        [self createGlTexture:imageData width:legalWidth height:legalHeight numMipmaps:0];
+        [self createGlTexture:_imageData width:width2 height:height2 numMipmaps:0];
 
         CGContextRelease(context);
-        free(imageData);
+        free(_imageData);
+
+        _width = width2;
+        _height = height2;
+        _scale = scale;
+
+        self.repeat = NO;
     }
     return self;
+}
+
+- (void)dealloc
+{
+    glDeleteTextures(1, &_name);
 }
 
 +(uint)nextPowerOfTwo:(uint)value
@@ -63,11 +76,10 @@
 {
     GLenum glTexType = GL_UNSIGNED_BYTE;
     GLenum glTexFormat = GL_RGBA;
-    GLuint glTexName;
     int bitsPerPixel = 32;
 
-    glGenTextures(1, &glTexName);
-    glBindTexture(GL_TEXTURE_2D, glTexName);
+    glGenTextures(1, &_name);
+    glBindTexture(GL_TEXTURE_2D, _name);
 
     int levelWidth  = width;
     int levelHeight = height;
@@ -83,6 +95,33 @@
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    GLenum glError = glGetError();
+    if (glError != GL_NO_ERROR) {
+        [NSException raise:@"invalid texture" format:@"glError is %d", glError];
+    }
+}
+
+-(unsigned char*)rgba
+{
+    return _imageData;
+}
+
+-(void)update
+{
+    glBindTexture(GL_TEXTURE_2D, _name);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGB, GL_UNSIGNED_BYTE, _imageData);
+    GLenum glError = glGetError();
+    if (glError != GL_NO_ERROR) {
+        [NSException raise:@"invalid texture" format:@"glError is %d", glError];
+    }
+}
+
+-(void)setRepeat:(BOOL)value
+{
+    _repeat = value;
+    glBindTexture(GL_TEXTURE_2D, _name);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
         [NSException raise:@"invalid texture" format:@"glError is %d", glError];
