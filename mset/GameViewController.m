@@ -34,8 +34,7 @@
     [self setupGL];
 
     @try {
-        NSUInteger numThreads = [[NSProcessInfo processInfo] activeProcessorCount];
-        self.setRenderer = [SetRenderer setRendererWithType:Mandelbrot numThreads:numThreads width:1024 height:768];
+        self.setRenderer = [SetRenderer setRendererWithWidth:1024 height:768];
     }
     @catch (NSException* ex) {
         NSLog(@"exception: '%@', reason: '%@'", ex.name, ex.reason);

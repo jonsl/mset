@@ -19,24 +19,25 @@
     float _height;
 }
 
-+(instancetype)setRendererWithType:(SetType)setType numThreads:(NSUInteger)numThreads width:(float)width height:(float)height {
-    return [[SetRenderer alloc] initWithSet:setType numThreads:numThreads width:width height:height];
++(instancetype)setRendererWithWidth:(float)width height:(float)height {
+    return [[SetRenderer alloc] initWithWidth:width height:height];
 }
 
--(instancetype)initWithSet:(SetType)setType numThreads:(NSUInteger)numThreads width:(float)width height:(float)height {
+-(instancetype)initWithWidth:(float)width height:(float)height {
     if ((self = [super init])) {
-        _setType = setType;
         _width = width;
         _height = height;
 
         self.rendererState = [RendererState rendererState];
 
+        NSUInteger numThreads = [Configuration sharedConfiguration].executionUnits;
+
         self.quads = [NSMutableArray arrayWithCapacity:numThreads];
 
 
         self.textures = [NSMutableArray arrayWithCapacity:numThreads];
-        float textureWidth = width / numThreads;
-        float textureHeight = height / numThreads;
+        float textureWidth = width / (numThreads >> 1);
+        float textureHeight = height / (numThreads >> 1);
         for (int i = 0; i < numThreads; ++i) {
             [self.textures addObject:[Texture textureWithWidth:textureWidth height:textureHeight scale:1]];
         }
