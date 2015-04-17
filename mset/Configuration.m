@@ -6,26 +6,34 @@
 #import "Mset.h"
 
 
-static NSString* RenderStrategyKey = @"RenderStrategy";
+static NSString* ExecutionStrategyKey = @"ExecutionStrategy";
 
 @implementation Configuration {
-    RenderStrategy _renderStrategy;
 }
 
--(instancetype)initWithRenderStrategy:(RenderStrategy)renderStrategy {
++(instancetype)sharedConfiguration {
+    static Configuration* configuration = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        configuration = [[self alloc] initWithExecutionStrategy:TileStrategy];
+    });
+    return configuration;
+}
+
+-(instancetype)initWithExecutionStrategy:(ExecutionStrategy)executionStrategy {
     if ((self = [super init])) {
-        _renderStrategy = renderStrategy;
+        self.executionStrategy = executionStrategy;
     }
     return self;
 }
 
 -(void)encodeWithCoder:(NSCoder*)encoder {
-    [encoder encodeObject:@(_renderStrategy) forKey:RenderStrategyKey];
+    [encoder encodeObject:@(_executionStrategy) forKey:ExecutionStrategyKey];
 }
 
 -(id)initWithCoder:(NSCoder*)decoder {
-    RenderStrategy renderStrategy = [[decoder decodeObjectForKey:RenderStrategyKey] shortValue];
-    return [self initWithRenderStrategy:renderStrategy];
+    ExecutionStrategy executionStrategy = [[decoder decodeObjectForKey:ExecutionStrategyKey] shortValue];
+    return [self initWithExecutionStrategy:executionStrategy];
 }
 
 @end

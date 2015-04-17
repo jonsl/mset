@@ -26,28 +26,27 @@
 -(instancetype)initWithSet:(SetType)setType numThreads:(NSUInteger)numThreads width:(float)width height:(float)height {
     if ((self = [super init])) {
         _setType = setType;
-
-        self.textures = [NSMutableArray arrayWithCapacity:numThreads];
-
         _width = width;
         _height = height;
 
+        self.rendererState = [RendererState rendererState];
+
+        self.quads = [NSMutableArray arrayWithCapacity:numThreads];
+
+
+        self.textures = [NSMutableArray arrayWithCapacity:numThreads];
         float textureWidth = width / numThreads;
         float textureHeight = height / numThreads;
-
         for (int i = 0; i < numThreads; ++i) {
             [self.textures addObject:[Texture textureWithWidth:textureWidth height:textureHeight scale:1]];
         }
-
-        self.rendererState = [RendererState rendererState];
     }
     return self;
 }
 
 -(void)render {
 
-    for (Texture* texture in self.textures)
-    {
+    for (Texture* texture in self.textures) {
         [texture setPixel:0 rgba:COLOUR_RGBA(0x10, 0x20, 0x30, 0x40)];
 
 //    self.texture.imageData[0] = 0xff;

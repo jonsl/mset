@@ -3,9 +3,14 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-typedef enum RenderStrategy {
-    TileRender, LineRender
-} RenderStrategy;
+typedef enum ExecutionStrategy {
+    TileStrategy, LineStrategy, ShaderStrategy
+} ExecutionStrategy;
 
-@interface Configuration : NSObject<NSCoding>
+@interface Configuration : NSObject <NSCoding>
+
++(instancetype)sharedConfiguration;
+
+@property (nonatomic, assign) ExecutionStrategy executionStrategy;
+
 @end
