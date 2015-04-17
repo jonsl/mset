@@ -22,7 +22,7 @@
         CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast;
         int bytesPerPixel = 4;
 
-        _imageData = calloc(width2 * height2 * bytesPerPixel, sizeof(unsigned char));
+        _imageData = calloc(width2 * height2 * bytesPerPixel, sizeof(uint8_t));
         CGContextRef context = CGBitmapContextCreate(_imageData, width2, height2, 8, bytesPerPixel * width2, cgColorSpace, bitmapInfo);
         CGColorSpaceRelease(cgColorSpace);
 
@@ -52,6 +52,7 @@
 
 -(void)setPixel:(uint)index rgba:(uint32_t)rgba {
     NSAssert(sizeof(uint32_t) == 4, @"invalid size");
+    NSAssert(index < _width * _height, @"invalid index");
     ((uint32_t*) _imageData)[index] = rgba;
 }
 
@@ -60,7 +61,9 @@
     GLenum glTexFormat = GL_RGBA;
     int bitsPerPixel = 32;
 
+    _name = 0;
     glGenTextures(1, &_name);
+    NSAssert(_name != 0, @"invalid texture name");
     glBindTexture(GL_TEXTURE_2D, _name);
 
     int levelWidth = width;
