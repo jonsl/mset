@@ -9,6 +9,13 @@
 
 @implementation Mandelbrot
 
+-(instancetype)init {
+    if ((self = [super init])) {
+
+    }
+    return self;
+}
+
 #pragma mark Fractal
 
 // return: number of iterations to diverge from (x, y), or -1 if convergent

@@ -38,6 +38,7 @@
     _aPosition = [self.program getTrait:@"aPosition"];
     _aTexCoords = [self.program getTrait:@"aTexCoords"];
     _uMvpMatrix = [self.program getTrait:@"uMvpMatrix"];
+    _uTexture = [self.program getTrait:@"uTexture"];
 
     glUseProgram(self.program.name);
     glUniformMatrix4fv(_uMvpMatrix, 1, NO, self.mvpMatrix.m);
@@ -45,6 +46,7 @@
     if (self.texture) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, self.texture.name);
+        glUniform1i(_uTexture, 0);
     }
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {

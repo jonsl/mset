@@ -12,6 +12,7 @@
 @interface GameViewController ()
 
 @property (strong, nonatomic) EAGLContext* context;
+@property (nonatomic, strong) NSObject <Fractal>* fractal;
 @property (nonatomic, strong) Renderer* renderer;
 
 @end
@@ -21,12 +22,10 @@
 -(void)viewDidLoad {
     [super viewDidLoad];
 
-    self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-
-    if (!self.context) {
-        NSLog(@"Failed to create ES context");
+    self.context = [self createBestEAGLContext];
+    if (self.context == nil) {
+        [NSException raise:ExceptionLogicError format:@"invalid OpenGL ES Context"];
     }
-
     GLKView* view = (GLKView*) self.view;
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
@@ -34,8 +33,11 @@
     [self setupGL];
 
     @try {
-        self.renderer = [Renderer rendererWithWidth:1024 height:768];
+        CGSize viewSize = self.view.bounds.size;
+        self.renderer = [Renderer rendererWithWidth:viewSize.width height:viewSize.height];
         [Configuration sharedConfiguration].renderStrategy = LineRender;
+
+        self.fractal = [[Mandelbrot alloc] init];
     }
     @catch (NSException* ex) {
         NSLog(@"exception: '%@', reason: '%@'", ex.name, ex.reason);
@@ -43,6 +45,14 @@
     @finally {
 
     }
+}
+
+-(EAGLContext*)createBestEAGLContext {
+    EAGLContext* context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    if (context == nil) {
+        context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    }
+    return context;
 }
 
 -(void)dealloc {
@@ -89,7 +99,7 @@
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    [self.renderer render];
+    [self.renderer render:self.fractal];
 
 }
 

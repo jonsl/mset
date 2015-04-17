@@ -5,4 +5,6 @@
 
 @interface Mandelbrot : NSObject <Fractal>
 
+-(instancetype)init;
+
 @end

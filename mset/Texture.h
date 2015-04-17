@@ -3,6 +3,10 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
+typedef enum TextureFilter {
+    NoFilter, LinearFilter,
+} TextureFilter;
+
 @interface Texture : NSObject
 
 +(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale;
@@ -15,5 +19,6 @@
 @property (nonatomic, readonly) uint name;
 @property (nonatomic) unsigned char* imageData;
 @property (nonatomic, assign) BOOL repeat;
+@property (nonatomic, assign) TextureFilter filter;
 
 @end

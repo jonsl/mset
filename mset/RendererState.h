@@ -18,6 +18,7 @@
 @property (nonatomic, readonly) int aPosition;
 @property (nonatomic, readonly) int aTexCoords;
 @property (nonatomic, readonly) int uMvpMatrix;
+@property (nonatomic, readonly) int uTexture;
 @property (nonatomic, strong) Texture* texture;
 
 @end

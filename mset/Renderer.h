@@ -6,7 +6,7 @@
 @interface Renderer : NSObject
 
 +(instancetype)rendererWithWidth:(float)width height:(float)height;
--(void)render;
+-(void)render:(NSObject<Fractal>*)fractal;
 
 @property (nonatomic, readonly) float width;
 @property (nonatomic, readonly) float height;

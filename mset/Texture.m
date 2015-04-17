@@ -17,28 +17,17 @@
         // only textures with sidelengths that are powers of 2 support all OpenGL ES features.
         NSUInteger width2 = [Texture nextPowerOfTwo:width * scale];
         NSUInteger height2 = [Texture nextPowerOfTwo:height * scale];
-
-        CGColorSpaceRef cgColorSpace = CGColorSpaceCreateDeviceRGB();
-        CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast;
-        NSUInteger bytesPerPixel = 4;
-
+        NSUInteger const bytesPerPixel = 4;
         _imageData = calloc(width2 * height2 * bytesPerPixel, sizeof(uint8_t));
-        CGContextRef context = CGBitmapContextCreate(_imageData, width2, height2, 8, bytesPerPixel * width2, cgColorSpace, bitmapInfo);
-        CGColorSpaceRelease(cgColorSpace);
-
-        // UIKit referential is upside down - we flip it and apply the scale factor
-        CGContextTranslateCTM(context, 0.0f, height2);
-        CGContextScaleCTM(context, scale, -scale);
-
         [self createGlTexture:_imageData width:width2 height:height2 numMipmaps:0];
-
-        CGContextRelease(context);
 
         _width = width2;
         _height = height2;
         _scale = scale;
 
-        self.repeat = NO;   // invoke setter
+        // invoke setters
+        self.repeat = NO;
+        self.filter = LinearFilter;
     }
     return self;
 }
@@ -69,13 +58,12 @@
     NSAssert(_name != 0, @"invalid texture name");
     glBindTexture(GL_TEXTURE_2D, _name);
 
-    int levelWidth = (int)width;
-    int levelHeight = (int)height;
+    int levelWidth = (int) width;
+    int levelHeight = (int) height;
     unsigned char* levelData = (unsigned char*) imgData;
-
     for (int level = 0; level <= numMipmaps; ++level) {
         int size = levelWidth * levelHeight * bitsPerPixel / 8;
-        glTexImage2D(GL_TEXTURE_2D, level, (GLint)glTexFormat, levelWidth, levelHeight,
+        glTexImage2D(GL_TEXTURE_2D, level, (GLint) glTexFormat, levelWidth, levelHeight,
                 0, glTexFormat, glTexType, levelData);
         levelData += size;
         levelWidth /= 2;
@@ -107,6 +95,23 @@
     if (glError != GL_NO_ERROR) {
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
+}
+
+-(void)setFilter:(TextureFilter)textureFilter {
+    glBindTexture(GL_TEXTURE_2D, _name);
+    GLint minFilter, magFilter;
+    switch (textureFilter) {
+        case NoFilter: {
+            minFilter = magFilter = GL_NEAREST;
+            break;
+        }
+        case LinearFilter: {
+            minFilter = magFilter = GL_LINEAR;
+            break;
+        }
+    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 }
 
 +(NSUInteger)nextPowerOfTwo:(NSUInteger)value {

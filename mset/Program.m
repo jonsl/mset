@@ -29,8 +29,7 @@
 
         self.traitMap = [NSMutableDictionary dictionary];
 
-        [self initialiseUniforms];
-        [self initialiseAttributes];
+        [self initialiseTraits];
     }
     return self;
 }
@@ -60,7 +59,7 @@
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char* log = malloc(sizeof(char) * (size_t)logLength);
+            char* log = malloc(sizeof(char) * (size_t) logLength);
             glGetProgramInfoLog(program, logLength, NULL, log);
             NSLog(@"Error linking program: %s", log);
             free(log);
@@ -99,7 +98,7 @@
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char* log = malloc(sizeof(char) * (size_t)logLength);
+            char* log = malloc(sizeof(char) * (size_t) logLength);
             glGetShaderInfoLog(shader, logLength, NULL, log);
             NSLog(@"Error compiling %@ shader: %s", type == GL_VERTEX_SHADER ? @"vertex" : @"fragment", log);
             free(log);
@@ -113,10 +112,10 @@
     return shader;
 }
 
--(void)initialiseUniforms {
+-(void)initialiseTraits {
     const int MAX_NAME_LENGTH = 64;
     char rawName[MAX_NAME_LENGTH];
-
+    // uniforms
     int numTraits = 0;
     glGetProgramiv(_name, GL_ACTIVE_UNIFORMS, &numTraits);
     for (GLuint i = 0; i < numTraits; ++i) {
@@ -125,16 +124,10 @@
         if (self.traitMap[name] == nil) {
             self.traitMap[name] = @(glGetUniformLocation(_name, rawName));
         } else {
-            [NSException raise:ExceptionLogicError format:@"shader name collision '%@' in program %d", name, _name];
+            [NSException raise:ExceptionLogicError format:@"shader uniform collision '%@' in program %d", name, _name];
         }
     }
-}
-
--(void)initialiseAttributes {
-    const int MAX_NAME_LENGTH = 64;
-    char rawName[MAX_NAME_LENGTH];
-
-    int numTraits = 0;
+    // attributes
     glGetProgramiv(_name, GL_ACTIVE_ATTRIBUTES, &numTraits);
     for (GLuint i = 0; i < numTraits; ++i) {
         glGetActiveAttrib(_name, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
@@ -142,7 +135,7 @@
         if (self.traitMap[name] == nil) {
             self.traitMap[name] = @(glGetAttribLocation(_name, rawName));
         } else {
-            [NSException raise:ExceptionLogicError format:@"shader name collision '%@' in program %d", name, _name];
+            [NSException raise:ExceptionLogicError format:@"shader attribute collision '%@' in program %d", name, _name];
         }
     }
 }
