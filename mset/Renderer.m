@@ -13,11 +13,7 @@
 
 @end
 
-@implementation Renderer {
-    SetType _setType;
-    float _width;
-    float _height;
-}
+@implementation Renderer
 
 +(instancetype)rendererWithWidth:(float)width height:(float)height {
     return [[Renderer alloc] initWithWidth:width height:height];
@@ -59,7 +55,7 @@
 
         self.rendererState.mvpMatrix = GLKMatrix4Identity;
         self.rendererState.texture = texture;
-        [self.rendererState prepareState];
+        [self.rendererState prepare];
 
 
         // render

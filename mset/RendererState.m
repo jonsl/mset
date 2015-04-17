@@ -28,7 +28,7 @@
     return self;
 }
 
--(void)prepareState {
+-(void)prepare {
     if (!self.program) {
         NSString* vertexShader = [self vertexShader];
         NSString* fragmentShader = [self fragmentShader];

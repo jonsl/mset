@@ -12,7 +12,7 @@
 @interface RendererState : NSObject
 
 +(RendererState*)rendererState;
--(void)prepareState;
+-(void)prepare;
 
 @property (nonatomic, assign) GLKMatrix4 mvpMatrix;
 @property (nonatomic, readonly) int aPosition;

@@ -12,7 +12,7 @@
 @interface GameViewController ()
 
 @property (strong, nonatomic) EAGLContext* context;
-@property (nonatomic, strong) Renderer* setRenderer;
+@property (nonatomic, strong) Renderer* renderer;
 
 @end
 
@@ -34,7 +34,8 @@
     [self setupGL];
 
     @try {
-        self.setRenderer = [Renderer rendererWithWidth:1024 height:768];
+        self.renderer = [Renderer rendererWithWidth:1024 height:768];
+        [Configuration sharedConfiguration].renderStrategy = LineRender;
     }
     @catch (NSException* ex) {
         NSLog(@"exception: '%@', reason: '%@'", ex.name, ex.reason);
@@ -88,7 +89,7 @@
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    [self.setRenderer render];
+    [self.renderer render];
 
 }
 

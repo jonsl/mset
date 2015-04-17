@@ -8,4 +8,7 @@
 +(instancetype)rendererWithWidth:(float)width height:(float)height;
 -(void)render;
 
+@property (nonatomic, readonly) float width;
+@property (nonatomic, readonly) float height;
+
 @end

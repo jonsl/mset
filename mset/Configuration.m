@@ -6,7 +6,7 @@
 #import "Mset.h"
 
 
-static NSString* SetTypeKey = @"SetType";
+static NSString* SetTypeKey = @"FractalType";
 static NSString* ExecutionUnitsKey = @"ExecutionUnits";
 static NSString* ExecutionStrategyKey = @"ExecutionStrategy";
 static NSString* RenderStrategyKey = @"RenderStrategy";
@@ -18,7 +18,7 @@ static NSString* RenderStrategyKey = @"RenderStrategy";
     static Configuration* configuration = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        configuration = [[self alloc] initWithSetType:Mandelbrot
+        configuration = [[self alloc] initWithSetType:MandelbrotSet
                                        executionUnits:[[NSProcessInfo processInfo] activeProcessorCount]
                                     executionStrategy:ThreadExecution
                                        renderStrategy:TileRender];
@@ -26,7 +26,7 @@ static NSString* RenderStrategyKey = @"RenderStrategy";
     return configuration;
 }
 
--(instancetype)initWithSetType:(SetType)setType
+-(instancetype)initWithSetType:(FractalType)setType
                 executionUnits:(NSUInteger)executionUnits
              executionStrategy:(ExecutionStrategy)executionStrategy
                 renderStrategy:(RenderStrategy)renderStrategy {
@@ -47,7 +47,7 @@ static NSString* RenderStrategyKey = @"RenderStrategy";
 }
 
 -(id)initWithCoder:(NSCoder*)decoder {
-    SetType setType = [[decoder decodeObjectForKey:SetTypeKey] shortValue];
+    FractalType setType = [[decoder decodeObjectForKey:SetTypeKey] shortValue];
     NSUInteger executionUnits = [[decoder decodeObjectForKey:ExecutionUnitsKey] shortValue];
     ExecutionStrategy executionStrategy = [[decoder decodeObjectForKey:ExecutionStrategyKey] shortValue];
     RenderStrategy renderStrategy = [[decoder decodeObjectForKey:RenderStrategyKey] shortValue];
