@@ -3,9 +3,9 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@interface SetRenderer : NSObject
+@interface Renderer : NSObject
 
-+(instancetype)setRendererWithWidth:(float)width height:(float)height;
++(instancetype)rendererWithWidth:(float)width height:(float)height;
 -(void)render;
 
 @end

@@ -22,6 +22,6 @@
 #import "Texture.h"
 #import "Quad.h"
 #import "RendererState.h"
-#import "SetRenderer.h"
+#import "Renderer.h"
 
 #endif

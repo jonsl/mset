@@ -12,7 +12,7 @@
 @interface GameViewController ()
 
 @property (strong, nonatomic) EAGLContext* context;
-@property (nonatomic, strong) SetRenderer* setRenderer;
+@property (nonatomic, strong) Renderer* setRenderer;
 
 @end
 
@@ -34,7 +34,7 @@
     [self setupGL];
 
     @try {
-        self.setRenderer = [SetRenderer setRendererWithWidth:1024 height:768];
+        self.setRenderer = [Renderer rendererWithWidth:1024 height:768];
     }
     @catch (NSException* ex) {
         NSLog(@"exception: '%@', reason: '%@'", ex.name, ex.reason);

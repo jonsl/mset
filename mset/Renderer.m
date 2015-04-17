@@ -5,7 +5,7 @@
 
 #import "Mset.h"
 
-@interface SetRenderer ()
+@interface Renderer ()
 
 @property (nonatomic, strong) RendererState* rendererState;
 @property (nonatomic, strong) NSMutableArray/*<Quad*>*/* quads;
@@ -13,14 +13,14 @@
 
 @end
 
-@implementation SetRenderer {
+@implementation Renderer {
     SetType _setType;
     float _width;
     float _height;
 }
 
-+(instancetype)setRendererWithWidth:(float)width height:(float)height {
-    return [[SetRenderer alloc] initWithWidth:width height:height];
++(instancetype)rendererWithWidth:(float)width height:(float)height {
+    return [[Renderer alloc] initWithWidth:width height:height];
 }
 
 -(instancetype)initWithWidth:(float)width height:(float)height {
