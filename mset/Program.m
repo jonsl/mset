@@ -49,8 +49,7 @@
 
     glLinkProgram(program);
 
-#if DEBUG
-
+#ifdef DEBUG
     int linked = 0;
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
 
@@ -65,7 +64,6 @@
             free(log);
         }
     }
-
 #endif
 
     glDetachShader(program, vertexShader);
@@ -88,8 +86,7 @@
     glShaderSource(shader, 1, &utfSource, NULL);
     glCompileShader(shader);
 
-#if DEBUG
-
+#ifdef DEBUG
     int compiled = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 
@@ -107,8 +104,8 @@
         glDeleteShader(shader);
         return 0;
     }
-
 #endif
+
     return shader;
 }
 
@@ -138,6 +135,12 @@
             [NSException raise:ExceptionLogicError format:@"shader attribute collision '%@' in program %d", name, _name];
         }
     }
+#ifdef DEBUG
+    GLenum glError = glGetError();
+    if (glError != GL_NO_ERROR) {
+        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
+    }
+#endif
 }
 
 -(int)getTrait:(NSString*)name {

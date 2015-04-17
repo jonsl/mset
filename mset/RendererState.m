@@ -48,10 +48,12 @@
         glBindTexture(GL_TEXTURE_2D, self.texture.name);
         glUniform1i(_uTexture, 0);
     }
+#ifdef DEBUG
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
+#endif
 }
 
 -(NSString*)vertexShader {

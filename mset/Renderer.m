@@ -98,15 +98,23 @@
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferName);
     glBufferData(GL_ARRAY_BUFFER, (long) sizeof(Vertex) * numVertices, _vertexData, GL_STATIC_DRAW);
+#ifdef DEBUG
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
+#endif
 }
 
 -(void)applyBlendMode:(GLenum)srcFactor dstFactor:(GLenum)dstFactor {
     glEnable(GL_BLEND);
     glBlendFunc(srcFactor, dstFactor);
+#ifdef DEBUG
+    GLenum glError = glGetError();
+    if (glError != GL_NO_ERROR) {
+        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
+    }
+#endif
 }
 
 -(void)render:(NSObject <Fractal>*)fractal {
@@ -128,7 +136,7 @@
         self.texture.imageData[base + 0] = 0xff;
         self.texture.imageData[base + 1] = 0x2f;
         self.texture.imageData[base + 2] = 0x00;
-        self.texture.imageData[base + 3] = 0x7f;
+        self.texture.imageData[base + 3] = (unsigned char) i;
     }
     [self.texture replace];
 
@@ -150,10 +158,12 @@
 
     int numIndices = 6;
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+#ifdef DEBUG
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
+#endif
 }
 
 -(BOOL)checkForExtension:(NSString*)searchName {

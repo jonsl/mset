@@ -70,20 +70,23 @@
         levelHeight /= 2;
     }
     glBindTexture(GL_TEXTURE_2D, 0);
-
+#ifdef DEBUG
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
+#endif
 }
 
 -(void)replace {
     glBindTexture(GL_TEXTURE_2D, _name);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, _imageData);
+#ifdef DEBUG
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
+#endif
 }
 
 -(void)setRepeat:(BOOL)value {
@@ -91,10 +94,12 @@
     glBindTexture(GL_TEXTURE_2D, _name);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
+#ifdef DEBUG
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
+#endif
 }
 
 -(void)setFilter:(TextureFilter)textureFilter {
@@ -112,6 +117,12 @@
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+#ifdef DEBUG
+    GLenum glError = glGetError();
+    if (glError != GL_NO_ERROR) {
+        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
+    }
+#endif
 }
 
 +(NSUInteger)nextPowerOfTwo:(NSUInteger)value {
