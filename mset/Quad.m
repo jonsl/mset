@@ -10,10 +10,12 @@
     Vertex _vertices[4];
 }
 
--(instancetype)initWithTexture:(Texture*)texture {
-    if ((self = [super init])) {
-        self.texture = texture;
++(Quad*)quadWithPositionTop:(float)top left:(float)left {
+    return [[Quad alloc] initWithPositionTop:top left:left];
+}
 
+-(instancetype)initWithPositionTop:(float)top left:(float)left {
+    if ((self = [super init])) {
         _vertices[0].texCoords.x = 0.f;
         _vertices[0].texCoords.y = 0.f;
         _vertices[1].texCoords.x = 1.0f;

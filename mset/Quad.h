@@ -5,6 +5,8 @@
 
 @interface Quad : NSObject
 
++(Quad*)quadWithPositionTop:(float)top left:(float)left;
+
 @property (nonatomic, strong) Texture* texture;
 
 @end

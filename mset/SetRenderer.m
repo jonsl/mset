@@ -8,7 +8,8 @@
 @interface SetRenderer ()
 
 @property (nonatomic, strong) RendererState* rendererState;
-@property (nonatomic, strong) NSMutableArray* textures;
+@property (nonatomic, strong) NSMutableArray/*<Quad*>*/* quads;
+@property (nonatomic, strong) NSMutableArray/*<Texture*>*/* textures;
 
 @end
 
