@@ -21,6 +21,7 @@
 		7852F77B122C2C1F39814A21 /* Quad.m in Sources */ = {isa = PBXBuildFile; fileRef = 7852FA1512BB56514A265EA0 /* Quad.m */; };
 		7852F973FA343BD1473FE379 /* SetRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7852FC2153618F47957D913D /* SetRenderer.m */; };
 		B1B19B561102711171B0EB61 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B19B6397B9191F2214BCAE /* Texture.m */; };
+		B1B19FEBBF46DD8F8BDF312E /* Configuration.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B19BCA584567D8BDA77FC0 /* Configuration.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,7 +62,9 @@
 		7852FC2153618F47957D913D /* SetRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SetRenderer.m; sourceTree = "<group>"; };
 		7852FF760FA269A5A91C19CE /* Quad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Quad.h; sourceTree = "<group>"; };
 		B1B198CE5251F54D818CB295 /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture.h; sourceTree = "<group>"; };
+		B1B19930662819024C4F41E4 /* Configuration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Configuration.h; sourceTree = "<group>"; };
 		B1B19B6397B9191F2214BCAE /* Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Texture.m; sourceTree = "<group>"; };
+		B1B19BCA584567D8BDA77FC0 /* Configuration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Configuration.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +130,8 @@
 				7852F96D778A6599D7702BB0 /* Util.h */,
 				7852FC2153618F47957D913D /* SetRenderer.m */,
 				7852F7AD1EB6D5AEE29B0A91 /* SetRenderer.h */,
+				B1B19BCA584567D8BDA77FC0 /* Configuration.m */,
+				B1B19930662819024C4F41E4 /* Configuration.h */,
 			);
 			path = mset;
 			sourceTree = "<group>";
@@ -266,6 +271,7 @@
 				B1B19B561102711171B0EB61 /* Texture.m in Sources */,
 				7852F77B122C2C1F39814A21 /* Quad.m in Sources */,
 				7852F973FA343BD1473FE379 /* SetRenderer.m in Sources */,
+				B1B19FEBBF46DD8F8BDF312E /* Configuration.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

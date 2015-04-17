@@ -16,6 +16,7 @@
 
 #import "GameViewController.h"
 #import "NSExtensions.h"
+#import "Configuration.h"
 #import "Util.h"
 #import "Program.h"
 #import "Texture.h"
