@@ -8,14 +8,25 @@
 
 @implementation Quad {
     Vertex _vertices[4];
+    float _left, _top;
 }
 
-+(Quad*)quadWithPositionTop:(float)top left:(float)left {
-    return [[Quad alloc] initWithPositionTop:top left:left];
++(Quad*)quadWithPositionLeft:(float)left top:(float)top {
+    return [[Quad alloc] initWithPositionLeft:left top:top];
 }
 
--(instancetype)initWithPositionTop:(float)top left:(float)left {
+-(instancetype)initWithPositionLeft:(float)left top:(float)top {
     if ((self = [super init])) {
+
+        _left = left;
+        _top = top;
+
+        _vertices[0].position.x = _left;
+        _vertices[0].position.y = _top;
+        _vertices[1].position.y = _top;
+        _vertices[2].position.x = _left;
+
+
         _vertices[0].texCoords.x = 0.f;
         _vertices[0].texCoords.y = 0.f;
         _vertices[1].texCoords.x = 1.0f;
@@ -32,14 +43,10 @@
     NSAssert(texture != nil, @"invalid texture");
     _texture = texture;
 
-    _vertices[0].position.x = 0.f;
-    _vertices[0].position.y = 0.f;
-    _vertices[1].position.x = texture.width;
-    _vertices[1].position.y = 0.f;
-    _vertices[2].position.x = 0.f;
-    _vertices[2].position.y = texture.height;
-    _vertices[3].position.x = texture.width;
-    _vertices[3].position.y = texture.height;
+    _vertices[1].position.x = _left+texture.width;
+    _vertices[2].position.y = _top+texture.height;
+    _vertices[3].position.x = _left+texture.width;
+    _vertices[3].position.y = _top+texture.height;
 }
 
 @end

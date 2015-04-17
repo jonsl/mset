@@ -11,26 +11,29 @@
 
 #pragma mark Fractal
 
-// return: number of iterations to diverge from x, y, or -1 if convergent
+// return: number of iterations to diverge from (x, y), or -1 if convergent
 -(NSInteger)calculatePoint:(double)x
                          y:(double)y
               escapeRadius:(double)escapeRadius
              maxIterations:(NSInteger)maxIterations {
     complex double C, Z;
-    int i = 0;
+    int iterations = 0;
 
     Z = 0 + 0 * I;
     C = x + y * I;
 
     do {
         Z = Z * Z + C;
-        i++;
-    } while ((creal(Z) * creal(Z) + cimag(Z) * cimag(Z)) <= (escapeRadius * escapeRadius) && i < maxIterations);
+        ++iterations;
+    } while (
+            (creal(Z) * creal(Z) + cimag(Z) * cimag(Z)) <= (escapeRadius * escapeRadius)
+                    && iterations < maxIterations
+            );
 
-    if (i >= maxIterations) {
+    if (iterations >= maxIterations) {
         return -1;
     }
-    return i;
+    return iterations;
 }
 
 @end
