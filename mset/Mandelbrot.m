@@ -9,15 +9,13 @@
 
 @implementation Mandelbrot
 
-/* The magnitude of a complex number */
-static double magnitude(complex double c) {
-    return sqrt(creal(c) * creal(c) + cimag(c) * cimag(c));
-}
+#pragma mark Fractal
 
-/* This is where the actual mandelbrot magic happens. Thanks to C99, it's tiny.
- * Return the number of iterations to diverge from x,y, or -1 if convergent
- * (ie, doesn't diverge within 'iteration' iterations). */
--(NSInteger)calculatePoint:(double)x y:(double)y iterations:(NSInteger)iterations {
+// return: number of iterations to diverge from x, y, or -1 if convergent
+-(NSInteger)calculatePoint:(double)x
+                         y:(double)y
+              escapeRadius:(double)escapeRadius
+             maxIterations:(NSInteger)maxIterations {
     complex double C, Z;
     int i = 0;
 
@@ -27,11 +25,12 @@ static double magnitude(complex double c) {
     do {
         Z = Z * Z + C;
         i++;
-    } while (magnitude(Z) < 2 && i < iterations);
+    } while ((creal(Z) * creal(Z) + cimag(Z) * cimag(Z)) <= (escapeRadius * escapeRadius) && i < maxIterations);
 
-    if (i >= iterations) return -1;
+    if (i >= maxIterations) {
+        return -1;
+    }
     return i;
-
 }
 
 @end

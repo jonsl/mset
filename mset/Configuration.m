@@ -47,10 +47,10 @@ static NSString* RenderStrategyKey = @"RenderStrategy";
 }
 
 -(id)initWithCoder:(NSCoder*)decoder {
-    FractalType setType = [[decoder decodeObjectForKey:SetTypeKey] shortValue];
-    NSUInteger executionUnits = [[decoder decodeObjectForKey:ExecutionUnitsKey] shortValue];
-    ExecutionStrategy executionStrategy = [[decoder decodeObjectForKey:ExecutionStrategyKey] shortValue];
-    RenderStrategy renderStrategy = [[decoder decodeObjectForKey:RenderStrategyKey] shortValue];
+    FractalType setType = (FractalType)[[decoder decodeObjectForKey:SetTypeKey] integerValue];
+    NSUInteger executionUnits = (NSUInteger)[[decoder decodeObjectForKey:ExecutionUnitsKey] integerValue];
+    ExecutionStrategy executionStrategy = (ExecutionStrategy)[[decoder decodeObjectForKey:ExecutionStrategyKey] integerValue];
+    RenderStrategy renderStrategy = (RenderStrategy)[[decoder decodeObjectForKey:RenderStrategyKey] integerValue];
     return [self initWithSetType:setType
                   executionUnits:executionUnits
                executionStrategy:executionStrategy

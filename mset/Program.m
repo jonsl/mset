@@ -56,11 +56,11 @@
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
 
     if (!linked) {
-        int logLength = 0;
+        GLint logLength = 0;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char* log = malloc(sizeof(char) * logLength);
+            char* log = malloc(sizeof(char) * (size_t)logLength);
             glGetProgramInfoLog(program, logLength, NULL, log);
             NSLog(@"Error linking program: %s", log);
             free(log);
@@ -95,11 +95,11 @@
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 
     if (!compiled) {
-        int logLength = 0;
+        GLint logLength = 0;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char* log = malloc(sizeof(char) * logLength);
+            char* log = malloc(sizeof(char) * (size_t)logLength);
             glGetShaderInfoLog(shader, logLength, NULL, log);
             NSLog(@"Error compiling %@ shader: %s", type == GL_VERTEX_SHADER ? @"vertex" : @"fragment", log);
             free(log);
@@ -119,7 +119,7 @@
 
     int numTraits = 0;
     glGetProgramiv(_name, GL_ACTIVE_UNIFORMS, &numTraits);
-    for (int i = 0; i < numTraits; ++i) {
+    for (GLuint i = 0; i < numTraits; ++i) {
         glGetActiveUniform(_name, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
         NSString* name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
         if (self.traitMap[name] == nil) {
@@ -136,7 +136,7 @@
 
     int numTraits = 0;
     glGetProgramiv(_name, GL_ACTIVE_ATTRIBUTES, &numTraits);
-    for (int i = 0; i < numTraits; ++i) {
+    for (GLuint i = 0; i < numTraits; ++i) {
         glGetActiveAttrib(_name, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
         NSString* name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
         if (self.traitMap[name] == nil) {

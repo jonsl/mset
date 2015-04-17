@@ -5,6 +5,9 @@
 
 @protocol Fractal <NSObject>
 
--(NSInteger)calculatePoint:(double)x y:(double)y iterations:(NSInteger)iterations;
+-(NSInteger)calculatePoint:(double)x
+                         y:(double)y
+              escapeRadius:(double)escapeRadius
+             maxIterations:(NSInteger)maxIterations;
 
 @end

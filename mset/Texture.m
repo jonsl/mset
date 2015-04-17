@@ -15,12 +15,12 @@
 -(instancetype)initWithWidth:(float)width height:(float)height scale:(float)scale {
     if ((self = [super init])) {
         // only textures with sidelengths that are powers of 2 support all OpenGL ES features.
-        int width2 = [Texture nextPowerOfTwo:width * scale];
-        int height2 = [Texture nextPowerOfTwo:height * scale];
+        NSUInteger width2 = [Texture nextPowerOfTwo:width * scale];
+        NSUInteger height2 = [Texture nextPowerOfTwo:height * scale];
 
         CGColorSpaceRef cgColorSpace = CGColorSpaceCreateDeviceRGB();
         CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast;
-        int bytesPerPixel = 4;
+        NSUInteger bytesPerPixel = 4;
 
         _imageData = calloc(width2 * height2 * bytesPerPixel, sizeof(uint8_t));
         CGContextRef context = CGBitmapContextCreate(_imageData, width2, height2, 8, bytesPerPixel * width2, cgColorSpace, bitmapInfo);
@@ -56,7 +56,10 @@
     ((uint32_t*) _imageData)[index] = rgba;
 }
 
--(void)createGlTexture:(const void*)imgData width:(uint)width height:(uint)height numMipmaps:(uint)numMipmaps {
+-(void)createGlTexture:(const void*)imgData
+                 width:(NSUInteger)width
+                height:(NSUInteger)height
+            numMipmaps:(NSUInteger)numMipmaps {
     GLenum glTexType = GL_UNSIGNED_BYTE;
     GLenum glTexFormat = GL_RGBA;
     int bitsPerPixel = 32;
@@ -66,13 +69,13 @@
     NSAssert(_name != 0, @"invalid texture name");
     glBindTexture(GL_TEXTURE_2D, _name);
 
-    int levelWidth = width;
-    int levelHeight = height;
+    int levelWidth = (int)width;
+    int levelHeight = (int)height;
     unsigned char* levelData = (unsigned char*) imgData;
 
     for (int level = 0; level <= numMipmaps; ++level) {
         int size = levelWidth * levelHeight * bitsPerPixel / 8;
-        glTexImage2D(GL_TEXTURE_2D, level, glTexFormat, levelWidth, levelHeight,
+        glTexImage2D(GL_TEXTURE_2D, level, (GLint)glTexFormat, levelWidth, levelHeight,
                 0, glTexFormat, glTexType, levelData);
         levelData += size;
         levelWidth /= 2;
@@ -106,9 +109,9 @@
     }
 }
 
-+(uint)nextPowerOfTwo:(uint)value {
++(NSUInteger)nextPowerOfTwo:(NSUInteger)value {
     // REF: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-    unsigned int v = value;
+    NSUInteger v = value;
     v--;
     v |= v >> 1;
     v |= v >> 2;
