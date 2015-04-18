@@ -80,7 +80,7 @@
 
 -(void)replace {
     glBindTexture(GL_TEXTURE_2D, _name);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, _imageData);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, (GLsizei)_width, (GLsizei)_height, GL_RGBA, GL_UNSIGNED_BYTE, _imageData);
 #ifdef DEBUG
     GLenum glError = glGetError();
     if (glError != GL_NO_ERROR) {

@@ -41,19 +41,19 @@
 #pragma mark Fractal
 
 -(void)compute:(unsigned char*)rgba
-         width:(NSInteger)width
-        height:(NSInteger)height
+         width:(NSUInteger)width
+        height:(NSUInteger)height
     updateDraw:(DrawBlock)updateDraw {
     if (_fractalDescriptor == nil) {
         [NSException raise:ExceptionLogicError format:@"invalid fractalDescriptor"];
     }
     // render
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
+    for (NSUInteger y = 0; y < height; y+=2) {
+        for (NSUInteger x = 0; x < width; x++) {
             double xp = ((double) x / width) * (_fractalDescriptor.xMax - _fractalDescriptor.xMin) + _fractalDescriptor.xMin; /* real point on fractal plane */
             double yp = ((double) y / height) * (_fractalDescriptor.yMax - _fractalDescriptor.yMin) + _fractalDescriptor.yMin;     /* imag - */
             NSInteger iterations = [self calculatePoint:xp y:yp];
-            int ppos = 4 * (width * y + x);
+            NSUInteger ppos = 4 * (width * y + x);
             if (iterations == _fractalDescriptor.maxIterations) {
                 rgba[ppos] = 0;
                 rgba[ppos + 1] = 0;

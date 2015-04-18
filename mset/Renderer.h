@@ -6,12 +6,14 @@
 @interface Renderer : NSObject
 
 +(instancetype)rendererWithWidth:(float)width height:(float)height;
+-(void)updateImage;
 -(void)render;
 
-@property (nonatomic, readonly) Texture* texture;
+@property (nonatomic) unsigned char* imageData;
+@property (nonatomic) NSUInteger imagewidth;
+@property (nonatomic) NSUInteger imageHeight;
 @property (nonatomic, readonly) float width;
 @property (nonatomic, readonly) float height;
-@property (nonatomic, readonly) float aspect;
 @property (nonatomic, assign) CGPoint textureOffset;
 
 @end

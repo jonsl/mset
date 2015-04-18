@@ -11,8 +11,8 @@ typedef struct {
 @protocol Fractal<NSObject>
 
 -(void)compute:(unsigned char*)rgba
-         width:(NSInteger)width
-        height:(NSInteger)height
+         width:(NSUInteger)width
+        height:(NSUInteger)height
     updateDraw:(DrawBlock)updateDraw;
 
 -(FractalCoordinate)convertCoordinates:(CGPoint)point;

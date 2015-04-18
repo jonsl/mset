@@ -11,9 +11,6 @@
 @property (strong, nonatomic) EAGLContext* context;
 @property (nonatomic, strong) RendererState* rendererState;
 @property (nonatomic, strong) Texture* texture;
-//@property (nonatomic, strong) Quad* quad;
-//@property (nonatomic, strong) NSMutableArray/*<Quad*>*/* quads;
-//@property (nonatomic, strong) NSMutableArray/*<Texture*>*/* textures;
 
 @end
 
@@ -33,22 +30,12 @@
     if ((self = [super init])) {
         _width = width;
         _height = height;
-        _aspect = _width / _height;
 
         self.rendererState = [RendererState rendererState];
 
         NSUInteger __unused numThreads = [Configuration sharedConfiguration].executionUnits;
 
         self.texture = [Texture textureWithWidth:_width height:_height scale:1];
-
-//        self.textures = [NSMutableArray arrayWithCapacity:numThreads];
-//        float textureWidth = width / (numThreads >> 1);
-//        float textureHeight = height / (numThreads >> 1);
-//        for (int i = 0; i < numThreads; ++i) {
-//            [self.textures addObject:[Texture textureWithWidth:textureWidth height:textureHeight scale:1]];
-
-//        }
-
         self.textureOffset = CGPointMake(-(self.texture.width - _width) / 2, -(self.texture.height - _height) / 2);
 
         _vertexData[0].texCoords.x = 0.f;
@@ -68,6 +55,18 @@
         _indexData[5] = 2;
     }
     return self;
+}
+
+-(unsigned char*)imageData {
+    return self.texture.imageData;
+}
+
+-(NSUInteger)imagewidth {
+    return self.texture.width;
+}
+
+-(NSUInteger)imageHeight {
+    return self.texture.height;
 }
 
 -(void)setTextureOffset:(CGPoint)textureOffset {
@@ -134,6 +133,10 @@
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
 #endif
+}
+
+-(void)updateImage {
+    [self.texture replace];
 }
 
 -(void)render {

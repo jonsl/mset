@@ -13,11 +13,11 @@ typedef enum TextureFilter {
 -(void)setPixel:(uint)index rgba:(uint32_t)rgba;
 -(void)replace;
 
-@property (nonatomic, readonly) float width;
-@property (nonatomic, readonly) float height;
+@property (nonatomic) unsigned char* imageData;
+@property (nonatomic, readonly) NSUInteger width;
+@property (nonatomic, readonly) NSUInteger height;
 @property (nonatomic, readonly) float scale;
 @property (nonatomic, readonly) uint name;
-@property (nonatomic) unsigned char* imageData;
 @property (nonatomic, assign) BOOL repeat;
 @property (nonatomic, assign) TextureFilter filter;
 

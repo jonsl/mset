@@ -117,11 +117,11 @@
                                                                                  yMax:centerY + (sizeX / 2)
                                                                          escapeRadius:2
                                                                         maxIterations:maxIterations];
-        [self.fractal compute:self.renderer.texture.imageData
-                        width:self.renderer.texture.width
-                       height:self.renderer.texture.height
+        [self.fractal compute:self.renderer.imageData
+                        width:self.renderer.imagewidth
+                       height:self.renderer.imageHeight
                    updateDraw:^() {
-                       [self.renderer.texture replace];
+                       [self.renderer updateImage];
                    }];
         _requireCompute = NO;
     }
