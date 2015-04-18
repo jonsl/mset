@@ -3,11 +3,19 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
+typedef void (^DrawBlock)();
+
 @protocol Fractal<NSObject>
 
--(NSInteger)calculatePoint:(double)x
-                         y:(double)y
-              escapeRadius:(double)escapeRadius
-             maxIterations:(NSInteger)maxIterations;
+-(void)compute:(unsigned char*)rgba
+         width:(NSInteger)width
+        height:(NSInteger)height
+          xMin:(double)xMin
+          xMax:(double)xMax
+          yMin:(double)yMin
+          yMax:(double)yMax
+  escapeRadius:(NSInteger)escapeRadius
+ maxIterations:(NSInteger)maxIterations
+    updateDraw:(DrawBlock)updateDraw;
 
 @end

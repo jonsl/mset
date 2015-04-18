@@ -6,10 +6,12 @@
 @interface Renderer : NSObject
 
 +(instancetype)rendererWithWidth:(float)width height:(float)height;
--(void)render:(NSObject<Fractal>*)fractal;
+-(void)render;
 
+@property (nonatomic, readonly) Texture* texture;
 @property (nonatomic, readonly) float width;
 @property (nonatomic, readonly) float height;
 @property (nonatomic, readonly) float aspect;
+@property (nonatomic, assign) CGPoint textureOffset;
 
 @end

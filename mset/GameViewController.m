@@ -12,12 +12,14 @@
 @interface GameViewController ()
 
 @property (strong, nonatomic) EAGLContext* context;
-@property (nonatomic, strong) NSObject <Fractal>* fractal;
+@property (nonatomic, strong) NSObject<Fractal>* fractal;
 @property (nonatomic, strong) Renderer* renderer;
 
 @end
 
-@implementation GameViewController
+@implementation GameViewController {
+    BOOL _requireCompute;
+}
 
 -(void)viewDidLoad {
     [super viewDidLoad];
@@ -39,6 +41,7 @@
 //        CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
         CGSize screenSize = CGSizeMake(1024, 768);
         self.renderer = [Renderer rendererWithWidth:screenSize.width height:screenSize.height];
+        _requireCompute = YES;
 
         self.fractal = [[MandelbrotSet alloc] init];
     }
@@ -102,8 +105,27 @@
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    [self.renderer render:self.fractal];
+    if (_requireCompute) {
+        double centerX = -0.5;
+        double centerY = 0;
+        double sizeX = 4;
+        NSInteger maxIterations = 100;
 
+        [self.fractal compute:self.renderer.texture.imageData
+                        width:self.renderer.texture.width
+                       height:self.renderer.texture.height
+                         xMin:centerX - (sizeX / 2)
+                         xMax:centerX + (sizeX / 2)
+                         yMin:centerY - (sizeX / 2)
+                         yMax:centerY + (sizeX / 2)
+                 escapeRadius:2
+                maxIterations:maxIterations
+                   updateDraw:^() {
+                       [self.renderer.texture replace];
+                   }];
+        _requireCompute = NO;
+    }
+    [self.renderer render];
 }
 
 @end
