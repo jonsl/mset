@@ -13,6 +13,7 @@ typedef struct {
 -(void)compute:(unsigned char*)rgba
          width:(NSUInteger)width
         height:(NSUInteger)height
+executionUnits:(NSUInteger)executionUnits
     updateDraw:(DrawBlock)updateDraw;
 
 -(FractalCoordinate)convertCoordinates:(CGPoint)point;

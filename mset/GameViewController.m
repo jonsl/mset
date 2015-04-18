@@ -99,9 +99,8 @@
 
 #pragma mark - GLKView and GLKViewController delegate methods
 
--(void)compute
-{
-    
+-(void)compute {
+
 }
 
 -(void)update {
@@ -120,6 +119,7 @@
         [self.fractal compute:self.renderer.imageData
                         width:self.renderer.imagewidth
                        height:self.renderer.imageHeight
+               executionUnits:[Configuration sharedConfiguration].executionUnits
                    updateDraw:^() {
                        [self.renderer updateImage];
                    }];
