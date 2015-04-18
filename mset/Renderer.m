@@ -33,12 +33,13 @@
     if ((self = [super init])) {
         _width = width;
         _height = height;
+        _aspect = _width / _height;
 
         self.rendererState = [RendererState rendererState];
 
 //        NSUInteger numThreads = [Configuration sharedConfiguration].executionUnits;
 
-        self.texture = [Texture textureWithWidth:256 height:256 scale:1];
+        self.texture = [Texture textureWithWidth:_width height:_height scale:1];
 
 //        self.textures = [NSMutableArray arrayWithCapacity:numThreads];
 //        float textureWidth = width / (numThreads >> 1);
@@ -124,14 +125,12 @@
           xMin:(double)xMin
           xMax:(double)xMax
           yMin:(double)yMin
-          yMax:(double)yMax {
-    int width = self.texture.width;
-    int height = self.texture.height;
-
-    NSInteger maxIterations = 1000;
+          yMax:(double)yMax
+ maxIterations:(NSInteger)maxIterations {
+    int width = _width;//self.texture.width;
+    int height = _height;//self.texture.height;
 
     // render
-    unsigned char px[3];
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             double xp = ((double) x / width) * (xMax - xMin) + xMin; /* real point on fractal plane */
@@ -170,12 +169,23 @@
     }
 
     if (_requireCompute) {
-        [self compute:fractal xMin:-1 xMax:+1 yMin:-1 yMax:+1];
+
+        double centerX = -0.4;
+        double centerY = 0;
+        double sizeX = 2;
+        NSInteger maxIterations = 50;
+
+        [self compute:fractal
+                 xMin:centerX - (sizeX / 2)*_aspect
+                 xMax:centerX + (sizeX / 2)*_aspect
+                 yMin:centerY - (sizeX / 2)
+                 yMax:centerY + (sizeX / 2)
+        maxIterations:maxIterations];
         _requireCompute = NO;
     }
 
     self.rendererState.texture = self.texture;
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, _width, 0, _height, 0.f, 100.0f);
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, _width, 0, _height, 0.f, 1.f);
     self.rendererState.mvpMatrix = projectionMatrix;
     [self.rendererState prepare];
     [self applyBlendMode:GL_SRC_ALPHA dstFactor:GL_ONE_MINUS_SRC_ALPHA];

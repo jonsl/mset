@@ -10,5 +10,6 @@
 
 @property (nonatomic, readonly) float width;
 @property (nonatomic, readonly) float height;
+@property (nonatomic, readonly) float aspect;
 
 @end

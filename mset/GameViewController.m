@@ -29,12 +29,16 @@
     GLKView* view = (GLKView*) self.view;
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
+    self.preferredFramesPerSecond = 60;
 
     [self setupGL];
 
     @try {
-        CGSize viewSize = self.view.bounds.size;
-        self.renderer = [Renderer rendererWithWidth:viewSize.width height:viewSize.height];
+//        CGRect screenBounds = [[UIScreen mainScreen] bounds];
+//        CGFloat screenScale = [[UIScreen mainScreen] scale];
+//        CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
+        CGSize screenSize = CGSizeMake(1024, 768);
+        self.renderer = [Renderer rendererWithWidth:screenSize.width height:screenSize.height];
 
         self.fractal = [[MandelbrotSet alloc] init];
     }
