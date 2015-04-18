@@ -32,6 +32,7 @@
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     self.preferredFramesPerSecond = 60;
+    self.multitouchEnabled = true;
 
     [self setupGL];
 
@@ -98,34 +99,97 @@
 
 #pragma mark - GLKView and GLKViewController delegate methods
 
--(void)update {
+-(void)compute
+{
+    
 }
 
--(void)glkView:(GLKView*)view drawInRect:(CGRect)rect {
-    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
+-(void)update {
     if (_requireCompute) {
         double centerX = -0.5;
         double centerY = 0;
         double sizeX = 4;
         NSInteger maxIterations = 100;
 
+        self.fractal.fractalDescriptor = [FractalDescriptor fractalDescriptorWithXMin:centerX - (sizeX / 2)
+                                                                                 xMax:centerX + (sizeX / 2)
+                                                                                 yMin:centerY - (sizeX / 2)
+                                                                                 yMax:centerY + (sizeX / 2)
+                                                                         escapeRadius:2
+                                                                        maxIterations:maxIterations];
         [self.fractal compute:self.renderer.texture.imageData
                         width:self.renderer.texture.width
                        height:self.renderer.texture.height
-                         xMin:centerX - (sizeX / 2)
-                         xMax:centerX + (sizeX / 2)
-                         yMin:centerY - (sizeX / 2)
-                         yMax:centerY + (sizeX / 2)
-                 escapeRadius:2
-                maxIterations:maxIterations
                    updateDraw:^() {
                        [self.renderer.texture replace];
                    }];
         _requireCompute = NO;
     }
+}
+
+-(void)glkView:(GLKView*)view drawInRect:(CGRect)rect {
+    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     [self.renderer render];
+}
+
+-(void)setMultitouchEnabled:(BOOL)multitouchEnabled {
+    self.view.multipleTouchEnabled = multitouchEnabled;
+}
+
+-(BOOL)multitouchEnabled {
+    return self.view.multipleTouchEnabled;
+}
+
+-(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+    [self processTouchEvent:event];
+}
+
+-(void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+    [self processTouchEvent:event];
+}
+
+-(void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+    [self processTouchEvent:event];
+}
+
+-(void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
+//    _lastTouchTimestamp -= 0.0001f; // cancelled touch events have an old timestamp -> workaround
+    [self processTouchEvent:event];
+}
+
+-(void)processTouchEvent:(UIEvent*)event {
+//    if (!self.paused && _lastTouchTimestamp != event.timestamp)
+//    {
+//        @autoreleasepool
+//        {
+//            CGSize viewSize = self.view.bounds.size;
+//            float xConversion = _stage.width / viewSize.width;
+//            float yConversion = _stage.height / viewSize.height;
+//
+//            // convert to SPTouches and forward to stage
+//            NSMutableSet *touches = [NSMutableSet set];
+//            double now = CACurrentMediaTime();
+//            for (UITouch *uiTouch in [event touchesForView:self.view])
+//            {
+//                CGPoint location = [uiTouch locationInView:self.view];
+//                CGPoint previousLocation = [uiTouch previousLocationInView:self.view];
+//                SPTouch *touch = [SPTouch touch];
+//                touch.timestamp = now; // timestamp of uiTouch not compatible to Sparrow timestamp
+//                touch.globalX = location.x * xConversion;
+//                touch.globalY = location.y * yConversion;
+//                touch.previousGlobalX = previousLocation.x * xConversion;
+//                touch.previousGlobalY = previousLocation.y * yConversion;
+//                touch.tapCount = (int)uiTouch.tapCount;
+//                touch.phase = (SPTouchPhase)uiTouch.phase;
+//                touch.nativeTouch = uiTouch;
+//                [touches addObject:touch];
+//            }
+//            [_touchProcessor processTouches:touches];
+//            _lastTouchTimestamp = event.timestamp;
+//        }
+//    }
 }
 
 @end

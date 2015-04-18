@@ -7,7 +7,9 @@
 #include <complex.h>
 
 
-@implementation MandelbrotSet
+@implementation MandelbrotSet {
+    FractalDescriptor* _fractalDescriptor;
+}
 
 -(instancetype)init {
     if ((self = [super init])) {
@@ -18,11 +20,10 @@
 
 // return: number of iterations to diverge from (x, y), or -1 if convergent
 -(NSInteger)calculatePoint:(double)x
-                         y:(double)y
-              escapeRadius:(double)escapeRadius
-             maxIterations:(NSInteger)maxIterations {
+                         y:(double)y {
     complex double C, Z;
     int iterations = 0;
+    NSInteger const ER2 = _fractalDescriptor.escapeRadius * _fractalDescriptor.escapeRadius;
 
     Z = 0 + 0 * I;
     C = x + y * I;
@@ -31,8 +32,8 @@
         Z = Z * Z + C;
         ++iterations;
     } while (
-            (creal(Z) * creal(Z) + cimag(Z) * cimag(Z)) <= (escapeRadius * escapeRadius)
-                    && iterations < maxIterations
+            (creal(Z) * creal(Z) + cimag(Z) * cimag(Z)) <= ER2
+                    && iterations < _fractalDescriptor.maxIterations
             );
     return iterations;
 }
@@ -42,26 +43,23 @@
 -(void)compute:(unsigned char*)rgba
          width:(NSInteger)width
         height:(NSInteger)height
-          xMin:(double)xMin
-          xMax:(double)xMax
-          yMin:(double)yMin
-          yMax:(double)yMax
-  escapeRadius:(NSInteger)escapeRadius
- maxIterations:(NSInteger)maxIterations
     updateDraw:(DrawBlock)updateDraw {
+    if (_fractalDescriptor == nil) {
+        [NSException raise:ExceptionLogicError format:@"invalid fractalDescriptor"];
+    }
     // render
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            double xp = ((double) x / width) * (xMax - xMin) + xMin; /* real point on fractal plane */
-            double yp = ((double) y / height) * (yMax - yMin) + yMin;     /* imag - */
-            NSInteger iterations = [self calculatePoint:xp y:yp escapeRadius:escapeRadius maxIterations:maxIterations];
+            double xp = ((double) x / width) * (_fractalDescriptor.xMax - _fractalDescriptor.xMin) + _fractalDescriptor.xMin; /* real point on fractal plane */
+            double yp = ((double) y / height) * (_fractalDescriptor.yMax - _fractalDescriptor.yMin) + _fractalDescriptor.yMin;     /* imag - */
+            NSInteger iterations = [self calculatePoint:xp y:yp];
             int ppos = 4 * (width * y + x);
-            if (iterations == maxIterations) {
+            if (iterations == _fractalDescriptor.maxIterations) {
                 rgba[ppos] = 0;
                 rgba[ppos + 1] = 0;
                 rgba[ppos + 2] = 0;
             } else {
-                double c = 3.0 * log(iterations) / log(maxIterations - 1.0);
+                double c = 3.0 * log(iterations) / log(_fractalDescriptor.maxIterations - 1.0);
                 if (c < 1) {
                     rgba[ppos] = (unsigned char) (255.0 * c);
                     rgba[ppos + 1] = 0;
@@ -82,6 +80,21 @@
     if (updateDraw) {
         updateDraw();
     }
+}
+
+-(FractalCoordinate)convertCoordinates:(CGPoint)point {
+    FractalCoordinate fractalCoordinate;
+    fractalCoordinate.x = point.x;
+    fractalCoordinate.y = point.y;
+    return fractalCoordinate;
+}
+
+-(FractalDescriptor*)fractalDescriptor {
+    return _fractalDescriptor;
+}
+
+-(void)setFractalDescriptor:(FractalDescriptor*)fractalDescriptor {
+    _fractalDescriptor = fractalDescriptor;
 }
 
 @end

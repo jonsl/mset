@@ -19,6 +19,7 @@
 		1ABD28FA1ADFBEFC00ADBE75 /* RendererState.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28F61ADFBEFC00ADBE75 /* RendererState.m */; };
 		1ABD28FC1ADFC02600ADBE75 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ABD28FB1ADFC02600ADBE75 /* Foundation.framework */; };
 		7852F973FA343BD1473FE379 /* Renderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7852FC2153618F47957D913D /* Renderer.m */; };
+		7852FFB3C02841F4A83D4605 /* FractalDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = 7852F8A081DF55243454C0E9 /* FractalDescriptor.m */; };
 		B1B19B561102711171B0EB61 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B19B6397B9191F2214BCAE /* Texture.m */; };
 		B1B19D81CF4B0BDDD7E7CFB1 /* MandelbrotSet.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B194B1A06D82276DDF7D97 /* MandelbrotSet.m */; };
 		B1B19FEBBF46DD8F8BDF312E /* Configuration.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B19BCA584567D8BDA77FC0 /* Configuration.m */; };
@@ -56,7 +57,9 @@
 		1ABD28F61ADFBEFC00ADBE75 /* RendererState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RendererState.m; sourceTree = "<group>"; };
 		1ABD28FB1ADFC02600ADBE75 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1ABD28FD1ADFC1A400ADBE75 /* Mset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mset.h; sourceTree = "<group>"; };
+		7852F06AE5F06F7A3E9F2523 /* FractalDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FractalDescriptor.h; sourceTree = "<group>"; };
 		7852F7AD1EB6D5AEE29B0A91 /* Renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Renderer.h; sourceTree = "<group>"; };
+		7852F8A081DF55243454C0E9 /* FractalDescriptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FractalDescriptor.m; sourceTree = "<group>"; };
 		7852F96D778A6599D7702BB0 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		7852FC2153618F47957D913D /* Renderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Renderer.m; sourceTree = "<group>"; };
 		B1B194B1A06D82276DDF7D97 /* MandelbrotSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MandelbrotSet.m; sourceTree = "<group>"; };
@@ -111,29 +114,31 @@
 			children = (
 				1ABD28C91ADFB83B00ADBE75 /* AppDelegate.h */,
 				1ABD28CA1ADFB83B00ADBE75 /* AppDelegate.m */,
+				B1B19930662819024C4F41E4 /* Configuration.h */,
+				B1B19BCA584567D8BDA77FC0 /* Configuration.m */,
+				B1B194DB8999B6530B8134C2 /* Fractal.h */,
+				7852F06AE5F06F7A3E9F2523 /* FractalDescriptor.h */,
+				7852F8A081DF55243454C0E9 /* FractalDescriptor.m */,
 				1ABD28D01ADFB83B00ADBE75 /* GameViewController.h */,
 				1ABD28D11ADFB83B00ADBE75 /* GameViewController.m */,
 				1ABD28D61ADFB83B00ADBE75 /* Images.xcassets */,
 				1ABD28D81ADFB83B00ADBE75 /* LaunchScreen.xib */,
 				1ABD28D31ADFB83B00ADBE75 /* Main.storyboard */,
+				B1B19E8ECFCD846EC3C2D152 /* MandelbrotSet.h */,
+				B1B194B1A06D82276DDF7D97 /* MandelbrotSet.m */,
 				1ABD28FD1ADFC1A400ADBE75 /* Mset.h */,
 				1ABD28F11ADFBEFC00ADBE75 /* NSExtensions.h */,
 				1ABD28F21ADFBEFC00ADBE75 /* NSExtensions.m */,
 				1ABD28F31ADFBEFC00ADBE75 /* Program.h */,
 				1ABD28F41ADFBEFC00ADBE75 /* Program.m */,
+				7852F7AD1EB6D5AEE29B0A91 /* Renderer.h */,
+				7852FC2153618F47957D913D /* Renderer.m */,
 				1ABD28F51ADFBEFC00ADBE75 /* RendererState.h */,
 				1ABD28F61ADFBEFC00ADBE75 /* RendererState.m */,
 				1ABD28C51ADFB83B00ADBE75 /* Supporting Files */,
-				B1B19B6397B9191F2214BCAE /* Texture.m */,
 				B1B198CE5251F54D818CB295 /* Texture.h */,
+				B1B19B6397B9191F2214BCAE /* Texture.m */,
 				7852F96D778A6599D7702BB0 /* Util.h */,
-				7852FC2153618F47957D913D /* Renderer.m */,
-				7852F7AD1EB6D5AEE29B0A91 /* Renderer.h */,
-				B1B19BCA584567D8BDA77FC0 /* Configuration.m */,
-				B1B19930662819024C4F41E4 /* Configuration.h */,
-				B1B194DB8999B6530B8134C2 /* Fractal.h */,
-				B1B194B1A06D82276DDF7D97 /* MandelbrotSet.m */,
-				B1B19E8ECFCD846EC3C2D152 /* MandelbrotSet.h */,
 			);
 			path = mset;
 			sourceTree = "<group>";
@@ -274,6 +279,7 @@
 				7852F973FA343BD1473FE379 /* Renderer.m in Sources */,
 				B1B19FEBBF46DD8F8BDF312E /* Configuration.m in Sources */,
 				B1B19D81CF4B0BDDD7E7CFB1 /* MandelbrotSet.m in Sources */,
+				7852FFB3C02841F4A83D4605 /* FractalDescriptor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
