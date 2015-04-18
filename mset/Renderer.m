@@ -127,8 +127,8 @@
           yMin:(double)yMin
           yMax:(double)yMax
  maxIterations:(NSInteger)maxIterations {
-    int width = _width;//self.texture.width;
-    int height = _height;//self.texture.height;
+    int width = self.texture.width;
+    int height = self.texture.height;
 
     // render
     for (int y = 0; y < height; y++) {
@@ -170,14 +170,14 @@
 
     if (_requireCompute) {
 
-        double centerX = -0.4;
+        double centerX = -0.5;
         double centerY = 0;
-        double sizeX = 2;
-        NSInteger maxIterations = 50;
+        double sizeX = 4;
+        NSInteger maxIterations = 100;
 
         [self compute:fractal
-                 xMin:centerX - (sizeX / 2)*_aspect
-                 xMax:centerX + (sizeX / 2)*_aspect
+                 xMin:centerX - (sizeX / 2)
+                 xMax:centerX + (sizeX / 2)
                  yMin:centerY - (sizeX / 2)
                  yMax:centerY + (sizeX / 2)
         maxIterations:maxIterations];
