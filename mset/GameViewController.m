@@ -35,9 +35,8 @@
     @try {
         CGSize viewSize = self.view.bounds.size;
         self.renderer = [Renderer rendererWithWidth:viewSize.width height:viewSize.height];
-        [Configuration sharedConfiguration].renderStrategy = LineRender;
 
-        self.fractal = [[Mandelbrot alloc] init];
+        self.fractal = [[MandelbrotSet alloc] init];
     }
     @catch (NSException* ex) {
         NSLog(@"exception: '%@', reason: '%@'", ex.name, ex.reason);
@@ -48,7 +47,7 @@
 }
 
 -(EAGLContext*)createBestEAGLContext {
-    EAGLContext* context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    EAGLContext* context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
     if (context == nil) {
         context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     }

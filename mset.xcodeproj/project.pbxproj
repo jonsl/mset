@@ -20,7 +20,7 @@
 		1ABD28FC1ADFC02600ADBE75 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ABD28FB1ADFC02600ADBE75 /* Foundation.framework */; };
 		7852F973FA343BD1473FE379 /* Renderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7852FC2153618F47957D913D /* Renderer.m */; };
 		B1B19B561102711171B0EB61 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B19B6397B9191F2214BCAE /* Texture.m */; };
-		B1B19D81CF4B0BDDD7E7CFB1 /* Mandelbrot.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B194B1A06D82276DDF7D97 /* Mandelbrot.m */; };
+		B1B19D81CF4B0BDDD7E7CFB1 /* MandelbrotSet.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B194B1A06D82276DDF7D97 /* MandelbrotSet.m */; };
 		B1B19FEBBF46DD8F8BDF312E /* Configuration.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B19BCA584567D8BDA77FC0 /* Configuration.m */; };
 /* End PBXBuildFile section */
 
@@ -59,13 +59,13 @@
 		7852F7AD1EB6D5AEE29B0A91 /* Renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Renderer.h; sourceTree = "<group>"; };
 		7852F96D778A6599D7702BB0 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		7852FC2153618F47957D913D /* Renderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Renderer.m; sourceTree = "<group>"; };
-		B1B194B1A06D82276DDF7D97 /* Mandelbrot.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Mandelbrot.m; sourceTree = "<group>"; };
+		B1B194B1A06D82276DDF7D97 /* MandelbrotSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MandelbrotSet.m; sourceTree = "<group>"; };
 		B1B194DB8999B6530B8134C2 /* Fractal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fractal.h; sourceTree = "<group>"; };
 		B1B198CE5251F54D818CB295 /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture.h; sourceTree = "<group>"; };
 		B1B19930662819024C4F41E4 /* Configuration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Configuration.h; sourceTree = "<group>"; };
 		B1B19B6397B9191F2214BCAE /* Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Texture.m; sourceTree = "<group>"; };
 		B1B19BCA584567D8BDA77FC0 /* Configuration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Configuration.m; sourceTree = "<group>"; };
-		B1B19E8ECFCD846EC3C2D152 /* Mandelbrot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mandelbrot.h; sourceTree = "<group>"; };
+		B1B19E8ECFCD846EC3C2D152 /* MandelbrotSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MandelbrotSet.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,8 +132,8 @@
 				B1B19BCA584567D8BDA77FC0 /* Configuration.m */,
 				B1B19930662819024C4F41E4 /* Configuration.h */,
 				B1B194DB8999B6530B8134C2 /* Fractal.h */,
-				B1B194B1A06D82276DDF7D97 /* Mandelbrot.m */,
-				B1B19E8ECFCD846EC3C2D152 /* Mandelbrot.h */,
+				B1B194B1A06D82276DDF7D97 /* MandelbrotSet.m */,
+				B1B19E8ECFCD846EC3C2D152 /* MandelbrotSet.h */,
 			);
 			path = mset;
 			sourceTree = "<group>";
@@ -273,7 +273,7 @@
 				B1B19B561102711171B0EB61 /* Texture.m in Sources */,
 				7852F973FA343BD1473FE379 /* Renderer.m in Sources */,
 				B1B19FEBBF46DD8F8BDF312E /* Configuration.m in Sources */,
-				B1B19D81CF4B0BDDD7E7CFB1 /* Mandelbrot.m in Sources */,
+				B1B19D81CF4B0BDDD7E7CFB1 /* MandelbrotSet.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

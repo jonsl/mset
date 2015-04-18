@@ -22,6 +22,7 @@
     ushort _indexData[6];
     uint _vertexBufferName;
     uint _indexBufferName;
+    BOOL _requireCompute;
 }
 
 +(instancetype)rendererWithWidth:(float)width height:(float)height {
@@ -71,6 +72,8 @@
         _indexData[3] = 1;
         _indexData[4] = 3;
         _indexData[5] = 2;
+
+        _requireCompute = YES;
     }
     return self;
 }
@@ -117,9 +120,58 @@
 #endif
 }
 
--(void)render:(NSObject <Fractal>*)fractal {
+-(void)compute:(NSObject<Fractal>*)fractal
+          xMin:(double)xMin
+          xMax:(double)xMax
+          yMin:(double)yMin
+          yMax:(double)yMax {
+    int width = self.texture.width;
+    int height = self.texture.height;
+
+    NSInteger maxIterations = 1000;
+
+    // render
+    unsigned char px[3];
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            double xp = ((double) x / width) * (xMax - xMin) + xMin; /* real point on fractal plane */
+            double yp = ((double) y / height) * (yMax - yMin) + yMin;     /* imag - */
+            NSInteger iterations = [fractal calculatePoint:xp y:yp escapeRadius:2 maxIterations:maxIterations];
+            int ppos = 4 * (width * y + x);
+            if (iterations == maxIterations) {
+                self.texture.imageData[ppos] = 0;
+                self.texture.imageData[ppos + 1] = 0;
+                self.texture.imageData[ppos + 2] = 0;
+            } else {
+                double c = 3.0 * log(iterations) / log(maxIterations - 1.0);
+                if (c < 1) {
+                    self.texture.imageData[ppos] = (unsigned char) (255.0 * c);
+                    self.texture.imageData[ppos + 1] = 0;
+                    self.texture.imageData[ppos + 2] = 0;
+                } else if (c < 2) {
+                    self.texture.imageData[ppos] = 255;
+                    self.texture.imageData[ppos + 1] = (unsigned char) (255.0 * (c - 1));
+                    self.texture.imageData[ppos + 2] = 0;
+                } else {
+                    self.texture.imageData[ppos] = 255;
+                    self.texture.imageData[ppos + 1] = 255;
+                    self.texture.imageData[ppos + 2] = (unsigned char) (255.0 * (c - 2));
+                }
+            }
+            self.texture.imageData[ppos + 3] = 0xff;
+        }
+    }
+    [self.texture replace];
+}
+
+-(void)render:(NSObject<Fractal>*)fractal {
     if (!_vertexBufferName) {
         [self createBuffers];
+    }
+
+    if (_requireCompute) {
+        [self compute:fractal xMin:-1 xMax:+1 yMin:-1 yMax:+1];
+        _requireCompute = NO;
     }
 
     self.rendererState.texture = self.texture;
@@ -127,18 +179,6 @@
     self.rendererState.mvpMatrix = projectionMatrix;
     [self.rendererState prepare];
     [self applyBlendMode:GL_SRC_ALPHA dstFactor:GL_ONE_MINUS_SRC_ALPHA];
-
-
-    // render
-
-    for (int i = 0; i < self.texture.width * self.texture.height; ++i) {
-        int base = i << 2;
-        self.texture.imageData[base + 0] = 0xff;
-        self.texture.imageData[base + 1] = 0x2f;
-        self.texture.imageData[base + 2] = 0x00;
-        self.texture.imageData[base + 3] = (unsigned char) i;
-    }
-    [self.texture replace];
 
 
     GLuint attribPosition = (GLuint) self.rendererState.aPosition;

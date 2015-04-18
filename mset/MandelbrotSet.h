@@ -3,7 +3,7 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@interface Mandelbrot : NSObject <Fractal>
+@interface MandelbrotSet : NSObject<Fractal>
 
 -(instancetype)init;
 

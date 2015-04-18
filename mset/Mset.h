@@ -18,7 +18,7 @@
 #import "GameViewController.h"
 #import "NSExtensions.h"
 #import "Fractal.h"
-#import "Mandelbrot.h"
+#import "MandelbrotSet.h"
 #import "Configuration.h"
 #import "Util.h"
 #import "Program.h"

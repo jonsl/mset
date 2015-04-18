@@ -7,7 +7,7 @@
 #include <complex.h>
 
 
-@implementation Mandelbrot
+@implementation MandelbrotSet
 
 -(instancetype)init {
     if ((self = [super init])) {
@@ -36,10 +36,6 @@
             (creal(Z) * creal(Z) + cimag(Z) * cimag(Z)) <= (escapeRadius * escapeRadius)
                     && iterations < maxIterations
             );
-
-    if (iterations >= maxIterations) {
-        return -1;
-    }
     return iterations;
 }
 

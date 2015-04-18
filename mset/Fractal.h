@@ -3,7 +3,7 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@protocol Fractal <NSObject>
+@protocol Fractal<NSObject>
 
 -(NSInteger)calculatePoint:(double)x
                          y:(double)y
