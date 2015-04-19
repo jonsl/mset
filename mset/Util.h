@@ -13,15 +13,12 @@
  * types
  */
 typedef struct {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    unsigned char a;
+    unsigned char r, g, b, a;
 } VertexColor;
 
 typedef struct {
-    GLKVector2 position;
-    GLKVector2 texCoords;
+    GLKVector2 x;
+    GLKVector2 uv;
     VertexColor colour;
 } Vertex;
 

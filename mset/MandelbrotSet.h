@@ -5,6 +5,6 @@
 
 @interface MandelbrotSet : NSObject<Fractal>
 
--(instancetype)init;
++(MandelbrotSet*)mandelbrotSet;
 
 @end

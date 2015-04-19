@@ -8,17 +8,21 @@
 
 #import "Mset.h"
 
+float const ScreenWidth = 1024.f;
 
 @interface GameViewController ()
 
 @property (strong, nonatomic) EAGLContext* eaglContext;
 @property (strong, nonatomic) CIContext* ciContext;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
+
 @property (nonatomic, strong) Quad* screenQuad;
 
 @end
 
 @implementation GameViewController {
+    GLKMatrix4 _projectionMatrix;
+    CGSize _screenSize;
     BOOL _requireCompute;
     CGRect _rectangle;
 }
@@ -40,14 +44,21 @@
     [self setupGL];
 
     @try {
-//        CGRect screenBounds = [[UIScreen mainScreen] bounds];
-//        CGFloat screenScale = [[UIScreen mainScreen] scale];
-//        CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
-        CGSize screenSize = CGSizeMake(1024, 768);
-        self.screenQuad = [Quad quadWithWidth:screenSize.width height:screenSize.height];
+        CGRect screenBounds = [[UIScreen mainScreen] bounds];
+        CGFloat screenScale = [[UIScreen mainScreen] scale];
+        CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
+        
+        float aspect = screenSize.width / screenSize.height;
+        _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / aspect);
+        
+        _projectionMatrix = GLKMatrix4MakeOrtho(0, _screenSize.width, 0, _screenSize.height, 0.f, 1.f);
+        
+        Texture* canvasTexture = [Texture textureWithWidth:ScreenWidth height:ScreenWidth scale:1];
+        self.screenQuad = [Quad quadWithTexture:canvasTexture width:ScreenWidth height:ScreenWidth];
+        
         _requireCompute = YES;
 
-        self.fractal = [[MandelbrotSet alloc] init];
+        self.fractal = [MandelbrotSet mandelbrotSet];
     }
     @catch (NSException* ex) {
         NSLog(@"exception: '%@', reason: '%@'", ex.name, ex.reason);
@@ -133,8 +144,10 @@
 -(void)glkView:(GLKView*)view drawInRect:(CGRect)rect {
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    
+    
 
-    [self.screenQuad renderWithAlpha:1.f];
+    [self.screenQuad renderWithMvpMatrix:_projectionMatrix alpha:1.f];
 }
 
 -(void)setMultitouchEnabled:(BOOL)multitouchEnabled {

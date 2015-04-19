@@ -14,7 +14,7 @@
 @end
 
 @implementation Quad {
-    Vertex _vertexData[4];
+    Vertex* _vertexData;
     ushort _indexData[6];
     uint _vertexBufferName;
     uint _indexBufferName;
@@ -22,30 +22,30 @@
 }
 
 +(instancetype)quadWithWidth:(float)width height:(float)height {
-    return [[Quad alloc] initWithWidth:width height:height];
+    return [[Quad alloc] initWithColour:0xff width:width height:height];
 }
 
--(instancetype)initWithWidth:(float)width height:(float)height {
++(instancetype)quadWithColour:(unsigned char)colour width:(float)width height:(float)height {
+    return [[Quad alloc] initWithColour:colour width:width height:height];
+}
+
++(instancetype)quadWithTexture:(Texture*)texture width:(float)width height:(float)height {
+    return [[Quad alloc] initWithTexture:texture width:width height:height];
+}
+
+-(instancetype)initWithColour:(unsigned char)colour width:(float)width height:(float)height {
     if ((self = [super init])) {
         _width = width;
         _height = height;
 
         self.rendererState = [RendererState rendererState];
 
-        NSUInteger __unused numThreads = [Configuration sharedConfiguration].executionUnits;
-
-        float size = _width > _height ? _width : _height;
-        self.texture = [Texture textureWithWidth:size height:size scale:1];
-        self.textureOffset = CGPointMake(-(self.texture.width - _width) / 2, -(self.texture.height - _height) / 2);
-
-        _vertexData[0].texCoords.x = 0.f;
-        _vertexData[0].texCoords.y = 0.f;
-        _vertexData[1].texCoords.x = 1.0f;
-        _vertexData[1].texCoords.y = 0.f;
-        _vertexData[2].texCoords.x = 0.f;
-        _vertexData[2].texCoords.y = 1.0f;
-        _vertexData[3].texCoords.x = 1.0f;
-        _vertexData[3].texCoords.y = 1.0f;
+        _vertexData = calloc(4, sizeof(Vertex));
+        VertexColor rgba = {colour, colour, colour, colour};
+        _vertexData[0].colour = rgba;
+        _vertexData[1].colour = rgba;
+        _vertexData[2].colour = rgba;
+        _vertexData[3].colour = rgba;
 
         _indexData[0] = 0;
         _indexData[1] = 1;
@@ -57,24 +57,50 @@
     return self;
 }
 
--(void)setTextureOffset:(CGPoint)textureOffset {
-    float xOffset = MAX(-(self.texture.width - _width), MIN(textureOffset.x, 0));
-    float yOffset = MAX(-(self.texture.height - _height), MIN(textureOffset.y, 0));
-    VertexColor colour = {0xff, 0xff, 0xff, 0xff};
-    _vertexData[0].position.x = xOffset;
-    _vertexData[0].position.y = yOffset;
-    _vertexData[0].colour = colour;
-    _vertexData[1].position.x = xOffset + self.texture.width;
-    _vertexData[1].position.y = yOffset;
-    _vertexData[1].colour = colour;
-    _vertexData[2].position.x = xOffset;
-    _vertexData[2].position.y = yOffset + self.texture.height;
-    _vertexData[2].colour = colour;
-    _vertexData[3].position.x = xOffset + self.texture.width;
-    _vertexData[3].position.y = yOffset + self.texture.height;
-    _vertexData[3].colour = colour;
+-(instancetype)initWithTexture:(Texture*)texture width:(float)width height:(float)height {
+    if ((self = [self initWithColour:0xff width:width height:height])) {
+        _vertexData[0].uv.x = 0.f;
+        _vertexData[0].uv.y = 0.f;
+        _vertexData[1].uv.x = 1.0f;
+        _vertexData[1].uv.y = 0.f;
+        _vertexData[2].uv.x = 0.f;
+        _vertexData[2].uv.y = 1.0f;
+        _vertexData[3].uv.x = 1.0f;
+        _vertexData[3].uv.y = 1.0f;
 
+//        float size = _width > _height ? _width : _height;
+        self.texture = texture;
+        self.position = CGPointMake(0, 0);
+//        self.textureOffset = CGPointMake(-(self.texture.width - _width) / 2, -(self.texture.height - _height) / 2);
+    }
+    return self;
+}
+
+-(void)dealloc {
+    free(_vertexData);
+    _vertexData = 0;
+}
+
+-(Vertex*)vertex:(NSInteger)index {
+    NSAssert(index >= 0 && index < 4, @"invalid index");
+    return &_vertexData[index];
+}
+
+-(void)setPosition:(CGPoint)position {
+//    float xOffset = MAX(-(self.texture.width - _width), MIN(textureOffset.x, 0));
+//    float yOffset = MAX(-(self.texture.height - _height), MIN(textureOffset.y, 0));
+    _vertexData[0].x.x = position.x;
+    _vertexData[0].x.y = position.y;
+    _vertexData[1].x.x = position.x + _width;
+    _vertexData[1].x.y = position.y;
+    _vertexData[2].x.x = position.x;
+    _vertexData[2].x.y = position.y + _height;
+    _vertexData[3].x.x = position.x + _width;
+    _vertexData[3].x.y = position.y + _height;
+    
     _syncRequired = YES;
+}
+-(void)setTextureOffset:(CGPoint)textureOffset {
 }
 
 -(void)createBuffers {
@@ -132,13 +158,12 @@
     [self.texture replace];
 }
 
--(void)renderWithAlpha:(float)alpha {
+-(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
     if (_syncRequired) {
         [self syncBuffers];
     }
     self.rendererState.texture = self.texture;
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, _width, 0, _height, 0.f, 1.f);
-    self.rendererState.mvpMatrix = projectionMatrix;
+    self.rendererState.mvpMatrix = mvpMatrix;
     self.rendererState.alpha = alpha;
     [self.rendererState prepare];
     [self applyBlendMode:GL_SRC_ALPHA dstFactor:GL_ONE_MINUS_SRC_ALPHA];
@@ -156,10 +181,10 @@
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferName);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferName);
 
-    glVertexAttribPointer(attribPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, position)));
+    glVertexAttribPointer(attribPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, x)));
     glVertexAttribPointer(attribColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*) (offsetof(Vertex, colour)));
     if (_texture) {
-        glVertexAttribPointer(attribTexCoords, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, texCoords)));
+        glVertexAttribPointer(attribTexCoords, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, uv)));
     }
 
     int numIndices = 6;

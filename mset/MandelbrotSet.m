@@ -12,6 +12,10 @@
     FractalDescriptor* _fractalDescriptor;
 }
 
++(MandelbrotSet*)mandelbrotSet {
+    return [[MandelbrotSet alloc] init];
+}
+
 -(instancetype)init {
     if ((self = [super init])) {
 
