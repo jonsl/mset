@@ -9,6 +9,7 @@
 #import "Mset.h"
 
 float const ScreenWidth = 1024.f;
+float const ScreenTextureSize = 1024.f;
 
 @interface GameViewController ()
 
@@ -17,6 +18,10 @@ float const ScreenWidth = 1024.f;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
 
 @property (nonatomic, strong) Quad* screenQuad;
+@property (nonatomic, assign) CGPoint screenPosition;
+
+@property (nonatomic, assign) CGPoint dragScreenStart;
+@property (nonatomic, assign) CGPoint dragScreenPosition;
 
 @end
 
@@ -47,18 +52,17 @@ float const ScreenWidth = 1024.f;
         CGRect screenBounds = [[UIScreen mainScreen] bounds];
         CGFloat screenScale = [[UIScreen mainScreen] scale];
         CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
-        
+
         float aspect = screenSize.width / screenSize.height;
         _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / aspect);
-        
         _projectionMatrix = GLKMatrix4MakeOrtho(0, _screenSize.width, 0, _screenSize.height, 0.f, 1.f);
-        
-        Texture* canvasTexture = [Texture textureWithWidth:ScreenWidth height:ScreenWidth scale:1];
-        self.screenQuad = [Quad quadWithTexture:canvasTexture width:ScreenWidth height:ScreenWidth];
-        
-        float diff = self.screenQuad.height - _screenSize.height;
-        self.screenQuad.position = CGPointMake(0, -diff / 2);
-        
+
+        Texture* canvasTexture = [Texture textureWithWidth:ScreenTextureSize height:ScreenTextureSize scale:1];
+        self.screenQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
+
+        CGPoint delta = CGPointMake(self.screenQuad.width - _screenSize.width, self.screenQuad.height - _screenSize.height);
+        self.screenPosition = CGPointMake(-delta.x / 2, -delta.y / 2);
+
         _requireCompute = YES;
 
         self.fractal = [MandelbrotSet mandelbrotSet];
@@ -69,6 +73,13 @@ float const ScreenWidth = 1024.f;
     @finally {
 
     }
+}
+
+-(void)setScreenPosition:(CGPoint)screenPosition {
+    float xOffset = MAX(-(self.screenQuad.width - _screenSize.width), MIN(screenPosition.x, 0));
+    float yOffset = MAX(-(self.screenQuad.height - _screenSize.height), MIN(screenPosition.y, 0));
+    _screenPosition = CGPointMake(xOffset, yOffset);
+    self.screenQuad.position = _screenPosition;
 }
 
 -(EAGLContext*)createBestEAGLContext {
@@ -147,8 +158,7 @@ float const ScreenWidth = 1024.f;
 -(void)glkView:(GLKView*)view drawInRect:(CGRect)rect {
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    
-    
+
 
     [self.screenQuad renderWithMvpMatrix:_projectionMatrix alpha:1.f];
 }
@@ -162,17 +172,24 @@ float const ScreenWidth = 1024.f;
 }
 
 -(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-    for (UITouch* touch in touches) {
-        CGPoint location = [touch locationInView:self.view];
-        _rectangle.origin = location;
+    NSArray* allTouches = [touches allObjects];
+    int count = [allTouches count];
+    UITouch* touch = [touches anyObject];
+    if ([touch tapCount] > 1) {
+        return;
+    }
+    if (count == 1) {
+        _dragScreenStart = [[allTouches objectAtIndex:0] locationInView:self.view];
+        _dragScreenPosition = _screenPosition;
+    }
+    else if (count == 2) {
     }
 }
 
 -(void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-    for (UITouch* touch in touches) {
-        CGPoint location = [touch locationInView:self.view];
-        _rectangle.size = CGSizeMake(location.x - _rectangle.origin.x, location.y - _rectangle.origin.y);
-    }
+    CGPoint pt = [[touches anyObject] locationInView:self.view];
+    self.screenPosition = CGPointMake(_dragScreenPosition.x - _dragScreenStart.x + pt.x,
+            _dragScreenPosition.y + _dragScreenStart.y - pt.y);
 }
 
 -(void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {

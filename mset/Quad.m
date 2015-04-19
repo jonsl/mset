@@ -87,8 +87,6 @@
 }
 
 -(void)setPosition:(CGPoint)position {
-//    float xOffset = MAX(-(self.texture.width - _width), MIN(textureOffset.x, 0));
-//    float yOffset = MAX(-(self.texture.height - _height), MIN(textureOffset.y, 0));
     _vertexData[0].x.x = position.x;
     _vertexData[0].x.y = position.y;
     _vertexData[1].x.x = position.x + _width;
