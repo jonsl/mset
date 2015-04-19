@@ -15,8 +15,8 @@
 
 @property (nonatomic) Vertex* vertexData;
 @property (nonatomic, strong) Texture* texture;
-@property (nonatomic, readonly) float width;
-@property (nonatomic, readonly) float height;
+@property (nonatomic, assign) float width;
+@property (nonatomic, assign) float height;
 @property (nonatomic, assign) CGPoint position;
 
 @end

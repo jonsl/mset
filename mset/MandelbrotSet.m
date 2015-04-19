@@ -4,9 +4,19 @@
 //
 
 #import "Mset.h"
+#import "Util.h"
 #include <complex.h>
 #import <pthread.h>
 
+
+typedef struct {
+    NSUInteger width, height;
+    NSInteger escapeRadius, maxIterations;
+    unsigned char* rgba;
+    ColourTable colourTable;
+    NSUInteger startY, strideY;
+    double xMin, xMax, yMin, yMax;
+} ExecutionContext;
 
 @implementation MandelbrotSet {
     FractalDescriptor* _fractalDescriptor;
@@ -42,14 +52,6 @@ NSInteger calculatePoint(double x, double y, NSInteger escapeRadius, NSInteger m
     return iterations;
 }
 
-typedef struct {
-    NSUInteger width, height;
-    NSInteger escapeRadius, maxIterations;
-    unsigned char* rgba;
-    NSUInteger startY, strideY;
-    double xMin, xMax, yMin, yMax;
-} ExecutionContext;
-
 void* renderthread(void* arg) {
     ExecutionContext* ec = (ExecutionContext*) arg;
     for (NSUInteger y = ec->startY; y < ec->height; y += ec->strideY) {
@@ -63,25 +65,36 @@ void* renderthread(void* arg) {
                 ec->rgba[ppos + 1] = 0;
                 ec->rgba[ppos + 2] = 0;
             } else {
-                double c = 3.0 * log(iterations) / log(ec->maxIterations - 1.0);
-                if (c < 1) {
-                    ec->rgba[ppos] = (unsigned char) (255 * c);
-                    ec->rgba[ppos + 1] = 0;
-                    ec->rgba[ppos + 2] = 0;
-                } else if (c < 2) {
-                    ec->rgba[ppos] = 255;
-                    ec->rgba[ppos + 1] = (unsigned char) (255 * (c - 1));
-                    ec->rgba[ppos + 2] = 0;
-                } else {
-                    ec->rgba[ppos] = 255;
-                    ec->rgba[ppos + 1] = 255;
-                    ec->rgba[ppos + 2] = (unsigned char) (255 * (c - 2));
-                }
+                ec->rgba[ppos] = ec->colourTable.rgb[iterations * 3];
+                ec->rgba[ppos + 1] = ec->colourTable.rgb[iterations * 3 + 1];
+                ec->rgba[ppos + 2] = ec->colourTable.rgb[iterations * 3 + 2];
             }
             ec->rgba[ppos + 3] = 255;
         }
     }
     return NULL;
+}
+
+void generateColourTable(ExecutionContext* ec) {
+    ec->colourTable.rgb = calloc(ec->maxIterations * 3, sizeof(unsigned char));
+    for (int iterations = 0; iterations < ec->maxIterations; ++iterations) {
+        int ppos = iterations * 3;
+        double c = 3.0 * log(iterations) / log(ec->maxIterations - 1.0);
+        if (c < 1) {
+            ec->colourTable.rgb[ppos] = (unsigned char) (255 * c);
+            ec->colourTable.rgb[ppos + 1] = 0;
+            ec->colourTable.rgb[ppos + 2] = 0;
+        } else if (c < 2) {
+            ec->colourTable.rgb[ppos] = 255;
+            ec->colourTable.rgb[ppos + 1] = (unsigned char) (255 * (c - 1));
+            ec->colourTable.rgb[ppos + 2] = 0;
+        } else {
+            ec->colourTable.rgb[ppos] = 255;
+            ec->colourTable.rgb[ppos + 1] = 255;
+            ec->colourTable.rgb[ppos + 2] = (unsigned char) (255 * (c - 2));
+        }
+    }
+    ec->colourTable.size = ec->maxIterations * 3 * sizeof(unsigned char);
 }
 
 #pragma mark Fractal
@@ -110,6 +123,7 @@ executionUnits:(NSUInteger)executionUnits
         contexts[i].xMax = _fractalDescriptor.xMax;
         contexts[i].yMin = _fractalDescriptor.yMin;
         contexts[i].yMax = _fractalDescriptor.yMax;
+        generateColourTable(&contexts[i]);
     }
 
     NSDate* executeStart = [NSDate date];

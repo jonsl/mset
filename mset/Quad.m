@@ -87,16 +87,27 @@
 }
 
 -(void)setPosition:(CGPoint)position {
-    _vertexData[0].x.x = position.x;
-    _vertexData[0].x.y = position.y;
-    _vertexData[1].x.x = position.x + _width;
-    _vertexData[1].x.y = position.y;
-    _vertexData[2].x.x = position.x;
-    _vertexData[2].x.y = position.y + _height;
-    _vertexData[3].x.x = position.x + _width;
-    _vertexData[3].x.y = position.y + _height;
+    _position = position;
+    _vertexData[0].x.x = _position.x;
+    _vertexData[0].x.y = _position.y;
+    _vertexData[1].x.x = _position.x + _width;
+    _vertexData[1].x.y = _position.y;
+    _vertexData[2].x.x = _position.x;
+    _vertexData[2].x.y = _position.y + _height;
+    _vertexData[3].x.x = _position.x + _width;
+    _vertexData[3].x.y = _position.y + _height;
     
     _syncRequired = YES;
+}
+
+-(void)setWidth:(float)width {
+    _width = width;
+    self.position = _position;
+}
+
+-(void)setHeight:(float)height {
+    _height = height;
+    self.position = _position;
 }
 
 -(void)setVertexColour:(NSInteger)index colour:(VertexColor)colour {

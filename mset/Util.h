@@ -22,6 +22,15 @@ typedef struct {
     VertexColor colour;
 } Vertex;
 
+typedef struct {
+    double x, y;
+} PPoint;
+
+typedef struct {
+    unsigned char* rgb;
+    size_t size;
+} ColourTable;
+
 /*
  * constants
  */

@@ -3,6 +3,8 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
+#import "Util.h"
+
 typedef void (^DrawBlock)();
 typedef struct {
     double x, y;
