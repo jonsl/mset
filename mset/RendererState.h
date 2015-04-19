@@ -14,11 +14,14 @@
 +(RendererState*)rendererState;
 -(void)prepare;
 
+@property (nonatomic, assign) float alpha;
 @property (nonatomic, assign) GLKMatrix4 mvpMatrix;
 @property (nonatomic, readonly) int aPosition;
+@property (nonatomic, readonly) int aColour;
 @property (nonatomic, readonly) int aTexCoords;
 @property (nonatomic, readonly) int uMvpMatrix;
 @property (nonatomic, readonly) int uTexture;
+@property (nonatomic, readonly) int uAlpha;
 @property (nonatomic, strong) Texture* texture;
 
 @end

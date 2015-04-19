@@ -11,25 +11,28 @@
 
 @interface GameViewController ()
 
-@property (strong, nonatomic) EAGLContext* context;
+@property (strong, nonatomic) EAGLContext* eaglContext;
+@property (strong, nonatomic) CIContext* ciContext;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
-@property (nonatomic, strong) Renderer* renderer;
+@property (nonatomic, strong) Quad* screenQuad;
 
 @end
 
 @implementation GameViewController {
     BOOL _requireCompute;
+    CGRect _rectangle;
 }
 
 -(void)viewDidLoad {
     [super viewDidLoad];
 
-    self.context = [self createBestEAGLContext];
-    if (self.context == nil) {
+    self.eaglContext = [self createBestEAGLContext];
+    if (self.eaglContext == nil) {
         [NSException raise:ExceptionLogicError format:@"invalid OpenGL ES Context"];
     }
+
     GLKView* view = (GLKView*) self.view;
-    view.context = self.context;
+    view.context = self.eaglContext;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     self.preferredFramesPerSecond = 60;
     self.multitouchEnabled = true;
@@ -41,7 +44,7 @@
 //        CGFloat screenScale = [[UIScreen mainScreen] scale];
 //        CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
         CGSize screenSize = CGSizeMake(1024, 768);
-        self.renderer = [Renderer rendererWithWidth:screenSize.width height:screenSize.height];
+        self.screenQuad = [Quad quadWithWidth:screenSize.width height:screenSize.height];
         _requireCompute = YES;
 
         self.fractal = [[MandelbrotSet alloc] init];
@@ -55,7 +58,7 @@
 }
 
 -(EAGLContext*)createBestEAGLContext {
-    EAGLContext* context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
+    EAGLContext* context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     if (context == nil) {
         context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     }
@@ -65,7 +68,7 @@
 -(void)dealloc {
     [self tearDownGL];
 
-    if ([EAGLContext currentContext] == self.context) {
+    if ([EAGLContext currentContext] == self.eaglContext) {
         [EAGLContext setCurrentContext:nil];
     }
 }
@@ -76,10 +79,10 @@
     if ([self isViewLoaded] && ([[self view] window] == nil)) {
         self.view = nil;
 
-        if ([EAGLContext currentContext] == self.context) {
+        if ([EAGLContext currentContext] == self.eaglContext) {
             [EAGLContext setCurrentContext:nil];
         }
-        self.context = nil;
+        self.eaglContext = nil;
     }
 
     // Dispose of any resources that can be recreated.
@@ -90,11 +93,11 @@
 }
 
 -(void)setupGL {
-    [EAGLContext setCurrentContext:self.context];
+    [EAGLContext setCurrentContext:self.eaglContext];
 }
 
 -(void)tearDownGL {
-    [EAGLContext setCurrentContext:self.context];
+    [EAGLContext setCurrentContext:self.eaglContext];
 }
 
 #pragma mark - GLKView and GLKViewController delegate methods
@@ -116,12 +119,12 @@
                                                                                  yMax:centerY + (sizeX / 2)
                                                                          escapeRadius:2
                                                                         maxIterations:maxIterations];
-        [self.fractal compute:self.renderer.imageData
-                        width:self.renderer.imagewidth
-                       height:self.renderer.imageHeight
+        [self.fractal compute:self.screenQuad.texture.imageData
+                        width:self.screenQuad.texture.width
+                       height:self.screenQuad.texture.height
                executionUnits:[Configuration sharedConfiguration].executionUnits
                    updateDraw:^() {
-                       [self.renderer updateImage];
+                       [self.screenQuad updateImage];
                    }];
         _requireCompute = NO;
     }
@@ -131,7 +134,7 @@
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    [self.renderer render];
+    [self.screenQuad renderWithAlpha:1.f];
 }
 
 -(void)setMultitouchEnabled:(BOOL)multitouchEnabled {
@@ -143,53 +146,25 @@
 }
 
 -(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-    [self processTouchEvent:event];
+    for (UITouch* touch in touches) {
+        CGPoint location = [touch locationInView:self.view];
+        _rectangle.origin = location;
+    }
 }
 
 -(void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-    [self processTouchEvent:event];
+    for (UITouch* touch in touches) {
+        CGPoint location = [touch locationInView:self.view];
+        _rectangle.size = CGSizeMake(location.x - _rectangle.origin.x, location.y - _rectangle.origin.y);
+    }
 }
 
 -(void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-    [self processTouchEvent:event];
+    for (UITouch* __unused touch in touches) {
+    }
 }
 
 -(void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-//    _lastTouchTimestamp -= 0.0001f; // cancelled touch events have an old timestamp -> workaround
-    [self processTouchEvent:event];
-}
-
--(void)processTouchEvent:(UIEvent*)event {
-//    if (!self.paused && _lastTouchTimestamp != event.timestamp)
-//    {
-//        @autoreleasepool
-//        {
-//            CGSize viewSize = self.view.bounds.size;
-//            float xConversion = _stage.width / viewSize.width;
-//            float yConversion = _stage.height / viewSize.height;
-//
-//            // convert to SPTouches and forward to stage
-//            NSMutableSet *touches = [NSMutableSet set];
-//            double now = CACurrentMediaTime();
-//            for (UITouch *uiTouch in [event touchesForView:self.view])
-//            {
-//                CGPoint location = [uiTouch locationInView:self.view];
-//                CGPoint previousLocation = [uiTouch previousLocationInView:self.view];
-//                SPTouch *touch = [SPTouch touch];
-//                touch.timestamp = now; // timestamp of uiTouch not compatible to Sparrow timestamp
-//                touch.globalX = location.x * xConversion;
-//                touch.globalY = location.y * yConversion;
-//                touch.previousGlobalX = previousLocation.x * xConversion;
-//                touch.previousGlobalY = previousLocation.y * yConversion;
-//                touch.tapCount = (int)uiTouch.tapCount;
-//                touch.phase = (SPTouchPhase)uiTouch.phase;
-//                touch.nativeTouch = uiTouch;
-//                [touches addObject:touch];
-//            }
-//            [_touchProcessor processTouches:touches];
-//            _lastTouchTimestamp = event.timestamp;
-//        }
-//    }
 }
 
 @end

@@ -18,7 +18,7 @@
 		1ABD28F91ADFBEFC00ADBE75 /* Program.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28F41ADFBEFC00ADBE75 /* Program.m */; };
 		1ABD28FA1ADFBEFC00ADBE75 /* RendererState.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28F61ADFBEFC00ADBE75 /* RendererState.m */; };
 		1ABD28FC1ADFC02600ADBE75 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ABD28FB1ADFC02600ADBE75 /* Foundation.framework */; };
-		7852F973FA343BD1473FE379 /* Renderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7852FC2153618F47957D913D /* Renderer.m */; };
+		7852F973FA343BD1473FE379 /* Quad.m in Sources */ = {isa = PBXBuildFile; fileRef = 7852FC2153618F47957D913D /* Quad.m */; };
 		7852FFB3C02841F4A83D4605 /* FractalDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = 7852F8A081DF55243454C0E9 /* FractalDescriptor.m */; };
 		B1B19B561102711171B0EB61 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B19B6397B9191F2214BCAE /* Texture.m */; };
 		B1B19D81CF4B0BDDD7E7CFB1 /* MandelbrotSet.m in Sources */ = {isa = PBXBuildFile; fileRef = B1B194B1A06D82276DDF7D97 /* MandelbrotSet.m */; };
@@ -58,10 +58,10 @@
 		1ABD28FB1ADFC02600ADBE75 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1ABD28FD1ADFC1A400ADBE75 /* Mset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mset.h; sourceTree = "<group>"; };
 		7852F06AE5F06F7A3E9F2523 /* FractalDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FractalDescriptor.h; sourceTree = "<group>"; };
-		7852F7AD1EB6D5AEE29B0A91 /* Renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Renderer.h; sourceTree = "<group>"; };
+		7852F7AD1EB6D5AEE29B0A91 /* Quad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Quad.h; sourceTree = "<group>"; };
 		7852F8A081DF55243454C0E9 /* FractalDescriptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FractalDescriptor.m; sourceTree = "<group>"; };
 		7852F96D778A6599D7702BB0 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
-		7852FC2153618F47957D913D /* Renderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Renderer.m; sourceTree = "<group>"; };
+		7852FC2153618F47957D913D /* Quad.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Quad.m; sourceTree = "<group>"; };
 		B1B194B1A06D82276DDF7D97 /* MandelbrotSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MandelbrotSet.m; sourceTree = "<group>"; };
 		B1B194DB8999B6530B8134C2 /* Fractal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fractal.h; sourceTree = "<group>"; };
 		B1B198CE5251F54D818CB295 /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture.h; sourceTree = "<group>"; };
@@ -131,8 +131,8 @@
 				1ABD28F21ADFBEFC00ADBE75 /* NSExtensions.m */,
 				1ABD28F31ADFBEFC00ADBE75 /* Program.h */,
 				1ABD28F41ADFBEFC00ADBE75 /* Program.m */,
-				7852F7AD1EB6D5AEE29B0A91 /* Renderer.h */,
-				7852FC2153618F47957D913D /* Renderer.m */,
+				7852F7AD1EB6D5AEE29B0A91 /* Quad.h */,
+				7852FC2153618F47957D913D /* Quad.m */,
 				1ABD28F51ADFBEFC00ADBE75 /* RendererState.h */,
 				1ABD28F61ADFBEFC00ADBE75 /* RendererState.m */,
 				1ABD28C51ADFB83B00ADBE75 /* Supporting Files */,
@@ -276,7 +276,7 @@
 				1ABD28D21ADFB83B00ADBE75 /* GameViewController.m in Sources */,
 				1ABD28C81ADFB83B00ADBE75 /* main.m in Sources */,
 				B1B19B561102711171B0EB61 /* Texture.m in Sources */,
-				7852F973FA343BD1473FE379 /* Renderer.m in Sources */,
+				7852F973FA343BD1473FE379 /* Quad.m in Sources */,
 				B1B19FEBBF46DD8F8BDF312E /* Configuration.m in Sources */,
 				B1B19D81CF4B0BDDD7E7CFB1 /* MandelbrotSet.m in Sources */,
 				7852FFB3C02841F4A83D4605 /* FractalDescriptor.m in Sources */,
@@ -368,12 +368,12 @@
 				GCC_WARN_STRICT_SELECTOR_MATCH = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PROVISIONING_PROFILE = "cc2413b2-b3ef-4611-ab33-b790d37213ae";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -420,11 +420,11 @@
 				GCC_WARN_STRICT_SELECTOR_MATCH = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PROVISIONING_PROFILE = "cc2413b2-b3ef-4611-ab33-b790d37213ae";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;

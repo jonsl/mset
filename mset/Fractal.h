@@ -10,6 +10,7 @@ typedef struct {
 
 @protocol Fractal<NSObject>
 
+@required
 -(void)compute:(unsigned char*)rgba
          width:(NSUInteger)width
         height:(NSUInteger)height
@@ -19,5 +20,8 @@ executionUnits:(NSUInteger)executionUnits
 -(FractalCoordinate)convertCoordinates:(CGPoint)point;
 
 @property (nonatomic, strong) FractalDescriptor* fractalDescriptor;
+
+@optional
+-(NSString*)fragmentShader;
 
 @end

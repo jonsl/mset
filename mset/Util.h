@@ -13,8 +13,16 @@
  * types
  */
 typedef struct {
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+} VertexColor;
+
+typedef struct {
     GLKVector2 position;
     GLKVector2 texCoords;
+    VertexColor colour;
 } Vertex;
 
 /*
@@ -25,3 +33,15 @@ static NSString* const ExceptionLogicError = @"ExceptionLogicError";
 /*
  * functions
  */
+static unsigned int nextPowerOfTwo(unsigned int value) {
+    // REF: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+    unsigned int v = value;
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+}

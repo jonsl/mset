@@ -6,15 +6,14 @@
 #import "Mset.h"
 
 
-@interface Renderer ()
+@interface Quad ()
 
 @property (strong, nonatomic) EAGLContext* context;
 @property (nonatomic, strong) RendererState* rendererState;
-@property (nonatomic, strong) Texture* texture;
 
 @end
 
-@implementation Renderer {
+@implementation Quad {
     Vertex _vertexData[4];
     ushort _indexData[6];
     uint _vertexBufferName;
@@ -22,8 +21,8 @@
     BOOL _syncRequired;
 }
 
-+(instancetype)rendererWithWidth:(float)width height:(float)height {
-    return [[Renderer alloc] initWithWidth:width height:height];
++(instancetype)quadWithWidth:(float)width height:(float)height {
+    return [[Quad alloc] initWithWidth:width height:height];
 }
 
 -(instancetype)initWithWidth:(float)width height:(float)height {
@@ -35,7 +34,8 @@
 
         NSUInteger __unused numThreads = [Configuration sharedConfiguration].executionUnits;
 
-        self.texture = [Texture textureWithWidth:_width height:_height scale:1];
+        float size = _width > _height ? _width : _height;
+        self.texture = [Texture textureWithWidth:size height:size scale:1];
         self.textureOffset = CGPointMake(-(self.texture.width - _width) / 2, -(self.texture.height - _height) / 2);
 
         _vertexData[0].texCoords.x = 0.f;
@@ -57,29 +57,22 @@
     return self;
 }
 
--(unsigned char*)imageData {
-    return self.texture.imageData;
-}
-
--(NSUInteger)imagewidth {
-    return self.texture.width;
-}
-
--(NSUInteger)imageHeight {
-    return self.texture.height;
-}
-
 -(void)setTextureOffset:(CGPoint)textureOffset {
     float xOffset = MAX(-(self.texture.width - _width), MIN(textureOffset.x, 0));
     float yOffset = MAX(-(self.texture.height - _height), MIN(textureOffset.y, 0));
+    VertexColor colour = {0xff, 0xff, 0xff, 0xff};
     _vertexData[0].position.x = xOffset;
     _vertexData[0].position.y = yOffset;
+    _vertexData[0].colour = colour;
     _vertexData[1].position.x = xOffset + self.texture.width;
     _vertexData[1].position.y = yOffset;
+    _vertexData[1].colour = colour;
     _vertexData[2].position.x = xOffset;
     _vertexData[2].position.y = yOffset + self.texture.height;
+    _vertexData[2].colour = colour;
     _vertexData[3].position.x = xOffset + self.texture.width;
     _vertexData[3].position.y = yOffset + self.texture.height;
+    _vertexData[3].colour = colour;
 
     _syncRequired = YES;
 }
@@ -139,31 +132,35 @@
     [self.texture replace];
 }
 
--(void)render {
+-(void)renderWithAlpha:(float)alpha {
     if (_syncRequired) {
         [self syncBuffers];
     }
     self.rendererState.texture = self.texture;
     GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, _width, 0, _height, 0.f, 1.f);
     self.rendererState.mvpMatrix = projectionMatrix;
+    self.rendererState.alpha = alpha;
     [self.rendererState prepare];
     [self applyBlendMode:GL_SRC_ALPHA dstFactor:GL_ONE_MINUS_SRC_ALPHA];
 
-
     GLuint attribPosition = (GLuint) self.rendererState.aPosition;
+    GLuint attribColor = (GLuint) self.rendererState.aColour;
     GLuint attribTexCoords = (GLuint) self.rendererState.aTexCoords;
 
     glEnableVertexAttribArray(attribPosition);
-    glEnableVertexAttribArray(attribTexCoords);
+    glEnableVertexAttribArray(attribColor);
+    if (_texture) {
+        glEnableVertexAttribArray(attribTexCoords);
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferName);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferName);
 
-    glVertexAttribPointer(attribPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-            (void*) (offsetof(Vertex, position)));
-
-    glVertexAttribPointer(attribTexCoords, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-            (void*) (offsetof(Vertex, texCoords)));
+    glVertexAttribPointer(attribPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, position)));
+    glVertexAttribPointer(attribColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*) (offsetof(Vertex, colour)));
+    if (_texture) {
+        glVertexAttribPointer(attribTexCoords, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, texCoords)));
+    }
 
     int numIndices = 6;
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);

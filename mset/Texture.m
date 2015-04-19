@@ -15,8 +15,8 @@
 -(instancetype)initWithWidth:(float)width height:(float)height scale:(float)scale {
     if ((self = [super init])) {
         // only textures with sidelengths that are powers of 2 support all OpenGL ES features.
-        NSUInteger width2 = [Texture nextPowerOfTwo:width * scale];
-        NSUInteger height2 = [Texture nextPowerOfTwo:height * scale];
+        NSUInteger width2 = nextPowerOfTwo(width * scale);
+        NSUInteger height2 = nextPowerOfTwo(height * scale);
         NSUInteger const bytesPerPixel = 4;
         _imageData = calloc(width2 * height2 * bytesPerPixel, sizeof(uint8_t));
         [self createGlTexture:_imageData width:width2 height:height2 numMipmaps:0];
@@ -27,7 +27,7 @@
 
         // invoke setters
         self.repeat = NO;
-        self.filter = LinearFilter;
+        self.filter = NoFilter;
     }
     return self;
 }
@@ -123,19 +123,6 @@
         [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
     }
 #endif
-}
-
-+(NSUInteger)nextPowerOfTwo:(NSUInteger)value {
-    // REF: https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-    NSUInteger v = value;
-    v--;
-    v |= v >> 1;
-    v |= v >> 2;
-    v |= v >> 4;
-    v |= v >> 8;
-    v |= v >> 16;
-    v++;
-    return v;
 }
 
 @end

@@ -3,15 +3,13 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@interface Renderer : NSObject
+@interface Quad : NSObject
 
-+(instancetype)rendererWithWidth:(float)width height:(float)height;
++(instancetype)quadWithWidth:(float)width height:(float)height;
 -(void)updateImage;
--(void)render;
+-(void)renderWithAlpha:(float)alpha;
 
-@property (nonatomic) unsigned char* imageData;
-@property (nonatomic) NSUInteger imagewidth;
-@property (nonatomic) NSUInteger imageHeight;
+@property (nonatomic, strong) Texture* texture;
 @property (nonatomic, readonly) float width;
 @property (nonatomic, readonly) float height;
 @property (nonatomic, assign) CGPoint textureOffset;
