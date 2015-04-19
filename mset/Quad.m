@@ -100,7 +100,12 @@
     
     _syncRequired = YES;
 }
--(void)setTextureOffset:(CGPoint)textureOffset {
+
+-(void)setVertexColour:(NSInteger)index colour:(VertexColor)colour {
+    NSAssert(index >= 0 && index < 4, @"invalid index");
+    _vertexData[index].colour = colour;
+    
+    _syncRequired = YES;
 }
 
 -(void)createBuffers {

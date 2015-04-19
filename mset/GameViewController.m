@@ -56,6 +56,9 @@ float const ScreenWidth = 1024.f;
         Texture* canvasTexture = [Texture textureWithWidth:ScreenWidth height:ScreenWidth scale:1];
         self.screenQuad = [Quad quadWithTexture:canvasTexture width:ScreenWidth height:ScreenWidth];
         
+        float diff = self.screenQuad.height - _screenSize.height;
+        self.screenQuad.position = CGPointMake(0, -diff / 2);
+        
         _requireCompute = YES;
 
         self.fractal = [MandelbrotSet mandelbrotSet];

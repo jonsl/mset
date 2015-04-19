@@ -8,6 +8,7 @@
 +(instancetype)quadWithWidth:(float)width height:(float)height;
 +(instancetype)quadWithColour:(unsigned char)colour width:(float)width height:(float)height;
 +(instancetype)quadWithTexture:(Texture*)texture width:(float)width height:(float)height;
+-(void)setVertexColour:(NSInteger)index colour:(VertexColor)colour;
 -(void)updateImage;
 -(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha;
 -(Vertex*)vertex:(NSInteger)index;
