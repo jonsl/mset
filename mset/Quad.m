@@ -5,7 +5,6 @@
 
 #import "Mset.h"
 
-
 @interface Quad ()
 
 @property (strong, nonatomic) EAGLContext* context;
@@ -53,6 +52,8 @@
         _indexData[3] = 1;
         _indexData[4] = 3;
         _indexData[5] = 2;
+
+        self.visible = YES;
     }
     return self;
 }
@@ -172,7 +173,16 @@
     [self.texture replace];
 }
 
+- (BOOL)hasVisibleArea
+{
+    return _visible;
+//    return _alpha != 0.0f && _visible && _scaleX != 0.0f && _scaleY != 0.0f;
+}
+
 -(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
+    if (![self hasVisibleArea]) {
+        return ;
+    }
     if (_syncRequired) {
         [self syncBuffers];
     }

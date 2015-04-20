@@ -11,13 +11,13 @@
 
 float const ScreenWidth = 1024.f;
 float const CanvasTextureSize = 1024.f;
-NSInteger const MaxIterations = 500;
+NSInteger const MaxIterations = 1000;
 
 @interface GameViewController ()
 
 @property (strong, nonatomic) EAGLContext* eaglContext;
 @property (strong, nonatomic) CIContext* ciContext;
-@property (nonatomic, strong) NSObject <Fractal>* fractal;
+@property (nonatomic, strong) NSObject<Fractal>* fractal;
 
 @property (nonatomic, strong) Quad* canvasQuad;
 @property (nonatomic, assign) CGPoint canvasOffset;
@@ -51,7 +51,7 @@ NSInteger const MaxIterations = 500;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     self.preferredFramesPerSecond = 60;
 
-    [self addGestureRecognisers];
+    [self.view setMultipleTouchEnabled:YES];
 
     [self setupGL];
 
@@ -70,6 +70,11 @@ NSInteger const MaxIterations = 500;
         CGPoint delta = CGPointMake(self.canvasQuad.width - _screenSize.width, self.canvasQuad.height - _screenSize.height);
         self.canvasOffset = CGPointMake(-delta.x / 2, -delta.y / 2);
 //        self.screenPosition = CGPointMake(0, -300);
+
+        self.selectionQuad = [Quad quadWithColour:0xff width:100 height:100];
+        self.selectionQuad.position = CGPointMake(0, 0);
+        self.selectionQuad.visible = NO;
+
 
         self.fractalDescriptor = [FractalDescriptor fractalDescriptorWithXMin:-2.5
                                                                          xMax:+1.5
@@ -143,7 +148,7 @@ NSInteger const MaxIterations = 500;
 -(void)compute {
 //    NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@", @(_fractalDescriptor.xMin), @(_fractalDescriptor.xMax), @(_fractalDescriptor.yMin), @(_fractalDescriptor.yMax));
     self.fractal.fractalDescriptor = self.fractalDescriptor;
-//    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:2048];
+//    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:4096];
     NewColourMap* newColourMap = [[NewColourMap alloc] initWithSize:768];
     [self.fractal compute:self.canvasQuad.texture.imageData
                     width:self.canvasQuad.texture.width
@@ -172,69 +177,6 @@ NSInteger const MaxIterations = 500;
     [self.selectionQuad renderWithMvpMatrix:_projectionMatrix alpha:0.5f];
 }
 
--(void)addGestureRecognisers {
-    UITapGestureRecognizer* doubleTapRecg = [[UITapGestureRecognizer alloc]
-            initWithTarget:self
-                    action:@selector(processDoubleTapGestureRecognizer:)];
-    doubleTapRecg.delegate = self;
-    doubleTapRecg.numberOfTapsRequired = 2;
-    doubleTapRecg.numberOfTouchesRequired = 1;
-    [self.view addGestureRecognizer:doubleTapRecg];
-
-    UITapGestureRecognizer* tapRecg = [[UITapGestureRecognizer alloc]
-            initWithTarget:self
-                    action:@selector(processSingleTapGestureRecognizer:)];
-    tapRecg.delegate = self;
-    tapRecg.numberOfTapsRequired = 1;
-    tapRecg.numberOfTouchesRequired = 1;
-    [self.view addGestureRecognizer:tapRecg];
-    [tapRecg requireGestureRecognizerToFail:doubleTapRecg];
-
-    UIPanGestureRecognizer* panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self
-                                                                                           action:@selector(processPanGestureRecognizer:)];
-    [panGestureRecognizer setMaximumNumberOfTouches:2];
-    [self.view addGestureRecognizer:panGestureRecognizer];
-}
-
--(void)processDoubleTapGestureRecognizer:(UITapGestureRecognizer*)recognizer {
-}
-
--(void)processSingleTapGestureRecognizer:(UITapGestureRecognizer*)recognizer {
-}
-
--(void)processPanGestureRecognizer:(UIPanGestureRecognizer*)panGestureRecognizer {
-
-    _lastTouchCount = _touchCount;
-    _touchCount = [panGestureRecognizer numberOfTouches];
-
-    if ([panGestureRecognizer state] == UIGestureRecognizerStateBegan) {
-        if (_touchCount == 1) {
-            [self oneTouchBegan:[panGestureRecognizer locationInView:self.view]];
-        } else if (_touchCount == 2) {
-            [self twoTouchesBegan:[panGestureRecognizer locationOfTouch:0 inView:self.view]
-                           second:[panGestureRecognizer locationOfTouch:1 inView:self.view]];
-        }
-    } else if ([panGestureRecognizer state] == UIGestureRecognizerStateChanged) {
-        if (_touchCount != _lastTouchCount && _touchCount == 1) {
-            [self oneTouchBegan:[panGestureRecognizer locationInView:self.view]];
-        } else if (_touchCount != _lastTouchCount && _touchCount == 2) {
-            [self twoTouchesBegan:[panGestureRecognizer locationOfTouch:0 inView:self.view]
-                           second:[panGestureRecognizer locationOfTouch:1 inView:self.view]];
-        } else if (_touchCount == 1) {
-            [self oneTouchMoved:[panGestureRecognizer locationInView:self.view]];
-        } else if (_touchCount == 2) {
-            [self twoTouchesMoved:[panGestureRecognizer locationOfTouch:0 inView:self.view]
-                           second:[panGestureRecognizer locationOfTouch:1 inView:self.view]];
-        }
-    } else if ([panGestureRecognizer state] == UIGestureRecognizerStateEnded) {
-        [self touchesEnded];
-        self.selectionQuad = nil;
-    } else if ([panGestureRecognizer state] == UIGestureRecognizerStateCancelled) {
-
-        self.selectionQuad = nil;
-    }
-}
-
 -(CGPoint)touchToCanvas:(CGPoint)touch {
     return CGPointMake(touch.x, _screenSize.height - touch.y);
 }
@@ -249,50 +191,102 @@ NSInteger const MaxIterations = 500;
     return pp;
 }
 
--(void)oneTouchBegan:(CGPoint)touch {
+#pragma mark UIResponder
+
+-(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+    NSSet* touchesForView = [event touchesForView:self.view];
+    NSArray* allTouchesForView = [touchesForView allObjects];
+    _lastTouchCount = _touchCount;
+    _touchCount = [allTouchesForView count];
+    if (_touchCount == 1) {
+        CGPoint pt = [allTouchesForView[0] locationInView:self.view];
+        [self beginDragWithTouch:pt];
+    } else if (_touchCount == 2) {
+        CGPoint pt1 = [allTouchesForView[0] locationInView:self.view];
+        CGPoint pt2 = [allTouchesForView[1] locationInView:self.view];
+        [self showSelectionAreaWithTouches:pt1 second:pt2];
+    }
+}
+
+-(void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+    NSSet* touchesForView = [event touchesForView:self.view];
+    NSArray* allTouchesForView = [touchesForView allObjects];
+    _lastTouchCount = _touchCount;
+    _touchCount = [allTouchesForView count];
+    if (_touchCount == 1) {
+        CGPoint pt = [allTouchesForView[0] locationInView:self.view];
+        if (_lastTouchCount == 2) {
+            [self beginDragWithTouch:pt];
+        }
+        [self dragWithTouch:pt];
+    } else if (_touchCount == 2) {
+        CGPoint pt1 = [allTouchesForView[0] locationInView:self.view];
+        CGPoint pt2 = [allTouchesForView[1] locationInView:self.view];
+        [self showSelectionAreaWithTouches:pt1 second:pt2];
+    }
+}
+
+-(void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+    NSSet* touchesForView = [event touchesForView:self.view];
+    NSArray* allTouchesForView = [touchesForView allObjects];
+    _lastTouchCount = _touchCount;
+    _touchCount = [allTouchesForView count];
+    if (_touchCount == 1) {
+        CGPoint pt = [allTouchesForView[0] locationInView:self.view];
+        [self endDragWithTouch:pt];
+    }
+    if (self.selectionQuad.visible) {
+        [self computeSelectionArea];
+        self.selectionQuad.visible = NO;
+    }
+}
+
+-(void)beginDragWithTouch:(CGPoint)touch {
     _dragStart = [self touchToCanvas:touch];
     _dragCanvasOffset = _canvasOffset;
 }
 
--(void)oneTouchMoved:(CGPoint)touch {
+-(void)dragWithTouch:(CGPoint)touch {
     CGPoint pt = [self touchToCanvas:touch];
     self.canvasOffset = CGPointMake(_dragCanvasOffset.x - _dragStart.x + pt.x, _dragCanvasOffset.y - _dragStart.y + pt.y);
-//    self.selectionQuad = nil;
 }
 
--(void)twoTouchesBegan:(CGPoint)first second:(CGPoint)second {
+-(void)endDragWithTouch:(CGPoint)touch {
 }
 
--(void)twoTouchesMoved:(CGPoint)touch1 second:(CGPoint)touch2 {
+-(void)showSelectionAreaWithTouches:(CGPoint)touch1 second:(CGPoint)touch2 {
     CGPoint pt1 = [self touchToCanvas:touch1];
     CGPoint pt2 = [self touchToCanvas:touch2];
-    self.selectionQuad = [Quad quadWithColour:0xff width:pt2.x - pt1.x height:pt2.y - pt1.y];
-    self.selectionQuad.position = pt1;
+    CGPoint mid = CGPointMake(pt1.x + (pt2.x - pt1.x) / 2, pt1.y + (pt2.y - pt1.y) / 2);
+    CGFloat size = MAX(fabs(pt2.x - pt1.x), fabs(pt2.y - pt1.y));
+    CGPoint bl = CGPointMake(mid.x - size / 2, mid.y - size / 2);
+
+    self.selectionQuad.width = size;
+    self.selectionQuad.height = size;
+    self.selectionQuad.position = bl;
+    self.selectionQuad.visible = YES;
 }
 
--(void)touchesEnded {
-    if (self.selectionQuad != nil) {
+-(void)computeSelectionArea {
+    float xMin = self.selectionQuad.position.x;
+    float xMax = self.selectionQuad.position.x + self.selectionQuad.width;
+    float yMin = self.selectionQuad.position.y;
+    float yMax = self.selectionQuad.position.y + self.selectionQuad.height;
 
-        float xMin = MIN(self.selectionQuad.position.x, self.selectionQuad.position.x + self.selectionQuad.width);
-        float xMax = MAX(self.selectionQuad.position.x, self.selectionQuad.position.x + self.selectionQuad.width);
-        float yMin = MIN(self.selectionQuad.position.y, self.selectionQuad.position.y + self.selectionQuad.height);
-        float yMax = MAX(self.selectionQuad.position.y, self.selectionQuad.position.y + self.selectionQuad.height);
+    CGPoint bl = CGPointMake(xMin, yMin);
+    CGPoint tr = CGPointMake(xMax, yMax);
 
-        CGPoint bl = CGPointMake(xMin, yMin);
-        CGPoint tr = CGPointMake(xMax, yMax);
+    PPoint a = [self canvasToComplexPlane:bl];
+    PPoint b = [self canvasToComplexPlane:tr];
 
-        PPoint a = [self canvasToComplexPlane:bl];
-        PPoint b = [self canvasToComplexPlane:tr];
+    self.fractalDescriptor = [FractalDescriptor fractalDescriptorWithXMin:a.x
+                                                                     xMax:b.x
+                                                                     yMin:a.y
+                                                                     yMax:b.y
+                                                             escapeRadius:2
+                                                            maxIterations:MaxIterations];
 
-        self.fractalDescriptor = [FractalDescriptor fractalDescriptorWithXMin:a.x
-                                                                         xMax:b.x
-                                                                         yMin:a.y
-                                                                         yMax:b.y
-                                                                 escapeRadius:2
-                                                                maxIterations:MaxIterations];
-
-        _requireCompute = YES;
-    }
+    _requireCompute = YES;
 }
 
 @end

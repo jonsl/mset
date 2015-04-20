@@ -18,5 +18,6 @@
 @property (nonatomic, assign) float width;
 @property (nonatomic, assign) float height;
 @property (nonatomic, assign) CGPoint position;
+@property (nonatomic, assign) BOOL visible;
 
 @end
