@@ -10,8 +10,8 @@
 
 
 float const ScreenWidth = 1024.f;
-float const ScreenTextureSize = 1024.f;
-NSInteger const MaxIterations = 2000;
+float const CanvasTextureSize = 1024.f;
+NSInteger const MaxIterations = 500;
 
 @interface GameViewController ()
 
@@ -19,12 +19,12 @@ NSInteger const MaxIterations = 2000;
 @property (strong, nonatomic) CIContext* ciContext;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
 
-@property (nonatomic, strong) Quad* screenQuad;
-@property (nonatomic, assign) CGPoint screenPosition;
+@property (nonatomic, strong) Quad* canvasQuad;
+@property (nonatomic, assign) CGPoint canvasOffset;
 @property (nonatomic, strong) Quad* selectionQuad;
 
 @property (nonatomic, assign) CGPoint dragStart;
-@property (nonatomic, assign) CGPoint dragScreenStart;
+@property (nonatomic, assign) CGPoint dragCanvasOffset;
 
 @property (nonatomic, strong) FractalDescriptor* fractalDescriptor;
 
@@ -64,11 +64,11 @@ NSInteger const MaxIterations = 2000;
         _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / aspect);
         _projectionMatrix = GLKMatrix4MakeOrtho(0, _screenSize.width, 0, _screenSize.height, 0.f, 1.f);
 
-        Texture* canvasTexture = [Texture textureWithWidth:ScreenTextureSize height:ScreenTextureSize scale:1];
-        self.screenQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
+        Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
+        self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
-        CGPoint delta = CGPointMake(self.screenQuad.width - _screenSize.width, self.screenQuad.height - _screenSize.height);
-        self.screenPosition = CGPointMake(-delta.x / 2, -delta.y / 2);
+        CGPoint delta = CGPointMake(self.canvasQuad.width - _screenSize.width, self.canvasQuad.height - _screenSize.height);
+        self.canvasOffset = CGPointMake(-delta.x / 2, -delta.y / 2);
 //        self.screenPosition = CGPointMake(0, -300);
 
         self.fractalDescriptor = [FractalDescriptor fractalDescriptorWithXMin:-2.5
@@ -90,11 +90,11 @@ NSInteger const MaxIterations = 2000;
     }
 }
 
--(void)setScreenPosition:(CGPoint)screenPosition {
-    float xOffset = MAX(-(self.screenQuad.width - _screenSize.width), MIN(screenPosition.x, 0));
-    float yOffset = MAX(-(self.screenQuad.height - _screenSize.height), MIN(screenPosition.y, 0));
-    _screenPosition = CGPointMake(xOffset, yOffset);
-    self.screenQuad.position = _screenPosition;
+-(void)setCanvasOffset:(CGPoint)canvasOffset {
+    float xOffset = MAX(-(self.canvasQuad.width - _screenSize.width), MIN(canvasOffset.x, 0));
+    float yOffset = MAX(-(self.canvasQuad.height - _screenSize.height), MIN(canvasOffset.y, 0));
+    _canvasOffset = CGPointMake(xOffset, yOffset);
+    self.canvasQuad.position = _canvasOffset;
 }
 
 -(EAGLContext*)createBestEAGLContext {
@@ -141,14 +141,18 @@ NSInteger const MaxIterations = 2000;
 #pragma mark - GLKView and GLKViewController delegate methods
 
 -(void)compute {
-    NSLog(@"recomputing with xMin: %lf, xMax: %lf, yMin: %f, yMax: %f", _fractalDescriptor.xMin, _fractalDescriptor.xMax, _fractalDescriptor.yMin, _fractalDescriptor.yMax);
+    NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@",
+            [NSNumber numberWithDouble:_fractalDescriptor.xMin],
+            [NSNumber numberWithDouble:_fractalDescriptor.xMax],
+            [NSNumber numberWithDouble:_fractalDescriptor.yMin],
+            [NSNumber numberWithDouble:_fractalDescriptor.yMax]);
     self.fractal.fractalDescriptor = self.fractalDescriptor;
-    [self.fractal compute:self.screenQuad.texture.imageData
-                    width:self.screenQuad.texture.width
-                   height:self.screenQuad.texture.height
+    [self.fractal compute:self.canvasQuad.texture.imageData
+                    width:self.canvasQuad.texture.width
+                   height:self.canvasQuad.texture.height
            executionUnits:[Configuration sharedConfiguration].executionUnits
                updateDraw:^() {
-                   [self.screenQuad updateImage];
+                   [self.canvasQuad updateImage];
                }];
 }
 
@@ -163,7 +167,7 @@ NSInteger const MaxIterations = 2000;
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    [self.screenQuad renderWithMvpMatrix:_projectionMatrix alpha:1.f];
+    [self.canvasQuad renderWithMvpMatrix:_projectionMatrix alpha:1.f];
     [self.selectionQuad renderWithMvpMatrix:_projectionMatrix alpha:0.5f];
 }
 
@@ -230,36 +234,39 @@ NSInteger const MaxIterations = 2000;
     }
 }
 
--(void)oneTouchBegan:(CGPoint)touch {
-    _dragStart = touch;
-    _dragScreenStart = _screenPosition;
+-(CGPoint)touchToCanvas:(CGPoint)touch {
+    return CGPointMake(touch.x, _screenSize.height - touch.y);
 }
 
--(PPoint)screenToWorld:(CGPoint)position {
-    double xDelta = (_fractalDescriptor.xMax - _fractalDescriptor.xMin) / self.screenQuad.width;
-    double yDelta = (_fractalDescriptor.yMax - _fractalDescriptor.yMin) / self.screenQuad.height;
-    CGPoint pt = CGPointMake(position.x - _screenPosition.x, position.y - _screenPosition.y);
+-(PPoint)canvasToComplexPlane:(CGPoint)position {
+    double xDelta = (_fractalDescriptor.xMax - _fractalDescriptor.xMin) / self.canvasQuad.width;
+    double yDelta = (_fractalDescriptor.yMax - _fractalDescriptor.yMin) / self.canvasQuad.height;
+    CGPoint pt = CGPointMake(position.x - _canvasOffset.x, position.y - _canvasOffset.y);
     PPoint pp;
     pp.x = _fractalDescriptor.xMin + (double) pt.x * xDelta;
     pp.y = _fractalDescriptor.yMin + (double) pt.y * yDelta;
     return pp;
 }
 
+-(void)oneTouchBegan:(CGPoint)touch {
+    _dragStart = [self touchToCanvas:touch];
+    _dragCanvasOffset = _canvasOffset;
+}
+
 -(void)oneTouchMoved:(CGPoint)touch {
-    self.screenPosition = CGPointMake(_dragScreenStart.x - _dragStart.x + touch.x, _dragScreenStart.y + _dragStart.y - touch.y);
+    CGPoint pt = [self touchToCanvas:touch];
+    self.canvasOffset = CGPointMake(_dragCanvasOffset.x - _dragStart.x + pt.x, _dragCanvasOffset.y - _dragStart.y + pt.y);
 //    self.selectionQuad = nil;
 }
 
 -(void)twoTouchesBegan:(CGPoint)first second:(CGPoint)second {
 }
 
--(void)twoTouchesMoved:(CGPoint)first second:(CGPoint)second {
-
-    CGPoint pt1 = CGPointMake(first.x, _screenSize.height - first.y);
-    CGPoint pt2 = CGPointMake(+(second.x - first.x), -(second.y - first.y));
-
-    self.selectionQuad = [Quad quadWithColour:0xff width:second.x - first.x height:-(second.y - first.y)];
-    self.selectionQuad.position = CGPointMake(first.x, _screenSize.height - first.y);
+-(void)twoTouchesMoved:(CGPoint)touch1 second:(CGPoint)touch2 {
+    CGPoint pt1 = [self touchToCanvas:touch1];
+    CGPoint pt2 = [self touchToCanvas:touch2];
+    self.selectionQuad = [Quad quadWithColour:0xff width:pt2.x - pt1.x height:pt2.y - pt1.y];
+    self.selectionQuad.position = pt1;
 }
 
 -(void)touchesEnded {
@@ -273,8 +280,8 @@ NSInteger const MaxIterations = 2000;
         CGPoint bl = CGPointMake(xMin, yMin);
         CGPoint tr = CGPointMake(xMax, yMax);
 
-        PPoint a = [self screenToWorld:bl];
-        PPoint b = [self screenToWorld:tr];
+        PPoint a = [self canvasToComplexPlane:bl];
+        PPoint b = [self canvasToComplexPlane:tr];
 
         self.fractalDescriptor = [FractalDescriptor fractalDescriptorWithXMin:a.x
                                                                          xMax:b.x
