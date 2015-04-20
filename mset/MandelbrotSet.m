@@ -71,15 +71,15 @@ void* renderThread(void* arg) {
             double xp = ((double) x / ec->width) * (ec->xMax - ec->xMin) + ec->xMin; // real point on fractal plane
             double yp = ((double) y / ec->height) * (ec->yMax - ec->yMin) + ec->yMin; // imag point on fractal plane
             float iterations = calculatePoint(xp, yp, ec->escapeRadius, ec->maxIterations, true);
-            NSInteger colorIndex = (int) (iterations / ec->maxIterations * colourEntries);
-            if (colorIndex >= colourEntries) {
-                colorIndex = 0;
-            }
-            if (colorIndex < 0) {
-                colorIndex = 0;
-            }
+            NSInteger colorIndex = (NSInteger) (iterations / ec->maxIterations * colourEntries);
+//            if (colorIndex >= colourEntries) {
+//                colorIndex = colourEntries-1;
+//            }
+//            if (colorIndex < 0) {
+//                colorIndex = 0;
+//            }
             NSUInteger ppos = 4 * (ec->width * y + x);
-            if (iterations == ec->maxIterations) {
+            if ((NSInteger)iterations == ec->maxIterations) {
                 ec->rgba[ppos] = 0;
                 ec->rgba[ppos + 1] = 0;
                 ec->rgba[ppos + 2] = 0;
