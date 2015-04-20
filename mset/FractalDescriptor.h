@@ -10,13 +10,13 @@
                                           yMin:(double)yMin
                                           yMax:(double)yMax
                                   escapeRadius:(NSInteger)escapeRadius
-                                 maxIterations:(NSInteger)maxIterations;
+                                 maxIterations:(NSUInteger)maxIterations;
 
 @property (nonatomic, readonly) double xMin;
 @property (nonatomic, readonly) double xMax;
 @property (nonatomic, readonly) double yMin;
 @property (nonatomic, readonly) double yMax;
 @property (nonatomic, readonly) NSInteger escapeRadius;
-@property (nonatomic, readonly) NSInteger maxIterations;
+@property (nonatomic, readonly) NSUInteger maxIterations;
 
 @end

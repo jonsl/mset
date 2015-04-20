@@ -17,7 +17,7 @@ NSInteger const MaxIterations = 500;
 
 @property (strong, nonatomic) EAGLContext* eaglContext;
 @property (strong, nonatomic) CIContext* ciContext;
-@property (nonatomic, strong) NSObject<Fractal>* fractal;
+@property (nonatomic, strong) NSObject <Fractal>* fractal;
 
 @property (nonatomic, strong) Quad* canvasQuad;
 @property (nonatomic, assign) CGPoint canvasOffset;
@@ -141,19 +141,18 @@ NSInteger const MaxIterations = 500;
 #pragma mark - GLKView and GLKViewController delegate methods
 
 -(void)compute {
-    NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@",
-            [NSNumber numberWithDouble:_fractalDescriptor.xMin],
-            [NSNumber numberWithDouble:_fractalDescriptor.xMax],
-            [NSNumber numberWithDouble:_fractalDescriptor.yMin],
-            [NSNumber numberWithDouble:_fractalDescriptor.yMax]);
+    NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@", @(_fractalDescriptor.xMin), @(_fractalDescriptor.xMax), @(_fractalDescriptor.yMin), @(_fractalDescriptor.yMax));
     self.fractal.fractalDescriptor = self.fractalDescriptor;
+    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:2048];
     [self.fractal compute:self.canvasQuad.texture.imageData
                     width:self.canvasQuad.texture.width
                    height:self.canvasQuad.texture.height
+              colourTable:defaultColourTable
            executionUnits:[Configuration sharedConfiguration].executionUnits
-               updateDraw:^() {
-                   [self.canvasQuad updateImage];
-               }];
+               updateDraw:
+                       ^() {
+                           [self.canvasQuad updateImage];
+                       }];
 }
 
 -(void)update {

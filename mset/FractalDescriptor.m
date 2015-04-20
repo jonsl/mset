@@ -13,7 +13,7 @@
                                           yMin:(double)yMin
                                           yMax:(double)yMax
                                   escapeRadius:(NSInteger)escapeRadius
-                                 maxIterations:(NSInteger)maxIterations {
+                                 maxIterations:(NSUInteger)maxIterations {
     return [[FractalDescriptor alloc] initWithXMin:xMin
                                               xMax:xMax
                                               yMin:yMin
@@ -27,7 +27,7 @@
                        yMin:(double)yMin
                        yMax:(double)yMax
                escapeRadius:(NSInteger)escapeRadius
-              maxIterations:(NSInteger)maxIterations {
+              maxIterations:(NSUInteger)maxIterations {
     if ((self = [super init])) {
         _xMin = xMin;
         _xMax = xMax;

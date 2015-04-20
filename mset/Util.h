@@ -29,7 +29,7 @@ typedef struct {
 typedef struct {
     unsigned char* rgb;
     size_t size;
-} ColourTable;
+} ColourLookup;
 
 /*
  * constants

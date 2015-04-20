@@ -11,9 +11,10 @@
 
 typedef struct {
     NSUInteger width, height;
-    NSInteger escapeRadius, maxIterations;
+    NSInteger escapeRadius;
+    NSUInteger maxIterations;
     unsigned char* rgba;
-    ColourTable colourTable;
+    ColourLookup colourTable;
     NSUInteger startY, strideY;
     double xMin, xMax, yMin, yMax;
 } ExecutionContext;
@@ -34,7 +35,7 @@ typedef struct {
 }
 
 // return: number of iterations to diverge from (x, y), or -1 if convergent
-NSInteger calculatePoint(double x, double y, NSInteger escapeRadius, NSInteger maxIterations) {
+float calculatePoint(double x, double y, NSInteger escapeRadius, NSUInteger maxIterations, bool renormaliseEscape) {
     complex double C, Z;
     NSInteger iterations = 0;
     NSInteger const ER2 = escapeRadius * escapeRadius;
@@ -49,25 +50,43 @@ NSInteger calculatePoint(double x, double y, NSInteger escapeRadius, NSInteger m
             (creal(Z) * creal(Z) + cimag(Z) * cimag(Z)) <= ER2
                     && iterations < maxIterations
             );
-    return iterations;
+    if (renormaliseEscape && iterations < maxIterations) {
+        double modulus = sqrt(creal(Z) * creal(Z) + cimag(Z) * cimag(Z));
+        Z = Z * Z + C;
+        ++iterations;
+        Z = Z * Z + C;
+        ++iterations;
+        float mu = iterations - (float) ((log(log(modulus))) / log(escapeRadius));
+        return mu;
+    } else {
+        return (float) iterations;
+    }
 }
 
-void* renderthread(void* arg) {
+void* renderThread(void* arg) {
     ExecutionContext* ec = (ExecutionContext*) arg;
+    NSInteger const colourEntries = ec->colourTable.size / 3;
     for (NSUInteger y = ec->startY; y < ec->height; y += ec->strideY) {
         for (NSUInteger x = 0; x < ec->width; ++x) {
             double xp = ((double) x / ec->width) * (ec->xMax - ec->xMin) + ec->xMin; // real point on fractal plane
             double yp = ((double) y / ec->height) * (ec->yMax - ec->yMin) + ec->yMin; // imag point on fractal plane
-            NSInteger iterations = calculatePoint(xp, yp, ec->escapeRadius, ec->maxIterations);
+            float iterations = calculatePoint(xp, yp, ec->escapeRadius, ec->maxIterations, true);
+            NSInteger colorIndex = (int) (iterations / ec->maxIterations * colourEntries);
+            if (colorIndex >= colourEntries) {
+                colorIndex = 0;
+            }
+            if (colorIndex < 0) {
+                colorIndex = 0;
+            }
             NSUInteger ppos = 4 * (ec->width * y + x);
             if (iterations == ec->maxIterations) {
                 ec->rgba[ppos] = 0;
                 ec->rgba[ppos + 1] = 0;
                 ec->rgba[ppos + 2] = 0;
             } else {
-                ec->rgba[ppos] = ec->colourTable.rgb[iterations * 3];
-                ec->rgba[ppos + 1] = ec->colourTable.rgb[iterations * 3 + 1];
-                ec->rgba[ppos + 2] = ec->colourTable.rgb[iterations * 3 + 2];
+                ec->rgba[ppos] = ec->colourTable.rgb[colorIndex * 3];
+                ec->rgba[ppos + 1] = ec->colourTable.rgb[colorIndex * 3 + 1];
+                ec->rgba[ppos + 2] = ec->colourTable.rgb[colorIndex * 3 + 2];
             }
             ec->rgba[ppos + 3] = 255;
         }
@@ -75,33 +94,12 @@ void* renderthread(void* arg) {
     return NULL;
 }
 
-void generateColourTable(ExecutionContext* ec) {
-    ec->colourTable.rgb = calloc(ec->maxIterations * 3, sizeof(unsigned char));
-    for (int iterations = 0; iterations < ec->maxIterations; ++iterations) {
-        int ppos = iterations * 3;
-        double c = 3.0 * log(iterations) / log(ec->maxIterations - 1.0);
-        if (c < 1) {
-            ec->colourTable.rgb[ppos] = (unsigned char) (255 * c);
-            ec->colourTable.rgb[ppos + 1] = 0;
-            ec->colourTable.rgb[ppos + 2] = 0;
-        } else if (c < 2) {
-            ec->colourTable.rgb[ppos] = 255;
-            ec->colourTable.rgb[ppos + 1] = (unsigned char) (255 * (c - 1));
-            ec->colourTable.rgb[ppos + 2] = 0;
-        } else {
-            ec->colourTable.rgb[ppos] = 255;
-            ec->colourTable.rgb[ppos + 1] = 255;
-            ec->colourTable.rgb[ppos + 2] = (unsigned char) (255 * (c - 2));
-        }
-    }
-    ec->colourTable.size = ec->maxIterations * 3 * sizeof(unsigned char);
-}
-
 #pragma mark Fractal
 
 -(void)compute:(unsigned char*)rgba
          width:(NSUInteger)width
         height:(NSUInteger)height
+   colourTable:(NSObject <ColourMap>*)colourTable
 executionUnits:(NSUInteger)executionUnits
     updateDraw:(DrawBlock)updateDraw {
     if (_fractalDescriptor == nil) {
@@ -123,13 +121,14 @@ executionUnits:(NSUInteger)executionUnits
         contexts[i].xMax = _fractalDescriptor.xMax;
         contexts[i].yMin = _fractalDescriptor.yMin;
         contexts[i].yMax = _fractalDescriptor.yMax;
-        generateColourTable(&contexts[i]);
+        contexts[i].colourTable.rgb = colourTable.rgb;
+        contexts[i].colourTable.size = colourTable.size;
     }
 
     NSDate* executeStart = [NSDate date];
 
     for (NSUInteger i = 0; i < executionUnits; i++) {
-        int threadError = pthread_create(&threads[i], NULL, &renderthread, (void*) &contexts[i]);
+        int threadError = pthread_create(&threads[i], NULL, &renderThread, (void*) &contexts[i]);
 #ifdef DEBUG
         if (threadError != 0) {
             NSLog(@"pthread_create error: %d", threadError);

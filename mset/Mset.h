@@ -15,8 +15,10 @@
 #import <OpenGLES/ES3/gl.h>
 #import <OpenGLES/ES3/glext.h>
 
-#import "GameViewController.h"
 #import "NSExtensions.h"
+#import "ColourMap.h"
+#import "DefaultColourMap.h"
+#import "GameViewController.h"
 #import "FractalDescriptor.h"
 #import "Fractal.h"
 #import "MandelbrotSet.h"

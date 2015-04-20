@@ -16,6 +16,7 @@ typedef struct {
 -(void)compute:(unsigned char*)rgba
          width:(NSUInteger)width
         height:(NSUInteger)height
+   colourTable:(NSObject<ColourMap>*)colourTable
 executionUnits:(NSUInteger)executionUnits
     updateDraw:(DrawBlock)updateDraw;
 
