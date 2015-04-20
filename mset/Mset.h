@@ -18,6 +18,7 @@
 #import "NSExtensions.h"
 #import "ColourMap.h"
 #import "DefaultColourMap.h"
+#import "NewColourMap.h"
 #import "GameViewController.h"
 #import "FractalDescriptor.h"
 #import "Fractal.h"

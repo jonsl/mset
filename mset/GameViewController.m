@@ -143,11 +143,13 @@ NSInteger const MaxIterations = 500;
 -(void)compute {
     NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@", @(_fractalDescriptor.xMin), @(_fractalDescriptor.xMax), @(_fractalDescriptor.yMin), @(_fractalDescriptor.yMax));
     self.fractal.fractalDescriptor = self.fractalDescriptor;
-    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:2048];
+//    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:2048];
+    NewColourMap* newColourMap = [[NewColourMap alloc] initWithSize:768];
     [self.fractal compute:self.canvasQuad.texture.imageData
                     width:self.canvasQuad.texture.width
                    height:self.canvasQuad.texture.height
-              colourTable:defaultColourTable
+//              colourTable:defaultColourTable
+              colourTable:newColourMap
            executionUnits:[Configuration sharedConfiguration].executionUnits
                updateDraw:
                        ^() {

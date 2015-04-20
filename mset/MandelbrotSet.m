@@ -37,7 +37,7 @@ typedef struct {
 // return: number of iterations to diverge from (x, y), or -1 if convergent
 float calculatePoint(double x, double y, NSInteger escapeRadius, NSUInteger maxIterations, bool renormaliseEscape) {
     complex double C, Z;
-    NSInteger iterations = 0;
+    NSInteger N = 0;
     NSInteger const ER2 = escapeRadius * escapeRadius;
 
     Z = 0 + 0 * I;
@@ -45,21 +45,15 @@ float calculatePoint(double x, double y, NSInteger escapeRadius, NSUInteger maxI
 
     do {
         Z = Z * Z + C;
-        ++iterations;
+        ++N;
     } while (
             (creal(Z) * creal(Z) + cimag(Z) * cimag(Z)) <= ER2
-                    && iterations < maxIterations
+                    && N < maxIterations
             );
-    if (renormaliseEscape && iterations < maxIterations) {
-        double modulus = sqrt(creal(Z) * creal(Z) + cimag(Z) * cimag(Z));
-        Z = Z * Z + C;
-        ++iterations;
-        Z = Z * Z + C;
-        ++iterations;
-        float mu = iterations - (float) ((log(log(modulus))) / log(escapeRadius));
-        return mu;
+    if (renormaliseEscape && N < maxIterations) {
+        return (float)(N + 1 - log(log(cabs(Z))) / log(escapeRadius));
     } else {
-        return (float) iterations;
+        return (float) N;
     }
 }
 
@@ -79,7 +73,7 @@ void* renderThread(void* arg) {
 //                colorIndex = 0;
 //            }
             NSUInteger ppos = 4 * (ec->width * y + x);
-            if ((NSInteger)iterations == ec->maxIterations) {
+            if ((NSInteger) iterations == ec->maxIterations) {
                 ec->rgba[ppos] = 0;
                 ec->rgba[ppos + 1] = 0;
                 ec->rgba[ppos + 2] = 0;
