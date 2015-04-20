@@ -3,7 +3,7 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@interface NewColourMap : NSObject <ColourMap>
+@interface BernsteinPolynomialColourMap : NSObject <ColourMap>
 
 -(instancetype)initWithSize:(NSUInteger)size;
 

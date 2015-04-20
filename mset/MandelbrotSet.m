@@ -4,8 +4,6 @@
 //
 
 #import "Mset.h"
-#import "Util.h"
-#include <complex.h>
 #import <pthread.h>
 
 
@@ -35,23 +33,25 @@ typedef struct {
 }
 
 // return: number of iterations to diverge from (x, y), or -1 if convergent
-float calculatePoint(Real x, Real y, NSInteger escapeRadius, NSUInteger maxIterations, bool renormaliseEscape) {
-    complex double C, Z;
+static inline float calculatePoint(Real Cr, Real Ci, NSInteger escapeRadius, NSUInteger maxIterations, bool renormaliseEscape) {
+    double Zr = 0;
+    double Zi = 0;
+    double Zrsqr = Zr * Zr;
+    double Zisqr = Zi * Zi;
+
     NSInteger N = 0;
     NSInteger const ER2 = escapeRadius * escapeRadius;
 
-    Z = 0 + 0 * I;
-    C = x + y * I;
-
-    do {
-        Z = Z * Z + C;
+    while (Zrsqr + Zisqr <= ER2 && N < maxIterations) {
+        Zi = (Zr + Zi) * (Zr + Zi) - Zrsqr - Zisqr;
+        Zi += Ci;
+        Zr = Zrsqr - Zisqr + Cr;
+        Zrsqr = Zr * Zr;
+        Zisqr = Zi * Zi;
         ++N;
-    } while (
-            (creal(Z) * creal(Z) + cimag(Z) * cimag(Z)) <= ER2
-                    && N < maxIterations
-            );
+    }
     if (renormaliseEscape && N < maxIterations) {
-        return (float)(N + 1 - logl(logl(cabsl(Z))) / logl(escapeRadius));
+        return (float)(N + 1 - logl(logl(sqrt(Zrsqr + Zisqr))) / logl(escapeRadius));
     } else {
         return (float) N;
     }
@@ -60,11 +60,13 @@ float calculatePoint(Real x, Real y, NSInteger escapeRadius, NSUInteger maxItera
 void* renderThread(void* arg) {
     ExecutionContext* ec = (ExecutionContext*) arg;
     NSInteger const colourEntries = ec->colourTable.size / 3;
+    Real Dr = (ec->xMax - ec->xMin) / (Real)ec->width;
+    Real Di = (ec->yMax - ec->yMin) / (Real)ec->height;
     for (NSUInteger y = ec->startY; y < ec->height; y += ec->strideY) {
         for (NSUInteger x = 0; x < ec->width; ++x) {
-            Real xp = ((Real) x / ec->width) * (ec->xMax - ec->xMin) + ec->xMin; // real point on fractal plane
-            Real yp = ((Real) y / ec->height) * (ec->yMax - ec->yMin) + ec->yMin; // imag point on fractal plane
-            float iterations = calculatePoint(xp, yp, ec->escapeRadius, ec->maxIterations, true);
+            Real Cr = ec->xMin + Dr * x;
+            Real Ci = ec->yMin + Di * y;
+            float iterations = calculatePoint(Cr, Ci, ec->escapeRadius, ec->maxIterations, true);
             NSInteger colorIndex = (NSInteger) (iterations / ec->maxIterations * colourEntries);
 //            if (colorIndex >= colourEntries) {
 //                colorIndex = colourEntries-1;
