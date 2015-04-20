@@ -141,7 +141,7 @@ NSInteger const MaxIterations = 500;
 #pragma mark - GLKView and GLKViewController delegate methods
 
 -(void)compute {
-    NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@", @(_fractalDescriptor.xMin), @(_fractalDescriptor.xMax), @(_fractalDescriptor.yMin), @(_fractalDescriptor.yMax));
+//    NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@", @(_fractalDescriptor.xMin), @(_fractalDescriptor.xMax), @(_fractalDescriptor.yMin), @(_fractalDescriptor.yMax));
     self.fractal.fractalDescriptor = self.fractalDescriptor;
 //    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:2048];
     NewColourMap* newColourMap = [[NewColourMap alloc] initWithSize:768];
@@ -240,12 +240,12 @@ NSInteger const MaxIterations = 500;
 }
 
 -(PPoint)canvasToComplexPlane:(CGPoint)position {
-    double xDelta = (_fractalDescriptor.xMax - _fractalDescriptor.xMin) / self.canvasQuad.width;
-    double yDelta = (_fractalDescriptor.yMax - _fractalDescriptor.yMin) / self.canvasQuad.height;
+    Real xDelta = (_fractalDescriptor.xMax - _fractalDescriptor.xMin) / self.canvasQuad.width;
+    Real yDelta = (_fractalDescriptor.yMax - _fractalDescriptor.yMin) / self.canvasQuad.height;
     CGPoint pt = CGPointMake(position.x - _canvasOffset.x, position.y - _canvasOffset.y);
     PPoint pp;
-    pp.x = _fractalDescriptor.xMin + (double) pt.x * xDelta;
-    pp.y = _fractalDescriptor.yMin + (double) pt.y * yDelta;
+    pp.x = _fractalDescriptor.xMin + (Real) pt.x * xDelta;
+    pp.y = _fractalDescriptor.yMin + (Real) pt.y * yDelta;
     return pp;
 }
 

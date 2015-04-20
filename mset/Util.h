@@ -12,6 +12,8 @@
 /*
  * types
  */
+typedef long double Real;
+
 typedef struct {
     unsigned char r, g, b, a;
 } VertexColor;
@@ -23,7 +25,7 @@ typedef struct {
 } Vertex;
 
 typedef struct {
-    double x, y;
+    Real x, y;
 } PPoint;
 
 typedef struct {

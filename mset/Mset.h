@@ -15,6 +15,7 @@
 #import <OpenGLES/ES3/gl.h>
 #import <OpenGLES/ES3/glext.h>
 
+#import "Util.h"
 #import "NSExtensions.h"
 #import "ColourMap.h"
 #import "DefaultColourMap.h"
@@ -24,7 +25,6 @@
 #import "Fractal.h"
 #import "MandelbrotSet.h"
 #import "Configuration.h"
-#import "Util.h"
 #import "Program.h"
 #import "Texture.h"
 #import "RendererState.h"

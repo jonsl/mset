@@ -7,7 +7,7 @@
 
 typedef void (^DrawBlock)();
 typedef struct {
-    double x, y;
+    Real x, y;
 } FractalCoordinate;
 
 @protocol Fractal<NSObject>

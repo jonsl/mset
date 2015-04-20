@@ -16,7 +16,7 @@ typedef struct {
     unsigned char* rgba;
     ColourLookup colourTable;
     NSUInteger startY, strideY;
-    double xMin, xMax, yMin, yMax;
+    Real xMin, xMax, yMin, yMax;
 } ExecutionContext;
 
 @implementation MandelbrotSet {
@@ -35,7 +35,7 @@ typedef struct {
 }
 
 // return: number of iterations to diverge from (x, y), or -1 if convergent
-float calculatePoint(double x, double y, NSInteger escapeRadius, NSUInteger maxIterations, bool renormaliseEscape) {
+float calculatePoint(Real x, Real y, NSInteger escapeRadius, NSUInteger maxIterations, bool renormaliseEscape) {
     complex double C, Z;
     NSInteger N = 0;
     NSInteger const ER2 = escapeRadius * escapeRadius;
@@ -51,7 +51,7 @@ float calculatePoint(double x, double y, NSInteger escapeRadius, NSUInteger maxI
                     && N < maxIterations
             );
     if (renormaliseEscape && N < maxIterations) {
-        return (float)(N + 1 - log(log(cabs(Z))) / log(escapeRadius));
+        return (float)(N + 1 - logl(logl(cabsl(Z))) / logl(escapeRadius));
     } else {
         return (float) N;
     }
@@ -62,8 +62,8 @@ void* renderThread(void* arg) {
     NSInteger const colourEntries = ec->colourTable.size / 3;
     for (NSUInteger y = ec->startY; y < ec->height; y += ec->strideY) {
         for (NSUInteger x = 0; x < ec->width; ++x) {
-            double xp = ((double) x / ec->width) * (ec->xMax - ec->xMin) + ec->xMin; // real point on fractal plane
-            double yp = ((double) y / ec->height) * (ec->yMax - ec->yMin) + ec->yMin; // imag point on fractal plane
+            Real xp = ((Real) x / ec->width) * (ec->xMax - ec->xMin) + ec->xMin; // real point on fractal plane
+            Real yp = ((Real) y / ec->height) * (ec->yMax - ec->yMin) + ec->yMin; // imag point on fractal plane
             float iterations = calculatePoint(xp, yp, ec->escapeRadius, ec->maxIterations, true);
             NSInteger colorIndex = (NSInteger) (iterations / ec->maxIterations * colourEntries);
 //            if (colorIndex >= colourEntries) {

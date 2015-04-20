@@ -8,10 +8,10 @@
 
 @implementation FractalDescriptor
 
-+(FractalDescriptor*)fractalDescriptorWithXMin:(double)xMin
-                                          xMax:(double)xMax
-                                          yMin:(double)yMin
-                                          yMax:(double)yMax
++(FractalDescriptor*)fractalDescriptorWithXMin:(Real)xMin
+                                          xMax:(Real)xMax
+                                          yMin:(Real)yMin
+                                          yMax:(Real)yMax
                                   escapeRadius:(NSInteger)escapeRadius
                                  maxIterations:(NSUInteger)maxIterations {
     return [[FractalDescriptor alloc] initWithXMin:xMin
@@ -22,10 +22,10 @@
                                      maxIterations:maxIterations];
 }
 
--(instancetype)initWithXMin:(double)xMin
-                       xMax:(double)xMax
-                       yMin:(double)yMin
-                       yMax:(double)yMax
+-(instancetype)initWithXMin:(Real)xMin
+                       xMax:(Real)xMax
+                       yMin:(Real)yMin
+                       yMax:(Real)yMax
                escapeRadius:(NSInteger)escapeRadius
               maxIterations:(NSUInteger)maxIterations {
     if ((self = [super init])) {

@@ -5,17 +5,17 @@
 
 @interface FractalDescriptor : NSObject
 
-+(FractalDescriptor*)fractalDescriptorWithXMin:(double)xMin
-                                          xMax:(double)xMax
-                                          yMin:(double)yMin
-                                          yMax:(double)yMax
++(FractalDescriptor*)fractalDescriptorWithXMin:(Real)xMin
+                                          xMax:(Real)xMax
+                                          yMin:(Real)yMin
+                                          yMax:(Real)yMax
                                   escapeRadius:(NSInteger)escapeRadius
                                  maxIterations:(NSUInteger)maxIterations;
 
-@property (nonatomic, readonly) double xMin;
-@property (nonatomic, readonly) double xMax;
-@property (nonatomic, readonly) double yMin;
-@property (nonatomic, readonly) double yMax;
+@property (nonatomic, readonly) Real xMin;
+@property (nonatomic, readonly) Real xMax;
+@property (nonatomic, readonly) Real yMin;
+@property (nonatomic, readonly) Real yMax;
 @property (nonatomic, readonly) NSInteger escapeRadius;
 @property (nonatomic, readonly) NSUInteger maxIterations;
 
