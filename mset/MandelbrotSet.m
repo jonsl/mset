@@ -14,7 +14,7 @@ typedef struct {
     unsigned char* rgba;
     ColourLookup colourTable;
     NSUInteger startY, strideY;
-    Real xMin, xMax, yMin, yMax;
+    Real rMin, rMax, iMin, iMax;
 } ExecutionContext;
 
 @implementation MandelbrotSet
@@ -60,12 +60,12 @@ static inline float calculatePoint(Real Cr, Real Ci, NSInteger escapeRadius, NSU
 void* renderThread(void* arg) {
     ExecutionContext* ec = (ExecutionContext*) arg;
     NSInteger const colourEntries = ec->colourTable.size / 3;
-    Real Dr = (ec->xMax - ec->xMin) / (Real)ec->width;
-    Real Di = (ec->yMax - ec->yMin) / (Real)ec->height;
+    Real Dr = (ec->rMax - ec->rMin) / (Real)ec->width;
+    Real Di = (ec->iMax - ec->iMin) / (Real)ec->height;
     for (NSUInteger y = ec->startY; y < ec->height; y += ec->strideY) {
         for (NSUInteger x = 0; x < ec->width; ++x) {
-            Real Cr = ec->xMin + Dr * x;
-            Real Ci = ec->yMin + Di * y;
+            Real Cr = ec->rMin + Dr * x;
+            Real Ci = ec->iMin + Di * y;
             float iterations = calculatePoint(Cr, Ci, ec->escapeRadius, ec->maxIterations, true);
             NSInteger colorIndex = (NSInteger) (iterations / ec->maxIterations * colourEntries);
 //            if (colorIndex >= colourEntries) {
@@ -115,10 +115,10 @@ executionUnits:(NSUInteger)executionUnits
         contexts[i].rgba = rgba;
         contexts[i].startY = i;
         contexts[i].strideY = executionUnits;
-        contexts[i].xMin = _complexPlane.xMin;
-        contexts[i].xMax = _complexPlane.xMax;
-        contexts[i].yMin = _complexPlane.yMin;
-        contexts[i].yMax = _complexPlane.yMax;
+        contexts[i].rMin = _complexPlane.rMin;
+        contexts[i].rMax = _complexPlane.rMax;
+        contexts[i].iMin = _complexPlane.iMin;
+        contexts[i].iMax = _complexPlane.iMax;
         contexts[i].colourTable.rgb = colourMap.rgb;
         contexts[i].colourTable.size = colourMap.size;
     }

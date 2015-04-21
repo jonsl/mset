@@ -7,6 +7,7 @@
 //
 
 #import "Mset.h"
+#import "Util.h"
 
 
 float const ScreenWidth = 1024.f;
@@ -33,9 +34,13 @@ NSInteger const MaxIterations = 1000;
 @implementation GameViewController {
     GLKMatrix4 _projectionMatrix;
     CGSize _screenSize;
+    CGFloat _aspect;
     NSUInteger _touchCount;
     NSUInteger _lastTouchCount;
     BOOL _requireCompute;
+    BOOL _isSelecting;
+    CGPoint _selectionCentre;
+    CGSize _selectionSize;
 }
 
 -(void)viewDidLoad {
@@ -60,22 +65,22 @@ NSInteger const MaxIterations = 1000;
         CGFloat screenScale = [[UIScreen mainScreen] scale];
         CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
 
-        float aspect = screenSize.width / screenSize.height;
-        _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / aspect);
+        _aspect = screenSize.width / screenSize.height;
+        _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / _aspect);
         _projectionMatrix = GLKMatrix4MakeOrtho(0, _screenSize.width, 0, _screenSize.height, 0.f, 1.f);
 
         Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
         self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
-        CGPoint delta = CGPointMake(self.canvasQuad.width - _screenSize.width, self.canvasQuad.height - _screenSize.height);
-        self.canvasOffset = CGPointMake(-delta.x / 2, -delta.y / 2);
+//        CGPoint delta = CGPointMake(self.canvasQuad.width - _screenSize.width, self.canvasQuad.height - _screenSize.height);
+//        self.canvasOffset = CGPointMake(-delta.x / 2, -delta.y / 2);
 //        self.screenPosition = CGPointMake(0, -300);
 
         self.selectionQuad = [Quad quadWithColour:0xff width:100 height:100];
         self.selectionQuad.position = CGPointMake(0, 0);
         self.selectionQuad.visible = NO;
 
-        self.complexPlane = [ComplexPlane complexPlaneWithXMax:-2.5 xMax:+1.5 yMin:-2.0 yMax:+2.0];
+        self.complexPlane = [ComplexPlane complexPlaneWithCentre:-0.5 cI:0 rWidth:4.0 iHeight:4.0];
 
         _requireCompute = YES;
 
@@ -145,8 +150,8 @@ NSInteger const MaxIterations = 1000;
 //    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:4096];
     PolynomialColourMap* newColourMap = [[PolynomialColourMap alloc] initWithSize:4096];
     [self.fractal compute:self.canvasQuad.texture.imageData
-                    width:self.canvasQuad.texture.width
-                   height:self.canvasQuad.texture.height
+                    width:_screenSize.width
+                   height:_screenSize.height
              escapeRadius:(NSInteger) 2
             maxIterations:(NSUInteger) MaxIterations
 //              colourMap:defaultColourTable
@@ -159,6 +164,14 @@ NSInteger const MaxIterations = 1000;
 }
 
 -(void)update {
+
+    self.selectionQuad.visible = _isSelecting;
+    if (_isSelecting) {
+        self.selectionQuad.position = CGPointMake(_selectionCentre.x - _selectionSize.width/2, _selectionCentre.y - _selectionSize.height / 2);
+        self.selectionQuad.width = _selectionSize.width;
+        self.selectionQuad.height = _selectionSize.height;
+    }
+
     if (_requireCompute) {
         [self compute];
         _requireCompute = NO;
@@ -177,13 +190,13 @@ NSInteger const MaxIterations = 1000;
     return CGPointMake(touch.x, _screenSize.height - touch.y);
 }
 
--(PPoint)canvasToComplexPlane:(CGPoint)position {
-    Real xDelta = (_complexPlane.xMax - _complexPlane.xMin) / self.canvasQuad.width;
-    Real yDelta = (_complexPlane.yMax - _complexPlane.yMin) / self.canvasQuad.height;
+-(PPoint)canvasPointToComplexPlane:(CGPoint)position {
+    Real xDelta = (_complexPlane.rMax - _complexPlane.rMin) / self.canvasQuad.width;
+    Real yDelta = (_complexPlane.iMax - _complexPlane.iMin) / self.canvasQuad.height;
     CGPoint pt = CGPointMake(position.x - _canvasOffset.x, position.y - _canvasOffset.y);
     PPoint pp;
-    pp.x = _complexPlane.xMin + (Real) pt.x * xDelta;
-    pp.y = _complexPlane.yMin + (Real) pt.y * yDelta;
+    pp.x = _complexPlane.rMin + (Real) pt.x * xDelta;
+    pp.y = _complexPlane.iMin + (Real) pt.y * yDelta;
     return pp;
 }
 
@@ -253,29 +266,16 @@ NSInteger const MaxIterations = 1000;
 -(void)showSelectionAreaWithTouches:(CGPoint)touch1 second:(CGPoint)touch2 {
     CGPoint pt1 = [self touchToCanvas:touch1];
     CGPoint pt2 = [self touchToCanvas:touch2];
-    CGPoint mid = CGPointMake(pt1.x + (pt2.x - pt1.x) / 2, pt1.y + (pt2.y - pt1.y) / 2);
-    CGFloat size = MAX(fabs(pt2.x - pt1.x), fabs(pt2.y - pt1.y));
-    CGPoint bl = CGPointMake(mid.x - size / 2, mid.y - size / 2);
-
-    self.selectionQuad.width = size;
-    self.selectionQuad.height = size;
-    self.selectionQuad.position = bl;
-    self.selectionQuad.visible = YES;
+    _selectionCentre = CGPointMake(pt1.x + (pt2.x - pt1.x) / 2, pt1.y + (pt2.y - pt1.y) / 2);
+    CGFloat width = MAX(fabs(pt2.x - pt1.x), fabs(pt2.y - pt1.y));
+    _selectionSize = CGSizeMake(width, width / _aspect);
+    _isSelecting = YES;
 }
 
 -(void)computeSelectionArea {
-    float xMin = self.selectionQuad.position.x;
-    float xMax = self.selectionQuad.position.x + self.selectionQuad.width;
-    float yMin = self.selectionQuad.position.y;
-    float yMax = self.selectionQuad.position.y + self.selectionQuad.height;
-
-    CGPoint bl = CGPointMake(xMin, yMin);
-    CGPoint tr = CGPointMake(xMax, yMax);
-
-    PPoint a = [self canvasToComplexPlane:bl];
-    PPoint b = [self canvasToComplexPlane:tr];
-
-    self.complexPlane = [ComplexPlane complexPlaneWithXMax:a.x xMax:b.x yMin:a.y yMax:b.y];
+    PPoint cCentre = [self canvasPointToComplexPlane:_selectionCentre];
+    PPoint cSize = [self canvasPointToComplexPlane:CGPointMake(_selectionSize.width, _selectionSize.height)];
+    self.complexPlane = [ComplexPlane complexPlaneWithCentre:cCentre.x cI:cCentre.y rWidth:cSize.x iHeight:cSize.y];
 
     _requireCompute = YES;
 }

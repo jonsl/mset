@@ -8,16 +8,16 @@
 
 @implementation ComplexPlane
 
-+(ComplexPlane*)complexPlaneWithXMax:(Real)xMin xMax:(Real)xMax yMin:(Real)yMin yMax:(Real)yMax {
-    return [[ComplexPlane alloc] initWithXMin:xMin xMax:xMax yMin:yMin yMax:yMax];
++(ComplexPlane*)complexPlaneWithCentre:(Real)cR cI:(Real)cI rWidth:(Real)rWidth iHeight:(Real)iHeight {
+    return [[ComplexPlane alloc] initWithCentre:cR cI:cI rWidth:rWidth iHeight:iHeight];
 }
 
--(instancetype)initWithXMin:(Real)xMin xMax:(Real)xMax yMin:(Real)yMin yMax:(Real)yMax {
+-(instancetype)initWithCentre:(Real)cR cI:(Real)cI rWidth:(Real)rWidth iHeight:(Real)iHeight {
     if ((self = [super init])) {
-        _xMin = xMin;
-        _xMax = xMax;
-        _yMin = yMin;
-        _yMax = yMax;
+        _rMin = cR - rWidth / 2;
+        _rMax = cR + rWidth / 2;
+        _iMin = cI - iHeight / 2;
+        _iMax = cI + iHeight / 2;
     }
     return self;
 }
