@@ -7,7 +7,7 @@
 
 // REF: https://solarianprogrammer.com/2013/02/28/mandelbrot-set-cpp-11/
 
-@implementation BernsteinPolynomialColourMap
+@implementation PolynomialColourMap
 
 @synthesize rgb = _rgb;
 @synthesize size = _size;

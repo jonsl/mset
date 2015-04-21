@@ -19,7 +19,7 @@
 #import "NSExtensions.h"
 #import "ColourMap.h"
 #import "DefaultColourMap.h"
-#import "BernsteinPolynomialColourMap.h"
+#import "PolynomialColourMap.h"
 #import "GameViewController.h"
 #import "ComplexPlane.h"
 #import "Fractal.h"
