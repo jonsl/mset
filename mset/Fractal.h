@@ -16,13 +16,15 @@ typedef struct {
 -(void)compute:(unsigned char*)rgba
          width:(NSUInteger)width
         height:(NSUInteger)height
-   colourTable:(NSObject<ColourMap>*)colourTable
+  escapeRadius:(NSInteger)escapeRadius
+ maxIterations:(NSUInteger)maxIterations
+     colourMap:(NSObject<ColourMap>*)colourMap
 executionUnits:(NSUInteger)executionUnits
     updateDraw:(DrawBlock)updateDraw;
 
 -(FractalCoordinate)convertCoordinates:(CGPoint)point;
 
-@property (nonatomic, strong) FractalDescriptor* fractalDescriptor;
+@property (nonatomic, strong) ComplexPlane* complexPlane;
 
 @optional
 -(NSString*)fragmentShader;

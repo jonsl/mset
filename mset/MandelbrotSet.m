@@ -17,9 +17,9 @@ typedef struct {
     Real xMin, xMax, yMin, yMax;
 } ExecutionContext;
 
-@implementation MandelbrotSet {
-    FractalDescriptor* _fractalDescriptor;
-}
+@implementation MandelbrotSet
+
+@synthesize complexPlane = _complexPlane;
 
 +(MandelbrotSet*)mandelbrotSet {
     return [[MandelbrotSet alloc] init];
@@ -95,10 +95,12 @@ void* renderThread(void* arg) {
 -(void)compute:(unsigned char*)rgba
          width:(NSUInteger)width
         height:(NSUInteger)height
-   colourTable:(NSObject <ColourMap>*)colourTable
+  escapeRadius:(NSInteger)escapeRadius
+ maxIterations:(NSUInteger)maxIterations
+     colourMap:(NSObject<ColourMap>*)colourMap
 executionUnits:(NSUInteger)executionUnits
     updateDraw:(DrawBlock)updateDraw {
-    if (_fractalDescriptor == nil) {
+    if (_complexPlane == nil) {
         [NSException raise:ExceptionLogicError format:@"invalid fractalDescriptor"];
     }
 
@@ -108,17 +110,17 @@ executionUnits:(NSUInteger)executionUnits
     for (NSUInteger i = 0; i < executionUnits; i++) {
         contexts[i].width = width;
         contexts[i].height = height;
-        contexts[i].escapeRadius = _fractalDescriptor.escapeRadius;
-        contexts[i].maxIterations = _fractalDescriptor.maxIterations;
+        contexts[i].escapeRadius = escapeRadius;
+        contexts[i].maxIterations = maxIterations;
         contexts[i].rgba = rgba;
         contexts[i].startY = i;
         contexts[i].strideY = executionUnits;
-        contexts[i].xMin = _fractalDescriptor.xMin;
-        contexts[i].xMax = _fractalDescriptor.xMax;
-        contexts[i].yMin = _fractalDescriptor.yMin;
-        contexts[i].yMax = _fractalDescriptor.yMax;
-        contexts[i].colourTable.rgb = colourTable.rgb;
-        contexts[i].colourTable.size = colourTable.size;
+        contexts[i].xMin = _complexPlane.xMin;
+        contexts[i].xMax = _complexPlane.xMax;
+        contexts[i].yMin = _complexPlane.yMin;
+        contexts[i].yMax = _complexPlane.yMax;
+        contexts[i].colourTable.rgb = colourMap.rgb;
+        contexts[i].colourTable.size = colourMap.size;
     }
 
     NSDate* executeStart = [NSDate date];
@@ -186,14 +188,6 @@ executionUnits:(NSUInteger)executionUnits
     fractalCoordinate.x = point.x;
     fractalCoordinate.y = point.y;
     return fractalCoordinate;
-}
-
--(FractalDescriptor*)fractalDescriptor {
-    return _fractalDescriptor;
-}
-
--(void)setFractalDescriptor:(FractalDescriptor*)fractalDescriptor {
-    _fractalDescriptor = fractalDescriptor;
 }
 
 @end

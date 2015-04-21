@@ -26,7 +26,7 @@ NSInteger const MaxIterations = 1000;
 @property (nonatomic, assign) CGPoint dragStart;
 @property (nonatomic, assign) CGPoint dragCanvasOffset;
 
-@property (nonatomic, strong) FractalDescriptor* fractalDescriptor;
+@property (nonatomic, strong) ComplexPlane* complexPlane;
 
 @end
 
@@ -75,13 +75,7 @@ NSInteger const MaxIterations = 1000;
         self.selectionQuad.position = CGPointMake(0, 0);
         self.selectionQuad.visible = NO;
 
-
-        self.fractalDescriptor = [FractalDescriptor fractalDescriptorWithXMin:-2.5
-                                                                         xMax:+1.5
-                                                                         yMin:-2.0
-                                                                         yMax:+2.0
-                                                                 escapeRadius:2
-                                                                maxIterations:MaxIterations];
+        self.complexPlane = [ComplexPlane complexPlaneWithXMax:-2.5 xMax:+1.5 yMin:-2.0 yMax:+2.0];
 
         _requireCompute = YES;
 
@@ -147,14 +141,16 @@ NSInteger const MaxIterations = 1000;
 
 -(void)compute {
 //    NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@", @(_fractalDescriptor.xMin), @(_fractalDescriptor.xMax), @(_fractalDescriptor.yMin), @(_fractalDescriptor.yMax));
-    self.fractal.fractalDescriptor = self.fractalDescriptor;
+    self.fractal.complexPlane = self.complexPlane;
 //    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:4096];
     BernsteinPolynomialColourMap* newColourMap = [[BernsteinPolynomialColourMap alloc] initWithSize:4096];
     [self.fractal compute:self.canvasQuad.texture.imageData
                     width:self.canvasQuad.texture.width
                    height:self.canvasQuad.texture.height
-//              colourTable:defaultColourTable
-              colourTable:newColourMap
+             escapeRadius:(NSInteger) 2
+            maxIterations:(NSUInteger) MaxIterations
+//              colourMap:defaultColourTable
+                colourMap:newColourMap
            executionUnits:[Configuration sharedConfiguration].executionUnits
                updateDraw:
                        ^() {
@@ -182,12 +178,12 @@ NSInteger const MaxIterations = 1000;
 }
 
 -(PPoint)canvasToComplexPlane:(CGPoint)position {
-    Real xDelta = (_fractalDescriptor.xMax - _fractalDescriptor.xMin) / self.canvasQuad.width;
-    Real yDelta = (_fractalDescriptor.yMax - _fractalDescriptor.yMin) / self.canvasQuad.height;
+    Real xDelta = (_complexPlane.xMax - _complexPlane.xMin) / self.canvasQuad.width;
+    Real yDelta = (_complexPlane.yMax - _complexPlane.yMin) / self.canvasQuad.height;
     CGPoint pt = CGPointMake(position.x - _canvasOffset.x, position.y - _canvasOffset.y);
     PPoint pp;
-    pp.x = _fractalDescriptor.xMin + (Real) pt.x * xDelta;
-    pp.y = _fractalDescriptor.yMin + (Real) pt.y * yDelta;
+    pp.x = _complexPlane.xMin + (Real) pt.x * xDelta;
+    pp.y = _complexPlane.yMin + (Real) pt.y * yDelta;
     return pp;
 }
 
@@ -279,12 +275,7 @@ NSInteger const MaxIterations = 1000;
     PPoint a = [self canvasToComplexPlane:bl];
     PPoint b = [self canvasToComplexPlane:tr];
 
-    self.fractalDescriptor = [FractalDescriptor fractalDescriptorWithXMin:a.x
-                                                                     xMax:b.x
-                                                                     yMin:a.y
-                                                                     yMax:b.y
-                                                             escapeRadius:2
-                                                            maxIterations:MaxIterations];
+    self.complexPlane = [ComplexPlane complexPlaneWithXMax:a.x xMax:b.x yMin:a.y yMax:b.y];
 
     _requireCompute = YES;
 }

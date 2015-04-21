@@ -21,7 +21,7 @@
 #import "DefaultColourMap.h"
 #import "BernsteinPolynomialColourMap.h"
 #import "GameViewController.h"
-#import "FractalDescriptor.h"
+#import "ComplexPlane.h"
 #import "Fractal.h"
 #import "MandelbrotSet.h"
 #import "Configuration.h"
