@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1A78417D1AE79B6F00B1E994 /* RenderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A78417B1AE79B6F00B1E994 /* RenderViewController.m */; };
+		1A78417E1AE79B6F00B1E994 /* RenderViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1A78417C1AE79B6F00B1E994 /* RenderViewController.xib */; };
 		1ABD28C81ADFB83B00ADBE75 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28C71ADFB83B00ADBE75 /* main.m */; };
 		1ABD28CB1ADFB83B00ADBE75 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28CA1ADFB83B00ADBE75 /* AppDelegate.m */; };
 		1ABD28D21ADFB83B00ADBE75 /* GameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28D11ADFB83B00ADBE75 /* GameViewController.m */; };
@@ -38,6 +40,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1A78417A1AE79B6F00B1E994 /* RenderViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderViewController.h; sourceTree = "<group>"; };
+		1A78417B1AE79B6F00B1E994 /* RenderViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RenderViewController.m; sourceTree = "<group>"; };
+		1A78417C1AE79B6F00B1E994 /* RenderViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RenderViewController.xib; sourceTree = "<group>"; };
 		1ABD28C21ADFB83B00ADBE75 /* mset.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mset.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1ABD28C61ADFB83B00ADBE75 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1ABD28C71ADFB83B00ADBE75 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -121,11 +126,14 @@
 			children = (
 				1ABD28C91ADFB83B00ADBE75 /* AppDelegate.h */,
 				1ABD28CA1ADFB83B00ADBE75 /* AppDelegate.m */,
-				B1B19930662819024C4F41E4 /* Configuration.h */,
-				B1B19BCA584567D8BDA77FC0 /* Configuration.m */,
-				B1B194DB8999B6530B8134C2 /* Fractal.h */,
+				B1B19C75CC53EF40029488E9 /* ColourMap.h */,
 				7852F06AE5F06F7A3E9F2523 /* ComplexPlane.h */,
 				7852F8A081DF55243454C0E9 /* ComplexPlane.m */,
+				B1B19930662819024C4F41E4 /* Configuration.h */,
+				B1B19BCA584567D8BDA77FC0 /* Configuration.m */,
+				B1B19B2600BF4922F225988A /* DefaultColourMap.h */,
+				B1B19C3241067C840BC1FFAD /* DefaultColourMap.m */,
+				B1B194DB8999B6530B8134C2 /* Fractal.h */,
 				1ABD28D01ADFB83B00ADBE75 /* GameViewController.h */,
 				1ABD28D11ADFB83B00ADBE75 /* GameViewController.m */,
 				1ABD28D61ADFB83B00ADBE75 /* Images.xcassets */,
@@ -136,21 +144,21 @@
 				1ABD28FD1ADFC1A400ADBE75 /* Mset.h */,
 				1ABD28F11ADFBEFC00ADBE75 /* NSExtensions.h */,
 				1ABD28F21ADFBEFC00ADBE75 /* NSExtensions.m */,
+				B1B19FC713F97162CFD58054 /* PolynomialColourMap.h */,
+				B1B1946033F99EE6BCF00731 /* PolynomialColourMap.m */,
 				1ABD28F31ADFBEFC00ADBE75 /* Program.h */,
 				1ABD28F41ADFBEFC00ADBE75 /* Program.m */,
 				7852F7AD1EB6D5AEE29B0A91 /* Quad.h */,
 				7852FC2153618F47957D913D /* Quad.m */,
 				1ABD28F51ADFBEFC00ADBE75 /* RendererState.h */,
 				1ABD28F61ADFBEFC00ADBE75 /* RendererState.m */,
+				1A78417A1AE79B6F00B1E994 /* RenderViewController.h */,
+				1A78417B1AE79B6F00B1E994 /* RenderViewController.m */,
+				1A78417C1AE79B6F00B1E994 /* RenderViewController.xib */,
 				1ABD28C51ADFB83B00ADBE75 /* Supporting Files */,
 				B1B198CE5251F54D818CB295 /* Texture.h */,
 				B1B19B6397B9191F2214BCAE /* Texture.m */,
 				7852F96D778A6599D7702BB0 /* Util.h */,
-				B1B19C75CC53EF40029488E9 /* ColourMap.h */,
-				B1B19C3241067C840BC1FFAD /* DefaultColourMap.m */,
-				B1B19B2600BF4922F225988A /* DefaultColourMap.h */,
-				B1B1946033F99EE6BCF00731 /* PolynomialColourMap.m */,
-				B1B19FC713F97162CFD58054 /* PolynomialColourMap.h */,
 			);
 			path = mset;
 			sourceTree = "<group>";
@@ -261,6 +269,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1A78417E1AE79B6F00B1E994 /* RenderViewController.xib in Resources */,
 				1ABD28DA1ADFB83B00ADBE75 /* LaunchScreen.xib in Resources */,
 				1ABD28D51ADFB83B00ADBE75 /* Main.storyboard in Resources */,
 				1ABD28D71ADFB83B00ADBE75 /* Images.xcassets in Resources */,
@@ -285,6 +294,7 @@
 				1ABD28FA1ADFBEFC00ADBE75 /* RendererState.m in Sources */,
 				1ABD28F81ADFBEFC00ADBE75 /* NSExtensions.m in Sources */,
 				1ABD28CB1ADFB83B00ADBE75 /* AppDelegate.m in Sources */,
+				1A78417D1AE79B6F00B1E994 /* RenderViewController.m in Sources */,
 				1ABD28D21ADFB83B00ADBE75 /* GameViewController.m in Sources */,
 				1ABD28C81ADFB83B00ADBE75 /* main.m in Sources */,
 				B1B19B561102711171B0EB61 /* Texture.m in Sources */,

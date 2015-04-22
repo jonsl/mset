@@ -6,6 +6,6 @@
 //  Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@interface GameViewController : GLKViewController<UIGestureRecognizerDelegate>
+@interface GameViewController : UIViewController<UIGestureRecognizerDelegate>
 
 @end
