@@ -34,7 +34,6 @@
 
 -(void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 -(BOOL)prefersStatusBarHidden {
@@ -42,58 +41,41 @@
 }
 
 -(void)generateGestureRecognizers {
-
-    //Setup gesture recognizers
     UIRotationGestureRecognizer* twoFingersRotate = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingersRotate:)];
     [self.renderViewController.view addGestureRecognizer:twoFingersRotate];
+    twoFingersRotate.delegate = self;
 
     UIPinchGestureRecognizer* twoFingersScale = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingersScale:)];
     [self.renderViewController.view addGestureRecognizer:twoFingersScale];
+    twoFingersScale.delegate = self;
 
     UIPanGestureRecognizer* oneFingerPan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(oneFingerPan:)];
     [self.renderViewController.view addGestureRecognizer:oneFingerPan];
-
-    [twoFingersRotate setDelegate:self];
-    [twoFingersScale setDelegate:self];
-    [oneFingerPan setDelegate:self];
+    oneFingerPan.delegate = self;
 }
 
 -(void)oneFingerPan:(UIPanGestureRecognizer*)recognizer {
     CGPoint translation = [recognizer translationInView:self.renderViewController.view];
-//    CGPoint location = [recognizer locationInView:self.hitView];
-
-    //Send info to renderViewController
     [self.renderViewController translate:translation];
-
-    //Reset recognizer so change doesn't accumulate
+    // no accumulation
     [recognizer setTranslation:CGPointZero inView:self.renderViewController.view];
 }
 
 -(void)twoFingersRotate:(UIRotationGestureRecognizer*)recognizer {
     CGPoint locationInView = [recognizer locationInView:self.renderViewController.view];
-    locationInView = CGPointMake(locationInView.x - self.renderViewController.view.bounds.size.width / 2, locationInView.y - self.renderViewController.view.bounds.size.height / 2);
-
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
-
-        //Send info to renderViewController
         [self.renderViewController rotate:locationInView radians:recognizer.rotation];
-
-        //Reset recognizer
-        [recognizer setRotation:0.0];
+        // no accumulation
+        [recognizer setRotation:0.f];
     }
 }
 
 -(void)twoFingersScale:(UIPinchGestureRecognizer*)recognizer {
     CGPoint locationInView = [recognizer locationInView:self.renderViewController.view];
-    locationInView = CGPointMake(locationInView.x - self.renderViewController.view.bounds.size.width / 2, locationInView.y - self.renderViewController.view.bounds.size.height / 2);
-
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
-
-        //Send info to renderViewController
         [self.renderViewController scale:locationInView scale:recognizer.scale];
-
-        //reset recognizer
-        [recognizer setScale:1.0];
+        // no accumulation
+        [recognizer setScale:1.f];
     }
 }
 
@@ -106,7 +88,6 @@
             || [otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
         return NO;
     }
-
     return YES;
 }
 
