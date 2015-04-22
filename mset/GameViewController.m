@@ -41,41 +41,50 @@
 }
 
 -(void)generateGestureRecognizers {
-    UIRotationGestureRecognizer* twoFingersRotate = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingersRotate:)];
-    [self.renderViewController.view addGestureRecognizer:twoFingersRotate];
-    twoFingersRotate.delegate = self;
+    UIPanGestureRecognizer* panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureRecognizer:)];
+    [self.renderViewController.view addGestureRecognizer:panGesture];
+    panGesture.delegate = self;
 
-    UIPinchGestureRecognizer* twoFingersScale = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingersScale:)];
-    [self.renderViewController.view addGestureRecognizer:twoFingersScale];
-    twoFingersScale.delegate = self;
+    UIRotationGestureRecognizer* rotationGesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotationGestureRecognizer:)];
+    [self.renderViewController.view addGestureRecognizer:rotationGesture];
+    rotationGesture.delegate = self;
 
-    UIPanGestureRecognizer* oneFingerPan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(oneFingerPan:)];
-    [self.renderViewController.view addGestureRecognizer:oneFingerPan];
-    oneFingerPan.delegate = self;
+    UIPinchGestureRecognizer* pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureRecognizer:)];
+    [self.renderViewController.view addGestureRecognizer:pinchGesture];
+    pinchGesture.delegate = self;
 }
 
--(void)oneFingerPan:(UIPanGestureRecognizer*)recognizer {
+-(void)panGestureRecognizer:(UIPanGestureRecognizer*)recognizer {
     CGPoint translation = [recognizer translationInView:self.renderViewController.view];
     [self.renderViewController translate:translation];
     // no accumulation
     [recognizer setTranslation:CGPointZero inView:self.renderViewController.view];
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        NSLog(@"oneFingerPan ended");
+    }
 }
 
--(void)twoFingersRotate:(UIRotationGestureRecognizer*)recognizer {
+-(void)rotationGestureRecognizer:(UIRotationGestureRecognizer*)recognizer {
     CGPoint locationInView = [recognizer locationInView:self.renderViewController.view];
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
         [self.renderViewController rotate:locationInView radians:recognizer.rotation];
         // no accumulation
         [recognizer setRotation:0.f];
     }
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        NSLog(@"twoFingersRotate ended");
+    }
 }
 
--(void)twoFingersScale:(UIPinchGestureRecognizer*)recognizer {
+-(void)pinchGestureRecognizer:(UIPinchGestureRecognizer*)recognizer {
     CGPoint locationInView = [recognizer locationInView:self.renderViewController.view];
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
         [self.renderViewController scale:locationInView scale:recognizer.scale];
         // no accumulation
         [recognizer setScale:1.f];
+    }
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        NSLog(@"twoFingersScale ended");
     }
 }
 
