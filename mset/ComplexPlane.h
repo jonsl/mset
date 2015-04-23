@@ -7,6 +7,8 @@
 
 +(ComplexPlane*)complexPlaneWithCentre:(Real)cR cI:(Real)cI rWidth:(Real)rWidth iHeight:(Real)iHeight;
 
+-(void)transform:(GLKMatrix4)matrix;
+
 @property (nonatomic, readonly) Real rMin;
 @property (nonatomic, readonly) Real rMax;
 @property (nonatomic, readonly) Real iMin;

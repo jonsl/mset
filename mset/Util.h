@@ -12,7 +12,7 @@
 /*
  * types
  */
-typedef long double Real;
+typedef double Real;
 
 typedef struct {
     unsigned char r, g, b, a;
