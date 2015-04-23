@@ -7,10 +7,12 @@
 //
 
 #import "Mset.h"
+#import "Util.h"
 
 static float const ScreenWidth = 1024.f;
 static float const CanvasTextureSize = 1024.f;
 static NSInteger const MaxIterations = 1000;
+static Real InitialRealCentre = -0.5;
 static Real InitialRealWidth = 4;
 
 
@@ -18,8 +20,9 @@ static Real InitialRealWidth = 4;
 
 @property (strong, nonatomic) EAGLContext* eaglContext;
 @property (nonatomic, assign) GLKMatrix4 modelViewMatrix;
-@property (nonatomic, assign) PPoint cCentre;
-@property (nonatomic, assign) PPoint cExtent;
+@property (nonatomic, assign) CPPoint cOrigin;
+@property (nonatomic, assign) CPPoint crMaxiMin;
+@property (nonatomic, assign) CPPoint crMiniMax;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
 @property (nonatomic, strong) Quad* canvasQuad;
 @property (nonatomic, strong) ComplexPlane* complexPlane;
@@ -73,12 +76,16 @@ static Real InitialRealWidth = 4;
         Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
         self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
-        _cCentre.x = -0.5;
-        _cCentre.y = 0;
-        _cExtent.x = InitialRealWidth;
-        _cExtent.y = InitialRealWidth / _aspect;
+        Real rHalfExtent = 0.5 * InitialRealWidth;
+        Real iHalfExtent = 0.5 * InitialRealWidth / _aspect;
+        _cOrigin.r = InitialRealCentre - rHalfExtent;
+        _cOrigin.i = -iHalfExtent;
+        _crMaxiMin.r = _cOrigin.r + InitialRealWidth;
+        _crMaxiMin.i = -iHalfExtent;
+        _crMiniMax.r = _cOrigin.r;
+        _crMiniMax.i = +iHalfExtent;
 
-        self.complexPlane = [ComplexPlane complexPlaneWithCentre:_cCentre.x cI:_cCentre.y rWidth:_cExtent.x iHeight:_cExtent.y];
+        self.complexPlane = [ComplexPlane complexPlaneWithOrigin:_cOrigin rMaxiMin:_crMaxiMin rMiniMax:_crMiniMax];
 
         _requireCompute = YES;
 
@@ -140,8 +147,9 @@ static Real InitialRealWidth = 4;
 #pragma mark - GLKView and GLKViewController delegate methods
 
 -(void)compute {
-    NSLog(@"recomputing with R(%lf,%lf), I(%lf,%lf)", _complexPlane.rMin, _complexPlane.rMax, _complexPlane.iMin, _complexPlane.iMax);
-    self.complexPlane = [ComplexPlane complexPlaneWithCentre:_cCentre.x cI:_cCentre.y rWidth:_cExtent.x iHeight:_cExtent.y];
+    NSLog(@"recomputing with complex plane origin(%lf,%lf), rMiniMax(%lf,%lf), rMiniMax(%lf,%lf)", _complexPlane.origin.r, _complexPlane.origin.i,
+            _complexPlane.rMaxiMin.r, _complexPlane.rMaxiMin.i, _complexPlane.rMiniMax.r, _complexPlane.rMiniMax.i);
+    self.complexPlane = [ComplexPlane complexPlaneWithOrigin:_cOrigin rMaxiMin:_crMaxiMin rMiniMax:_crMiniMax];
     self.fractal.complexPlane = self.complexPlane;
     self.modelViewMatrix = GLKMatrix4Identity;
     //    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:4096];
@@ -160,20 +168,22 @@ static Real InitialRealWidth = 4;
                        }];
 }
 
--(void)transformComplexPlane {
+-(void)screenToComplexPlane {
     // un-transform full size screen coordinates to get new screen
     bool isInvertible;
     GLKMatrix4 screenMatrix = GLKMatrix4Invert(self.modelViewMatrix, &isInvertible);
-    GLKVector4 screenMin = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(0, 0, 0, 1.f));
-    GLKVector4 screenMax = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(_screenSize.width, _screenSize.height, 0, 1.f));
+    GLKVector4 vOrigin = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(0, 0, 0, 1.f));
+    GLKVector4 vCrMaxiMin = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(_screenSize.width, 0, 0, 1.f));
+    GLKVector4 vCrMiniMax = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(0, _screenSize.height, 0, 1.f));
     // convert to complex plane
-    PPoint cMin = [self canvasPointToComplexPlane:CGPointMake(screenMin.x, screenMin.y)];
-    PPoint cMax = [self canvasPointToComplexPlane:CGPointMake(screenMax.x, screenMax.y)];
+    CPPoint cOrigin = [self canvasPointToComplexPlane:CGPointMake(vOrigin.x, vOrigin.y)];
+    CPPoint crMaxiMin = [self canvasPointToComplexPlane:CGPointMake(vCrMaxiMin.x, vCrMaxiMin.y)];
+    CPPoint crMiniMax = [self canvasPointToComplexPlane:CGPointMake(vCrMiniMax.x, vCrMiniMax.y)];
 
-    _cExtent.x = cMax.x - cMin.x;
-    _cExtent.y = cMax.y - cMin.y;
-    _cCentre.x = cMin.x + _cExtent.x / 2;
-    _cCentre.y = cMin.y + _cExtent.y / 2;
+    _cOrigin = cOrigin;
+    NSLog(@"pp = (%lf,%lf)", _cOrigin.r, _cOrigin.i);
+    _crMaxiMin = crMaxiMin;
+    _crMiniMax = crMiniMax;
 }
 
 -(void)update {
@@ -182,8 +192,8 @@ static Real InitialRealWidth = 4;
     _rotateMatrix = GLKMatrix4Identity;
     _scaleMatrix = GLKMatrix4Identity;
 
-    if (!_requireCompute) {
-        [self transformComplexPlane];
+    if (_requireCompute) {
+        [self screenToComplexPlane];
     }
 
     if (_requireCompute) {
@@ -204,12 +214,16 @@ static Real InitialRealWidth = 4;
     return CGPointMake(touch.x, _screenSize.height - touch.y);
 }
 
--(PPoint)canvasPointToComplexPlane:(CGPoint)position {
-    Real xDelta = (_complexPlane.rMax - _complexPlane.rMin) / _screenSize.width;
-    Real yDelta = (_complexPlane.iMax - _complexPlane.iMin) / _screenSize.height;
-    PPoint pp;
-    pp.x = _complexPlane.rMin + (Real) position.x * xDelta;
-    pp.y = _complexPlane.iMin + (Real) position.y * yDelta;
+Real cpLength(CPPoint p1, CPPoint p2) {
+    return sqrt((p2.r - p1.r) * (p2.r - p1.r) + (p2.i - p1.i) * (p2.i - p1.i));
+}
+
+-(CPPoint)canvasPointToComplexPlane:(CGPoint)position {
+    Real xLen = (Real) position.x / _screenSize.width;
+    Real yLen = (Real) position.y / _screenSize.height;
+    CPPoint pp;
+    pp.r = _cOrigin.r + xLen * (_crMaxiMin.r - _cOrigin.r) + yLen * (_crMiniMax.r - _cOrigin.r);
+    pp.i = _cOrigin.i + yLen * (_crMiniMax.i - _cOrigin.i) + xLen * (_crMaxiMin.i - _cOrigin.i);
     return pp;
 }
 

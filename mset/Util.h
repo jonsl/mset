@@ -25,8 +25,8 @@ typedef struct {
 } Vertex;
 
 typedef struct {
-    Real x, y;
-} PPoint;
+    Real r, i;
+} CPPoint;
 
 typedef struct {
     unsigned char* rgb;

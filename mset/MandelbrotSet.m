@@ -14,7 +14,7 @@ typedef struct {
     unsigned char* rgba;
     ColourLookup colourTable;
     NSUInteger startY, strideY;
-    Real rMin, rMax, iMin, iMax;
+    CPPoint _cOrigin, _crMaxiMin, _crMiniMax;
 } ExecutionContext;
 
 @implementation MandelbrotSet
@@ -33,7 +33,7 @@ typedef struct {
 }
 
 // return: number of iterations to diverge from (x, y), or -1 if convergent
-static inline float calculatePoint(Real Cr, Real Ci, NSInteger escapeRadius, NSUInteger maxIterations, bool renormaliseEscape) {
+static inline float calculatePoint(Real cR, Real cI, NSInteger escapeRadius, NSUInteger maxIterations, bool renormaliseEscape) {
     double Zr = 0;
     double Zi = 0;
     double Zrsqr = Zr * Zr;
@@ -44,29 +44,32 @@ static inline float calculatePoint(Real Cr, Real Ci, NSInteger escapeRadius, NSU
 
     while (Zrsqr + Zisqr <= ER2 && N < maxIterations) {
         Zi = (Zr + Zi) * (Zr + Zi) - Zrsqr - Zisqr;
-        Zi += Ci;
-        Zr = Zrsqr - Zisqr + Cr;
+        Zi += cI;
+        Zr = Zrsqr - Zisqr + cR;
         Zrsqr = Zr * Zr;
         Zisqr = Zi * Zi;
         ++N;
     }
     if (renormaliseEscape && N < maxIterations) {
-        return (float)(N + 1 - logl(logl(sqrt(Zrsqr + Zisqr))) / logl(escapeRadius));
+        return (float) (N + 1 - logl(logl(sqrt(Zrsqr + Zisqr))) / logl(escapeRadius));
     } else {
         return (float) N;
     }
 }
 
+
 void* renderThread(void* arg) {
-    ExecutionContext* ec = (ExecutionContext*) arg;
+    ExecutionContext* const ec = (ExecutionContext* const) arg;
     NSInteger const colourEntries = ec->colourTable.size / 3;
-    Real Dr = (ec->rMax - ec->rMin) / (Real)ec->width;
-    Real Di = (ec->iMax - ec->iMin) / (Real)ec->height;
+    Real const fX = 1.0 / ec->width;
+    Real const fY = 1.0 / ec->height;
     for (NSUInteger y = ec->startY; y < ec->height; y += ec->strideY) {
         for (NSUInteger x = 0; x < ec->width; ++x) {
-            Real Cr = ec->rMin + Dr * x;
-            Real Ci = ec->iMin + Di * y;
-            float iterations = calculatePoint(Cr, Ci, ec->escapeRadius, ec->maxIterations, true);
+            Real const dX = x * fX;
+            Real const dY = y * fY;
+            Real cR = ec->_cOrigin.r + dX * (ec->_crMaxiMin.r - ec->_cOrigin.r) + dY * (ec->_crMiniMax.r - ec->_cOrigin.r);
+            Real cI = ec->_cOrigin.i + dY * (ec->_crMiniMax.i - ec->_cOrigin.i) + dX * (ec->_crMaxiMin.i - ec->_cOrigin.i);
+            float iterations = calculatePoint(cR, cI, ec->escapeRadius, ec->maxIterations, true);
             NSInteger colorIndex = (NSInteger) (iterations / ec->maxIterations * colourEntries);
 //            if (colorIndex >= colourEntries) {
 //                colorIndex = colourEntries-1;
@@ -115,10 +118,9 @@ executionUnits:(NSUInteger)executionUnits
         contexts[i].rgba = rgba;
         contexts[i].startY = i;
         contexts[i].strideY = executionUnits;
-        contexts[i].rMin = _complexPlane.rMin;
-        contexts[i].rMax = _complexPlane.rMax;
-        contexts[i].iMin = _complexPlane.iMin;
-        contexts[i].iMax = _complexPlane.iMax;
+        contexts[i]._cOrigin = _complexPlane.origin;
+        contexts[i]._crMaxiMin = _complexPlane.rMaxiMin;
+        contexts[i]._crMiniMax = _complexPlane.rMiniMax;
         contexts[i].colourTable.rgb = colourMap.rgb;
         contexts[i].colourTable.size = colourMap.size;
     }

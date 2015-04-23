@@ -5,11 +5,10 @@
 
 @interface ComplexPlane : NSObject
 
-+(ComplexPlane*)complexPlaneWithCentre:(Real)cR cI:(Real)cI rWidth:(Real)rWidth iHeight:(Real)iHeight;
++(ComplexPlane*)complexPlaneWithOrigin:(CPPoint)origin rMaxiMin:(CPPoint)rMaxiMin rMiniMax:(CPPoint)rMiniMax;
 
-@property (nonatomic, readonly) Real rMin;
-@property (nonatomic, readonly) Real rMax;
-@property (nonatomic, readonly) Real iMin;
-@property (nonatomic, readonly) Real iMax;
+@property (nonatomic, readonly) CPPoint origin;
+@property (nonatomic, readonly) CPPoint rMaxiMin;
+@property (nonatomic, readonly) CPPoint rMiniMax;
 
 @end

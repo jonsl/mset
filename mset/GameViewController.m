@@ -45,9 +45,9 @@
     [self.renderViewController.view addGestureRecognizer:panGesture];
     panGesture.delegate = self;
 
-//    UIRotationGestureRecognizer* rotationGesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotationGestureRecognizer:)];
-//    [self.renderViewController.view addGestureRecognizer:rotationGesture];
-//    rotationGesture.delegate = self;
+    UIRotationGestureRecognizer* rotationGesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotationGestureRecognizer:)];
+    [self.renderViewController.view addGestureRecognizer:rotationGesture];
+    rotationGesture.delegate = self;
 
     UIPinchGestureRecognizer* pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureRecognizer:)];
     [self.renderViewController.view addGestureRecognizer:pinchGesture];
