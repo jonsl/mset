@@ -11,5 +11,8 @@
 -(void)translate:(CGPoint)location;
 -(void)rotate:(CGPoint)location radians:(CGFloat)radians;
 -(void)scale:(CGPoint)location scale:(CGFloat)scale;
+-(void)translateEnded;
+-(void)rotateEnded;
+-(void)scaleEnded;
 
 @end

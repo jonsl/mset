@@ -18,6 +18,8 @@ static Real InitialRealWidth = 4;
 
 @property (strong, nonatomic) EAGLContext* eaglContext;
 @property (nonatomic, assign) GLKMatrix4 modelViewMatrix;
+@property (nonatomic, assign) PPoint cCentre;
+@property (nonatomic, assign) PPoint cExtent;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
 @property (nonatomic, strong) Quad* canvasQuad;
 @property (nonatomic, strong) ComplexPlane* complexPlane;
@@ -30,13 +32,9 @@ static Real InitialRealWidth = 4;
     CGFloat _aspect;
     BOOL _requireCompute;
 
-    GLKMatrix4 _translateCanvas;
-    GLKMatrix4 _scaleCanvas;
-    GLKMatrix4 _rotateCanvas;
-
-    GLKMatrix4 _translateCP;
-    GLKMatrix4 _scaleCP;
-    GLKMatrix4 _rotateCP;
+    GLKMatrix4 _translateMatrix;
+    GLKMatrix4 _scaleMatrix;
+    GLKMatrix4 _rotateMatrix;
 
     CGPoint _initialPosition;
     CGFloat _initialScale;
@@ -75,7 +73,12 @@ static Real InitialRealWidth = 4;
         Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
         self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
-        self.complexPlane = [ComplexPlane complexPlaneWithCentre:-0.5 cI:0 rWidth:InitialRealWidth iHeight:InitialRealWidth / _aspect];
+        _cCentre.x = -0.5;
+        _cCentre.y = 0;
+        _cExtent.x = InitialRealWidth;
+        _cExtent.y = InitialRealWidth / _aspect;
+
+        self.complexPlane = [ComplexPlane complexPlaneWithCentre:_cCentre.x cI:_cCentre.y rWidth:_cExtent.x iHeight:_cExtent.y];
 
         _requireCompute = YES;
 
@@ -138,7 +141,9 @@ static Real InitialRealWidth = 4;
 
 -(void)compute {
     //    NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@", @(_fractalDescriptor.xMin), @(_fractalDescriptor.xMax), @(_fractalDescriptor.yMin), @(_fractalDescriptor.yMax));
+    self.complexPlane = [ComplexPlane complexPlaneWithCentre:_cCentre.x cI:_cCentre.y rWidth:_cExtent.x iHeight:_cExtent.y];
     self.fractal.complexPlane = self.complexPlane;
+    self.modelViewMatrix = GLKMatrix4Identity;
     //    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:4096];
     PolynomialColourMap* newColourMap = [[PolynomialColourMap alloc] initWithSize:4096];
     [self.fractal compute:self.canvasQuad.texture.imageData
@@ -156,28 +161,37 @@ static Real InitialRealWidth = 4;
 }
 
 -(void)transformComplexPlane {
-    bool isInvertible = false;
-    GLKMatrix4 inverseModelViewMatrix = GLKMatrix4Invert(self.modelViewMatrix, &isInvertible);
-    [self.complexPlane transform:inverseModelViewMatrix];
+    // un-transform full size screen coordinates to get new screen
+    bool isInvertible;
+    GLKMatrix4 screenMatrix = GLKMatrix4Invert(self.modelViewMatrix, &isInvertible);
+    GLKVector4 screenMin = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(0, 0, 0, 1.f));
+    GLKVector4 screenMax = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(_screenSize.width, _screenSize.height, 0, 1.f));
+    // convert to complex plane
+    PPoint cMin = [self canvasPointToComplexPlane:CGPointMake(screenMin.x, screenMin.y)];
+    PPoint cMax = [self canvasPointToComplexPlane:CGPointMake(screenMax.x, screenMax.y)];
+
+    _cExtent.x = cMax.x - cMin.x;
+    _cExtent.y = cMax.y - cMin.y;
+    _cCentre.x = cMin.x + _cExtent.x / 2;
+    _cCentre.y = cMin.y + _cExtent.y / 2;
 }
 
 -(void)update {
-    self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(GLKMatrix4Multiply(_scaleCanvas, _rotateCanvas), _translateCanvas), self.modelViewMatrix);
-
-    [self transformComplexPlane];
-
-    _translateCanvas = GLKMatrix4Identity;
-    _rotateCanvas = GLKMatrix4Identity;
-    _scaleCanvas = GLKMatrix4Identity;
+    self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix), _translateMatrix), self.modelViewMatrix);
+    _translateMatrix = GLKMatrix4Identity;
+    _rotateMatrix = GLKMatrix4Identity;
+    _scaleMatrix = GLKMatrix4Identity;
 
     if (_requireCompute) {
         [self compute];
         _requireCompute = NO;
+    } else {
+        [self transformComplexPlane];
     }
 }
 
 -(void)glkView:(GLKView*)view drawInRect:(CGRect)rect {
-    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
+    glClearColor(0.f, 0.f, 0.f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLKMatrix4 mvpMatrix = GLKMatrix4Multiply(_projectionMatrix, self.modelViewMatrix);
@@ -198,32 +212,44 @@ static Real InitialRealWidth = 4;
 }
 
 -(void)initialiseMatrices {
-    _translateCanvas = GLKMatrix4Translate(GLKMatrix4Identity, _initialPosition.x, _initialPosition.y, 0.0);
-    _scaleCanvas = GLKMatrix4Scale(GLKMatrix4Identity, _initialScale, _initialScale, 1.0);
-    _rotateCanvas = GLKMatrix4Rotate(GLKMatrix4Identity, _initialRotation, 0.0, 0.0, 1.0);
-    self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(GLKMatrix4Multiply(_scaleCanvas, _rotateCanvas), _translateCanvas), GLKMatrix4Identity);
+    _translateMatrix = GLKMatrix4Translate(GLKMatrix4Identity, _initialPosition.x, _initialPosition.y, 0.0);
+    _scaleMatrix = GLKMatrix4Scale(GLKMatrix4Identity, _initialScale, _initialScale, 1.0);
+    _rotateMatrix = GLKMatrix4Rotate(GLKMatrix4Identity, _initialRotation, 0.0, 0.0, 1.0);
+    self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix), _translateMatrix), GLKMatrix4Identity);
 
-    _scaleCanvas = GLKMatrix4Identity;
-    _rotateCanvas = GLKMatrix4Identity;
-    _translateCanvas = GLKMatrix4Identity;
+    _scaleMatrix = GLKMatrix4Identity;
+    _rotateMatrix = GLKMatrix4Identity;
+    _translateMatrix = GLKMatrix4Identity;
 }
 
 -(void)translate:(CGPoint)location {
-    _translateCanvas = GLKMatrix4Translate(_translateCanvas, location.x, -location.y, 0.0);
+    _translateMatrix = GLKMatrix4Translate(_translateMatrix, location.x, -location.y, 0.0);
 }
 
 -(void)rotate:(CGPoint)location radians:(CGFloat)radians {
     CGPoint pt = [self touchToCanvas:location];
-    _rotateCanvas = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
-    _rotateCanvas = GLKMatrix4Rotate(_rotateCanvas, -radians * 2.f, 0.0, 0.0, 1.0);
-    _rotateCanvas = GLKMatrix4Translate(_rotateCanvas, -pt.x, -pt.y, 0.0);
+    _rotateMatrix = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
+    _rotateMatrix = GLKMatrix4Rotate(_rotateMatrix, -radians * 2.f, 0.0, 0.0, 1.0);
+    _rotateMatrix = GLKMatrix4Translate(_rotateMatrix, -pt.x, -pt.y, 0.0);
 }
 
 -(void)scale:(CGPoint)location scale:(CGFloat)scale {
     CGPoint pt = [self touchToCanvas:location];
-    _scaleCanvas = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
-    _scaleCanvas = GLKMatrix4Scale(_scaleCanvas, scale, scale, 1.0);
-    _scaleCanvas = GLKMatrix4Translate(_scaleCanvas, -pt.x, -pt.y, 0.0);
+    _scaleMatrix = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
+    _scaleMatrix = GLKMatrix4Scale(_scaleMatrix, scale, scale, 1.0);
+    _scaleMatrix = GLKMatrix4Translate(_scaleMatrix, -pt.x, -pt.y, 0.0);
+}
+
+-(void)translateEnded {
+    _requireCompute = YES;
+}
+
+-(void)rotateEnded {
+    _requireCompute = YES;
+}
+
+-(void)scaleEnded {
+    _requireCompute = YES;
 }
 
 @end
