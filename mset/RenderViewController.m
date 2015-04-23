@@ -140,7 +140,7 @@ static Real InitialRealWidth = 4;
 #pragma mark - GLKView and GLKViewController delegate methods
 
 -(void)compute {
-    //    NSLog(@"recomputing with xMin: %@, xMax: %@, yMin: %@, yMax: %@", @(_fractalDescriptor.xMin), @(_fractalDescriptor.xMax), @(_fractalDescriptor.yMin), @(_fractalDescriptor.yMax));
+    NSLog(@"recomputing with R(%lf,%lf), I(%lf,%lf)", _complexPlane.rMin, _complexPlane.rMax, _complexPlane.iMin, _complexPlane.iMax);
     self.complexPlane = [ComplexPlane complexPlaneWithCentre:_cCentre.x cI:_cCentre.y rWidth:_cExtent.x iHeight:_cExtent.y];
     self.fractal.complexPlane = self.complexPlane;
     self.modelViewMatrix = GLKMatrix4Identity;
@@ -182,11 +182,13 @@ static Real InitialRealWidth = 4;
     _rotateMatrix = GLKMatrix4Identity;
     _scaleMatrix = GLKMatrix4Identity;
 
+    if (!_requireCompute) {
+        [self transformComplexPlane];
+    }
+
     if (_requireCompute) {
         [self compute];
         _requireCompute = NO;
-    } else {
-        [self transformComplexPlane];
     }
 }
 
