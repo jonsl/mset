@@ -33,7 +33,8 @@ static Real InitialRealWidth = 4;
     GLKMatrix4 _projectionMatrix;
     CGSize _screenSize;
     CGFloat _aspect;
-    BOOL _requireCompute;
+    BOOL _recomputing;
+    BOOL _pendingCompute;
 
     GLKMatrix4 _translateMatrix;
     GLKMatrix4 _scaleMatrix;
@@ -87,7 +88,8 @@ static Real InitialRealWidth = 4;
 
         self.complexPlane = [ComplexPlane complexPlaneWithOrigin:_cOrigin rMaxiMin:_crMaxiMin rMiniMax:_crMiniMax];
 
-        _requireCompute = YES;
+        _recomputing = NO;
+        _pendingCompute = YES;
 
         self.fractal = [MandelbrotSet mandelbrotSet];
     }
@@ -192,13 +194,13 @@ static Real InitialRealWidth = 4;
     _rotateMatrix = GLKMatrix4Identity;
     _scaleMatrix = GLKMatrix4Identity;
 
-    if (_requireCompute) {
+    if (!_recomputing && _pendingCompute) {
+        _recomputing = YES;
         [self screenToComplexPlane];
-    }
-
-    if (_requireCompute) {
         [self compute];
-        _requireCompute = NO;
+        _recomputing = NO;
+
+        _pendingCompute = NO;
     }
 }
 
@@ -257,15 +259,15 @@ Real cpLength(CPPoint p1, CPPoint p2) {
 }
 
 -(void)translateEnded {
-    _requireCompute = YES;
+    _pendingCompute = YES;
 }
 
 -(void)rotateEnded {
-    _requireCompute = YES;
+    _pendingCompute = YES;
 }
 
 -(void)scaleEnded {
-    _requireCompute = YES;
+    _pendingCompute = YES;
 }
 
 @end
