@@ -20,10 +20,7 @@ static Real InitialRealWidth = 4;
 
 @property (strong, nonatomic) EAGLContext* eaglContext;
 @property (nonatomic, assign) GLKMatrix4 modelViewMatrix;
-@property (nonatomic, assign) CPPoint cOrigin;
-@property (nonatomic, assign) CPPoint crMaxiMin;
-@property (nonatomic, assign) CPPoint crMiniMax;
-@property (nonatomic, strong) NSObject<Fractal>* fractal;
+@property (nonatomic, strong) NSObject <Fractal>* fractal;
 @property (nonatomic, strong) Quad* canvasQuad;
 @property (nonatomic, strong) ComplexPlane* complexPlane;
 
@@ -77,21 +74,21 @@ static Real InitialRealWidth = 4;
         Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
         self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
+        self.fractal = [MandelbrotSet mandelbrotSet];
+        // compute initial complex plane
         Real rHalfExtent = 0.5 * InitialRealWidth;
         Real iHalfExtent = 0.5 * InitialRealWidth / _aspect;
-        _cOrigin.r = InitialRealCentre - rHalfExtent;
-        _cOrigin.i = -iHalfExtent;
-        _crMaxiMin.r = _cOrigin.r + InitialRealWidth;
-        _crMaxiMin.i = -iHalfExtent;
-        _crMiniMax.r = _cOrigin.r;
-        _crMiniMax.i = +iHalfExtent;
-
-        self.complexPlane = [ComplexPlane complexPlaneWithOrigin:_cOrigin rMaxiMin:_crMaxiMin rMiniMax:_crMiniMax];
+        CPPoint cOrigin, rMaxiMin, rMiniMax;
+        cOrigin.r = InitialRealCentre - rHalfExtent;
+        cOrigin.i = -iHalfExtent;
+        rMaxiMin.r = cOrigin.r + InitialRealWidth;
+        rMaxiMin.i = -iHalfExtent;
+        rMiniMax.r = cOrigin.r;
+        rMiniMax.i = +iHalfExtent;
+        self.fractal.complexPlane = self.complexPlane = [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:rMaxiMin rMiniMax:rMiniMax];
 
         _recomputing = NO;
         _pendingCompute = YES;
-
-        self.fractal = [MandelbrotSet mandelbrotSet];
     }
     @catch (NSException* ex) {
         NSLog(@"exception: '%@', reason: '%@'", ex.name, ex.reason);
@@ -114,8 +111,6 @@ static Real InitialRealWidth = 4;
 }
 
 -(void)dealloc {
-    [self tearDownGL];
-
     if ([EAGLContext currentContext] == self.eaglContext) {
         [EAGLContext setCurrentContext:nil];
     }
@@ -138,22 +133,14 @@ static Real InitialRealWidth = 4;
     return YES;
 }
 
--(void)setupGL {
-    [EAGLContext setCurrentContext:self.eaglContext];
-}
-
--(void)tearDownGL {
-    [EAGLContext setCurrentContext:self.eaglContext];
-}
-
 #pragma mark - GLKView and GLKViewController delegate methods
 
 -(void)compute {
+    self.modelViewMatrix = GLKMatrix4Identity;
+
     NSLog(@"recomputing with complex plane origin(%lf,%lf), rMiniMax(%lf,%lf), rMiniMax(%lf,%lf)", _complexPlane.origin.r, _complexPlane.origin.i,
             _complexPlane.rMaxiMin.r, _complexPlane.rMaxiMin.i, _complexPlane.rMiniMax.r, _complexPlane.rMiniMax.i);
-    self.complexPlane = [ComplexPlane complexPlaneWithOrigin:_cOrigin rMaxiMin:_crMaxiMin rMiniMax:_crMiniMax];
     self.fractal.complexPlane = self.complexPlane;
-    self.modelViewMatrix = GLKMatrix4Identity;
     //    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:4096];
     PolynomialColourMap* newColourMap = [[PolynomialColourMap alloc] initWithSize:4096];
     [self.fractal compute:self.canvasQuad.texture.imageData
@@ -164,10 +151,18 @@ static Real InitialRealWidth = 4;
             //              colourMap:defaultColourTable
                 colourMap:newColourMap
            executionUnits:[Configuration sharedConfiguration].executionUnits
-               updateDraw:
-                       ^() {
-                           [self.canvasQuad updateImage];
-                       }];
+               updateDraw:^() {
+                   [self.canvasQuad updateImage];
+               }];
+}
+
+-(CPPoint)canvasPointToComplexPlane:(CGPoint)position {
+    Real xLen = (Real) position.x / _screenSize.width;
+    Real yLen = (Real) position.y / _screenSize.height;
+    CPPoint pp;
+    pp.r = self.fractal.complexPlane.origin.r + xLen * (self.fractal.complexPlane.rMaxiMin.r - self.fractal.complexPlane.origin.r) + yLen * (self.fractal.complexPlane.rMiniMax.r - self.fractal.complexPlane.origin.r);
+    pp.i = self.fractal.complexPlane.origin.i + yLen * (self.fractal.complexPlane.rMiniMax.i - self.fractal.complexPlane.origin.i) + xLen * (self.fractal.complexPlane.rMaxiMin.i - self.fractal.complexPlane.origin.i);
+    return pp;
 }
 
 -(void)screenToComplexPlane {
@@ -181,11 +176,7 @@ static Real InitialRealWidth = 4;
     CPPoint cOrigin = [self canvasPointToComplexPlane:CGPointMake(vOrigin.x, vOrigin.y)];
     CPPoint crMaxiMin = [self canvasPointToComplexPlane:CGPointMake(vCrMaxiMin.x, vCrMaxiMin.y)];
     CPPoint crMiniMax = [self canvasPointToComplexPlane:CGPointMake(vCrMiniMax.x, vCrMiniMax.y)];
-
-    _cOrigin = cOrigin;
-    NSLog(@"pp = (%lf,%lf)", _cOrigin.r, _cOrigin.i);
-    _crMaxiMin = crMaxiMin;
-    _crMiniMax = crMiniMax;
+    self.complexPlane = [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:crMaxiMin rMiniMax:crMiniMax];
 }
 
 -(void)update {
@@ -216,19 +207,6 @@ static Real InitialRealWidth = 4;
     return CGPointMake(touch.x, _screenSize.height - touch.y);
 }
 
-Real cpLength(CPPoint p1, CPPoint p2) {
-    return sqrt((p2.r - p1.r) * (p2.r - p1.r) + (p2.i - p1.i) * (p2.i - p1.i));
-}
-
--(CPPoint)canvasPointToComplexPlane:(CGPoint)position {
-    Real xLen = (Real) position.x / _screenSize.width;
-    Real yLen = (Real) position.y / _screenSize.height;
-    CPPoint pp;
-    pp.r = _cOrigin.r + xLen * (_crMaxiMin.r - _cOrigin.r) + yLen * (_crMiniMax.r - _cOrigin.r);
-    pp.i = _cOrigin.i + yLen * (_crMiniMax.i - _cOrigin.i) + xLen * (_crMaxiMin.i - _cOrigin.i);
-    return pp;
-}
-
 -(void)initialiseMatrices {
     _translateMatrix = GLKMatrix4Translate(GLKMatrix4Identity, _initialPosition.x, _initialPosition.y, 0.0);
     _scaleMatrix = GLKMatrix4Scale(GLKMatrix4Identity, _initialScale, _initialScale, 1.0);
@@ -242,14 +220,14 @@ Real cpLength(CPPoint p1, CPPoint p2) {
 
 -(void)translate:(CGPoint)location {
     if (_pendingCompute) {
-        return ;
+        return;
     }
     _translateMatrix = GLKMatrix4Translate(_translateMatrix, location.x, -location.y, 0.0);
 }
 
 -(void)rotate:(CGPoint)location radians:(CGFloat)radians {
     if (_pendingCompute) {
-        return ;
+        return;
     }
     CGPoint pt = [self touchToCanvas:location];
     _rotateMatrix = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
@@ -259,7 +237,7 @@ Real cpLength(CPPoint p1, CPPoint p2) {
 
 -(void)scale:(CGPoint)location scale:(CGFloat)scale {
     if (_pendingCompute) {
-        return ;
+        return;
     }
     CGPoint pt = [self touchToCanvas:location];
     _scaleMatrix = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
