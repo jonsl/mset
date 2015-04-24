@@ -241,10 +241,16 @@ Real cpLength(CPPoint p1, CPPoint p2) {
 }
 
 -(void)translate:(CGPoint)location {
+    if (_pendingCompute) {
+        return ;
+    }
     _translateMatrix = GLKMatrix4Translate(_translateMatrix, location.x, -location.y, 0.0);
 }
 
 -(void)rotate:(CGPoint)location radians:(CGFloat)radians {
+    if (_pendingCompute) {
+        return ;
+    }
     CGPoint pt = [self touchToCanvas:location];
     _rotateMatrix = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
     _rotateMatrix = GLKMatrix4Rotate(_rotateMatrix, -radians * 2.f, 0.0, 0.0, 1.0);
@@ -252,6 +258,9 @@ Real cpLength(CPPoint p1, CPPoint p2) {
 }
 
 -(void)scale:(CGPoint)location scale:(CGFloat)scale {
+    if (_pendingCompute) {
+        return ;
+    }
     CGPoint pt = [self touchToCanvas:location];
     _scaleMatrix = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
     _scaleMatrix = GLKMatrix4Scale(_scaleMatrix, scale, scale, 1.0);
