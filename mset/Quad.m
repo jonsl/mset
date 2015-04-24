@@ -69,10 +69,8 @@
         _vertexData[3].uv.x = 1.0f;
         _vertexData[3].uv.y = 1.0f;
 
-//        float size = _width > _height ? _width : _height;
         self.texture = texture;
         self.position = CGPointMake(0, 0);
-//        self.textureOffset = CGPointMake(-(self.texture.width - _width) / 2, -(self.texture.height - _height) / 2);
     }
     return self;
 }

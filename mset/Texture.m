@@ -39,12 +39,6 @@
     _imageData = 0;
 }
 
--(void)setPixel:(uint)index rgba:(uint32_t)rgba {
-    NSAssert(sizeof(uint32_t) == 4, @"invalid size");
-    NSAssert(index < _width * _height, @"invalid index");
-    ((uint32_t*) _imageData)[index] = rgba;
-}
-
 -(void)createGlTexture:(const void*)imgData
                  width:(NSUInteger)width
                 height:(NSUInteger)height

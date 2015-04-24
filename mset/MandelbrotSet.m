@@ -8,12 +8,12 @@
 
 
 typedef struct {
-    NSUInteger width, height;
-    NSInteger escapeRadius;
-    NSUInteger maxIterations;
-    unsigned char* rgba;
-    ColourLookup colourTable;
-    NSUInteger startY, strideY;
+    NSUInteger _width, _height;
+    NSInteger _escapeRadius;
+    NSUInteger _maxIterations;
+    unsigned char* _rgba;
+    ColourLookup _colourTable;
+    NSUInteger _startY, _strideY;
     CPPoint _cOrigin, _crMaxiMin, _crMiniMax;
 } ExecutionContext;
 
@@ -60,34 +60,34 @@ static inline float calculatePoint(Real cR, Real cI, NSInteger escapeRadius, NSU
 
 void* renderThread(void* arg) {
     ExecutionContext* const ec = (ExecutionContext* const) arg;
-    NSInteger const colourEntries = ec->colourTable.size / 3;
-    Real const fX = 1.0 / ec->width;
-    Real const fY = 1.0 / ec->height;
-    for (NSUInteger y = ec->startY; y < ec->height; y += ec->strideY) {
-        for (NSUInteger x = 0; x < ec->width; ++x) {
+    NSInteger const colourEntries = ec->_colourTable.size / 3;
+    Real const fX = 1.0 / ec->_width;
+    Real const fY = 1.0 / ec->_height;
+    for (NSUInteger y = ec->_startY; y < ec->_height; y += ec->_strideY) {
+        for (NSUInteger x = 0; x < ec->_width; ++x) {
             Real const dX = x * fX;
             Real const dY = y * fY;
             Real cR = ec->_cOrigin.r + dX * (ec->_crMaxiMin.r - ec->_cOrigin.r) + dY * (ec->_crMiniMax.r - ec->_cOrigin.r);
             Real cI = ec->_cOrigin.i + dY * (ec->_crMiniMax.i - ec->_cOrigin.i) + dX * (ec->_crMaxiMin.i - ec->_cOrigin.i);
-            float iterations = calculatePoint(cR, cI, ec->escapeRadius, ec->maxIterations, true);
-            NSInteger colorIndex = (NSInteger) (iterations / ec->maxIterations * colourEntries);
+            float iterations = calculatePoint(cR, cI, ec->_escapeRadius, ec->_maxIterations, true);
+            NSInteger colorIndex = (NSInteger) (iterations / ec->_maxIterations * colourEntries);
 //            if (colorIndex >= colourEntries) {
 //                colorIndex = colourEntries-1;
 //            }
 //            if (colorIndex < 0) {
 //                colorIndex = 0;
 //            }
-            NSUInteger ppos = 4 * (ec->width * y + x);
-            if ((NSInteger) iterations == ec->maxIterations) {
-                ec->rgba[ppos] = 0;
-                ec->rgba[ppos + 1] = 0;
-                ec->rgba[ppos + 2] = 0;
+            NSUInteger ppos = 4 * (ec->_width * y + x);
+            if ((NSInteger) iterations == ec->_maxIterations) {
+                ec->_rgba[ppos] = 0;
+                ec->_rgba[ppos + 1] = 0;
+                ec->_rgba[ppos + 2] = 0;
             } else {
-                ec->rgba[ppos] = ec->colourTable.rgb[colorIndex * 3];
-                ec->rgba[ppos + 1] = ec->colourTable.rgb[colorIndex * 3 + 1];
-                ec->rgba[ppos + 2] = ec->colourTable.rgb[colorIndex * 3 + 2];
+                ec->_rgba[ppos] = ec->_colourTable.rgb[colorIndex * 3];
+                ec->_rgba[ppos + 1] = ec->_colourTable.rgb[colorIndex * 3 + 1];
+                ec->_rgba[ppos + 2] = ec->_colourTable.rgb[colorIndex * 3 + 2];
             }
-            ec->rgba[ppos + 3] = 255;
+            ec->_rgba[ppos + 3] = 255;
         }
     }
     return NULL;
@@ -111,18 +111,18 @@ executionUnits:(NSUInteger)executionUnits
     ExecutionContext* contexts = calloc(executionUnits, sizeof(ExecutionContext));
 
     for (NSUInteger i = 0; i < executionUnits; i++) {
-        contexts[i].width = width;
-        contexts[i].height = height;
-        contexts[i].escapeRadius = escapeRadius;
-        contexts[i].maxIterations = maxIterations;
-        contexts[i].rgba = rgba;
-        contexts[i].startY = i;
-        contexts[i].strideY = executionUnits;
+        contexts[i]._width = width;
+        contexts[i]._height = height;
+        contexts[i]._escapeRadius = escapeRadius;
+        contexts[i]._maxIterations = maxIterations;
+        contexts[i]._rgba = rgba;
+        contexts[i]._startY = i;
+        contexts[i]._strideY = executionUnits;
         contexts[i]._cOrigin = _complexPlane.origin;
         contexts[i]._crMaxiMin = _complexPlane.rMaxiMin;
         contexts[i]._crMiniMax = _complexPlane.rMiniMax;
-        contexts[i].colourTable.rgb = colourMap.rgb;
-        contexts[i].colourTable.size = colourMap.size;
+        contexts[i]._colourTable.rgb = colourMap.rgb;
+        contexts[i]._colourTable.size = colourMap.size;
     }
 
     NSDate* executeStart = [NSDate date];
