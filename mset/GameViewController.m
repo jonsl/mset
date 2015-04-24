@@ -61,7 +61,7 @@
     [recognizer setTranslation:CGPointZero inView:self.renderViewController.view];
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         [self.renderViewController translateEnded];
-        NSLog(@"oneFingerPan ended");
+        NSLog(@"panGestureRecognizer ended");
     }
 }
 
@@ -74,7 +74,7 @@
     }
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         [self.renderViewController rotateEnded];
-        NSLog(@"twoFingersRotate ended");
+        NSLog(@"rotationGestureRecognizer ended");
     }
 }
 
@@ -87,7 +87,7 @@
     }
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         [self.renderViewController scaleEnded];
-        NSLog(@"twoFingersScale ended");
+        NSLog(@"pinchGestureRecognizer ended");
     }
 }
 
@@ -96,8 +96,7 @@
     if (gestureRecognizer.view != otherGestureRecognizer.view) {
         return NO;
     }
-    if ([gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]
-            || [otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
+    if ([gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
         return NO;
     }
     return YES;
