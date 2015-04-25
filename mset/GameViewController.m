@@ -26,7 +26,7 @@
     [self.view addSubview:self.renderViewController.view];
     [self.renderViewController didMoveToParentViewController:self];
 
-    [self generateGestureRecognizers];
+    [self addGestureRecognizers];
 }
 
 -(void)dealloc {
@@ -40,7 +40,9 @@
     return YES;
 }
 
--(void)generateGestureRecognizers {
+-(void)addGestureRecognizers {
+    [self removeGestureRecognizers];
+
     UIPanGestureRecognizer* panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGestureRecognizer:)];
     [self.renderViewController.view addGestureRecognizer:panGesture];
     panGesture.delegate = self;
@@ -52,6 +54,12 @@
     UIPinchGestureRecognizer* pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureRecognizer:)];
     [self.renderViewController.view addGestureRecognizer:pinchGesture];
     pinchGesture.delegate = self;
+}
+
+-(void)removeGestureRecognizers {
+    for (UIGestureRecognizer* gestureRecognizer in self.renderViewController.view.gestureRecognizers) {
+        [self.renderViewController.view removeGestureRecognizer:gestureRecognizer];
+    }
 }
 
 -(void)panGestureRecognizer:(UIPanGestureRecognizer*)recognizer {

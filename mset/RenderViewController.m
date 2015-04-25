@@ -18,9 +18,10 @@ static Real InitialRealWidth = 4;
 
 @interface RenderViewController ()
 
-@property (strong, nonatomic) EAGLContext* eaglContext;
+@property (nonatomic, strong) GameViewController* gameViewController;
+@property (nonatomic, strong) EAGLContext* eaglContext;
 @property (nonatomic, assign) GLKMatrix4 modelViewMatrix;
-@property (nonatomic, strong) NSObject <Fractal>* fractal;
+@property (nonatomic, strong) NSObject<Fractal>* fractal;
 @property (nonatomic, strong) Quad* canvasQuad;
 @property (nonatomic, strong) ComplexPlane* complexPlane;
 
@@ -30,6 +31,7 @@ static Real InitialRealWidth = 4;
     GLKMatrix4 _projectionMatrix;
     CGSize _screenSize;
     CGFloat _aspect;
+
     BOOL _recomputing;
     BOOL _pendingCompute;
 
@@ -99,7 +101,9 @@ static Real InitialRealWidth = 4;
 }
 
 -(void)didMoveToParentViewController:(UIViewController*)parent {
-
+    if ([parent isKindOfClass:[GameViewController class]]) {
+        self.gameViewController = (GameViewController*) parent;
+    }
 }
 
 -(EAGLContext*)createBestEAGLContext {
@@ -179,6 +183,10 @@ static Real InitialRealWidth = 4;
     self.complexPlane = [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:crMaxiMin rMiniMax:crMiniMax];
 }
 
+-(void)scheduleRecompute {
+    _pendingCompute = YES;
+}
+
 -(void)update {
     self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix), _translateMatrix), self.modelViewMatrix);
     _translateMatrix = GLKMatrix4Identity;
@@ -186,17 +194,17 @@ static Real InitialRealWidth = 4;
     _scaleMatrix = GLKMatrix4Identity;
 
     if (!_recomputing && _pendingCompute) {
+        _pendingCompute = NO;
+
         _recomputing = YES;
         [self screenToComplexPlane];
         [self compute];
         _recomputing = NO;
-
-        _pendingCompute = NO;
     }
 }
 
 -(void)glkView:(GLKView*)view drawInRect:(CGRect)rect {
-    glClearColor(0.f, 0.f, 0.f, 1.0f);
+    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLKMatrix4 mvpMatrix = GLKMatrix4Multiply(_projectionMatrix, self.modelViewMatrix);
@@ -219,16 +227,10 @@ static Real InitialRealWidth = 4;
 }
 
 -(void)translate:(CGPoint)location {
-    if (_pendingCompute) {
-        return;
-    }
     _translateMatrix = GLKMatrix4Translate(_translateMatrix, location.x, -location.y, 0.0);
 }
 
 -(void)rotate:(CGPoint)location radians:(CGFloat)radians {
-    if (_pendingCompute) {
-        return;
-    }
     CGPoint pt = [self touchToCanvas:location];
     _rotateMatrix = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
     _rotateMatrix = GLKMatrix4Rotate(_rotateMatrix, -radians * 2.f, 0.0, 0.0, 1.0);
@@ -236,9 +238,6 @@ static Real InitialRealWidth = 4;
 }
 
 -(void)scale:(CGPoint)location scale:(CGFloat)scale {
-    if (_pendingCompute) {
-        return;
-    }
     CGPoint pt = [self touchToCanvas:location];
     _scaleMatrix = GLKMatrix4Translate(GLKMatrix4Identity, pt.x, pt.y, 0.0);
     _scaleMatrix = GLKMatrix4Scale(_scaleMatrix, scale, scale, 1.0);
@@ -246,15 +245,15 @@ static Real InitialRealWidth = 4;
 }
 
 -(void)translateEnded {
-    _pendingCompute = YES;
+    [self scheduleRecompute];
 }
 
 -(void)rotateEnded {
-    _pendingCompute = YES;
+    [self scheduleRecompute];
 }
 
 -(void)scaleEnded {
-    _pendingCompute = YES;
+    [self scheduleRecompute];
 }
 
 @end

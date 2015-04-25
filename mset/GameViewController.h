@@ -8,4 +8,7 @@
 
 @interface GameViewController : UIViewController<UIGestureRecognizerDelegate>
 
+-(void)addGestureRecognizers;
+-(void)removeGestureRecognizers;
+
 @end
