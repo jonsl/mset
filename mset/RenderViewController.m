@@ -164,8 +164,12 @@ static Real InitialRealWidth = 4;
     Real xLen = (Real) position.x / _screenSize.width;
     Real yLen = (Real) position.y / _screenSize.height;
     CPPoint pp;
-    pp.r = self.fractal.complexPlane.origin.r + xLen * (self.fractal.complexPlane.rMaxiMin.r - self.fractal.complexPlane.origin.r) + yLen * (self.fractal.complexPlane.rMiniMax.r - self.fractal.complexPlane.origin.r);
-    pp.i = self.fractal.complexPlane.origin.i + yLen * (self.fractal.complexPlane.rMiniMax.i - self.fractal.complexPlane.origin.i) + xLen * (self.fractal.complexPlane.rMaxiMin.i - self.fractal.complexPlane.origin.i);
+    pp.r = self.fractal.complexPlane.origin.r
+            + xLen * (self.fractal.complexPlane.rMaxiMin.r - self.fractal.complexPlane.origin.r)
+            + yLen * (self.fractal.complexPlane.rMiniMax.r - self.fractal.complexPlane.origin.r);
+    pp.i = self.fractal.complexPlane.origin.i
+            + yLen * (self.fractal.complexPlane.rMiniMax.i - self.fractal.complexPlane.origin.i)
+            + xLen * (self.fractal.complexPlane.rMaxiMin.i - self.fractal.complexPlane.origin.i);
     return pp;
 }
 
@@ -189,6 +193,8 @@ static Real InitialRealWidth = 4;
 
 -(void)update {
     self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix), _translateMatrix), self.modelViewMatrix);
+    [self screenToComplexPlane];
+
     _translateMatrix = GLKMatrix4Identity;
     _rotateMatrix = GLKMatrix4Identity;
     _scaleMatrix = GLKMatrix4Identity;
@@ -197,7 +203,6 @@ static Real InitialRealWidth = 4;
         _pendingCompute = NO;
 
         _recomputing = YES;
-        [self screenToComplexPlane];
         [self compute];
         _recomputing = NO;
     }
