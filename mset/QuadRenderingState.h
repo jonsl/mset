@@ -1,5 +1,5 @@
 //
-//  RendererState.h
+//  QuadRenderingState.h
 //  mandelbrot
 //
 //  Created by Jonathan Slater on 15/04/2015.
@@ -9,10 +9,7 @@
 @class Program;
 @class Texture;
 
-@interface RendererState : NSObject
-
-+(RendererState*)rendererState;
--(void)prepare;
+@interface QuadRenderingState : NSObject<RenderingState>
 
 @property (nonatomic, assign) float alpha;
 @property (nonatomic, assign) GLKMatrix4 mvpMatrix;

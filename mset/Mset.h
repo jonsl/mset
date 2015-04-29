@@ -17,18 +17,22 @@
 
 #import "Util.h"
 #import "NSExtensions.h"
+#import "Configuration.h"
+// renderer
+#import "Program.h"
+#import "Texture.h"
+#import "RenderingState.h"
+#import "QuadRenderingState.h"
+#import "Quad.h"
+// fractal
 #import "ColourMap.h"
 #import "DefaultColourMap.h"
 #import "PolynomialColourMap.h"
-#import "GameViewController.h"
-#import "RenderViewController.h"
 #import "ComplexPlane.h"
 #import "Fractal.h"
 #import "MandelbrotSet.h"
-#import "Configuration.h"
-#import "Program.h"
-#import "Texture.h"
-#import "RendererState.h"
-#import "Quad.h"
+// controllers
+#import "GameViewController.h"
+#import "RenderViewController.h"
 
 #endif

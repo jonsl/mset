@@ -1,5 +1,5 @@
 //
-//  RendererState.m
+//  QuadRenderingState.m
 //  mandelbrot
 //
 //  Created by Jonathan Slater on 15/04/2015.
@@ -9,56 +9,28 @@
 #import "Mset.h"
 
 
-@interface RendererState ()
+@interface QuadRenderingState ()
 
 @property (nonatomic, strong) Program* program;
-@property (nonatomic, strong) NSMutableDictionary* programs;
 
 @end
 
-@implementation RendererState
-
-+(RendererState*)rendererState {
-    return [[RendererState alloc] init];
-}
+@implementation QuadRenderingState
 
 -(instancetype)init {
     if ((self = [super init])) {
         _mvpMatrix = GLKMatrix4Identity;
         _alpha = 1.0f;
-        self.programs = [NSMutableDictionary dictionary];
     }
     return self;
 }
 
--(NSString*)programName:(BOOL)hasTexture {
-    if (hasTexture) {
-        return @"programTexture";
-    } else {
-        return @"program";
-    }
-}
-
--(void)registerProgram:(Program*)program name:(NSString*)name {
-    _programs[name] = program;
-}
-
--(void)unregisterProgram:(NSString*)name {
-    [_programs removeObjectForKey:name];
-}
-
--(void)prepare {
-    BOOL hasTexture = _texture != nil;
-
+-(void)prepareToDraw {
     if (!self.program) {
-        NSString* programName = [self programName:hasTexture];
-        self.program = self.programs[programName];
-
         if (!self.program) {
             NSString* vertexShader = [self vertexShader:_texture];
             NSString* fragmentShader = [self fragmentShader:_texture];
             self.program = [Program programWithVertexShader:vertexShader fragmentShader:fragmentShader];
-            self.programs[programName] = self.program;
         }
     }
 

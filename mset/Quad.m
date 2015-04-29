@@ -8,7 +8,7 @@
 @interface Quad ()
 
 @property (strong, nonatomic) EAGLContext* context;
-@property (nonatomic, strong) RendererState* rendererState;
+@property (nonatomic, strong) QuadRenderingState* quadRenderingState;
 
 @end
 
@@ -37,7 +37,7 @@
         _width = width;
         _height = height;
 
-        self.rendererState = [RendererState rendererState];
+        self.quadRenderingState = [[QuadRenderingState alloc] init];
 
         _vertexData = calloc(4, sizeof(Vertex));
         VertexColor rgba = {colour, colour, colour, colour};
@@ -95,7 +95,7 @@
     _vertexData[2].x.y = _position.y + _height;
     _vertexData[3].x.x = _position.x + _width;
     _vertexData[3].x.y = _position.y + _height;
-    
+
     _syncRequired = YES;
 }
 
@@ -112,7 +112,7 @@
 -(void)setVertexColour:(NSInteger)index colour:(VertexColor)colour {
     NSAssert(index >= 0 && index < 4, @"invalid index");
     _vertexData[index].colour = colour;
-    
+
     _syncRequired = YES;
 }
 
@@ -171,28 +171,26 @@
     [self.texture replace];
 }
 
-- (BOOL)hasVisibleArea
-{
+-(BOOL)hasVisibleArea {
     return _visible;
-//    return _alpha != 0.0f && _visible && _scaleX != 0.0f && _scaleY != 0.0f;
 }
 
 -(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
     if (![self hasVisibleArea]) {
-        return ;
+        return;
     }
     if (_syncRequired) {
         [self syncBuffers];
     }
-    self.rendererState.texture = self.texture;
-    self.rendererState.mvpMatrix = mvpMatrix;
-    self.rendererState.alpha = alpha;
-    [self.rendererState prepare];
+    self.quadRenderingState.texture = self.texture;
+    self.quadRenderingState.mvpMatrix = mvpMatrix;
+    self.quadRenderingState.alpha = alpha;
+    [self.quadRenderingState prepareToDraw];
     [self applyBlendMode:GL_SRC_ALPHA dstFactor:GL_ONE_MINUS_SRC_ALPHA];
 
-    GLuint attribPosition = (GLuint) self.rendererState.aPosition;
-    GLuint attribColor = (GLuint) self.rendererState.aColour;
-    GLuint attribTexCoords = (GLuint) self.rendererState.aTexCoords;
+    GLuint attribPosition = (GLuint) self.quadRenderingState.aPosition;
+    GLuint attribColor = (GLuint) self.quadRenderingState.aColour;
+    GLuint attribTexCoords = (GLuint) self.quadRenderingState.aTexCoords;
 
     glEnableVertexAttribArray(attribPosition);
     glEnableVertexAttribArray(attribColor);
