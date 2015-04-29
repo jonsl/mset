@@ -3,7 +3,7 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@protocol ColourMap <NSObject>
+@protocol ColourMapping<NSObject>
 
 @required
 @property (nonatomic, readonly) unsigned char* rgb;

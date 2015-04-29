@@ -79,7 +79,7 @@
 		B1B19B6397B9191F2214BCAE /* Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Texture.m; sourceTree = "<group>"; };
 		B1B19BCA584567D8BDA77FC0 /* Configuration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Configuration.m; sourceTree = "<group>"; };
 		B1B19C3241067C840BC1FFAD /* DefaultColourMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DefaultColourMap.m; sourceTree = "<group>"; };
-		B1B19C75CC53EF40029488E9 /* ColourMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColourMap.h; sourceTree = "<group>"; };
+		B1B19C75CC53EF40029488E9 /* ColourMapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColourMapping.h; sourceTree = "<group>"; };
 		B1B19E8ECFCD846EC3C2D152 /* MandelbrotSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MandelbrotSet.h; sourceTree = "<group>"; };
 		B1B19FC713F97162CFD58054 /* PolynomialColourMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PolynomialColourMap.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -127,7 +127,7 @@
 			children = (
 				1ABD28C91ADFB83B00ADBE75 /* AppDelegate.h */,
 				1ABD28CA1ADFB83B00ADBE75 /* AppDelegate.m */,
-				B1B19C75CC53EF40029488E9 /* ColourMap.h */,
+				B1B19C75CC53EF40029488E9 /* ColourMapping.h */,
 				7852F06AE5F06F7A3E9F2523 /* ComplexPlane.h */,
 				7852F8A081DF55243454C0E9 /* ComplexPlane.m */,
 				B1B19930662819024C4F41E4 /* Configuration.h */,

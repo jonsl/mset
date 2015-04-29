@@ -25,7 +25,7 @@
 #import "QuadRenderingState.h"
 #import "Quad.h"
 // fractal
-#import "ColourMap.h"
+#import "ColourMapping.h"
 #import "DefaultColourMap.h"
 #import "PolynomialColourMap.h"
 #import "ComplexPlane.h"

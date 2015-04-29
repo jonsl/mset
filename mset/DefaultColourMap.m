@@ -16,7 +16,7 @@
         _rgb = calloc(size * 3, sizeof(unsigned char));
         for (int index = 0; index < size; ++index) {
             int ppos = index * 3;
-            Real c = 3.0 * logl(index) / logl(size - 1.0);
+            Real c = 3.0 * log(index) / log(size - 1.0);
             if (c < 1) {
                 _rgb[ppos] = (unsigned char) (255 * c);
                 _rgb[ppos + 1] = 0;

@@ -5,6 +5,7 @@
 
 @protocol RenderingState<NSObject>
 
+@required
 -(void)prepareToDraw;
 -(NSString*)vertexShader:(Texture*)texture;
 -(NSString*)fragmentShader:(Texture*)texture;

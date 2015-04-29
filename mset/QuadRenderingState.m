@@ -65,16 +65,22 @@
 
     [source appendLine:@"attribute vec4 aPosition;"];
     [source appendLine:@"attribute vec4 aColour;"];
-    if (hasTexture) [source appendLine:@"attribute vec2 aTexCoords;"];
+    if (hasTexture) {
+        [source appendLine:@"attribute vec2 aTexCoords;"];
+    }
     [source appendLine:@"uniform mat4 uMvpMatrix;"];
     [source appendLine:@"uniform vec4 uAlpha;"];
     [source appendLine:@"varying lowp vec4 vColour;"];
-    if (hasTexture) [source appendLine:@"varying lowp vec2 vTexCoords;"];
+    if (hasTexture) {
+        [source appendLine:@"varying lowp vec2 vTexCoords;"];
+    }
 
     [source appendLine:@"void main() {"];
     [source appendLine:@"  gl_Position = uMvpMatrix * aPosition;"];
     [source appendLine:@"  vColour = aColour * uAlpha;"];
-    if (hasTexture) [source appendLine:@"  vTexCoords  = aTexCoords;"];
+    if (hasTexture) {
+        [source appendLine:@"  vTexCoords  = aTexCoords;"];
+    }
     [source appendString:@"}"];
 
     return source;

@@ -6,10 +6,8 @@
 //  Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@implementation NSMutableString (NSExtensions)
+@interface NSMutableString (NSExtensions)
 
--(void)appendLine:(NSString*)line {
-    [self appendFormat:@"%@\n", line];
-}
+-(void)appendLine:(NSString*)line;
 
 @end

@@ -3,7 +3,7 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@interface PolynomialColourMap : NSObject <ColourMap>
+@interface PolynomialColourMap : NSObject<ColourMapping>
 
 -(instancetype)initWithSize:(NSUInteger)size;
 

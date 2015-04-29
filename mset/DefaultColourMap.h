@@ -3,7 +3,7 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@interface DefaultColourMap : NSObject <ColourMap>
+@interface DefaultColourMap : NSObject<ColourMapping>
 
 -(instancetype)initWithSize:(NSUInteger)size;
 

@@ -100,7 +100,7 @@ void* renderThread(void* arg) {
         height:(NSUInteger)height
   escapeRadius:(NSInteger)escapeRadius
  maxIterations:(NSUInteger)maxIterations
-     colourMap:(NSObject<ColourMap>*)colourMap
+     colourMap:(NSObject<ColourMapping>*)colourMap
 executionUnits:(NSUInteger)executionUnits
     updateDraw:(DrawBlock)updateDraw {
     if (_complexPlane == nil) {
