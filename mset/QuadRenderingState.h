@@ -9,7 +9,9 @@
 @class Program;
 @class Texture;
 
-@interface QuadRenderingState : NSObject<RenderingState>
+@interface QuadRenderingState : NSObject<Shading>
+
+-(void)prepareToDrawWithShading:(NSObject<Shading>*)shading;
 
 @property (nonatomic, assign) float alpha;
 @property (nonatomic, assign) GLKMatrix4 mvpMatrix;

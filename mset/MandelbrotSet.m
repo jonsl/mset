@@ -17,9 +17,11 @@ typedef struct {
     CPPoint _cOrigin, _crMaxiMin, _crMiniMax;
 } ExecutionContext;
 
+
 @implementation MandelbrotSet
 
 @synthesize complexPlane = _complexPlane;
+@synthesize shader = _shader;
 
 +(MandelbrotSet*)mandelbrotSet {
     return [[MandelbrotSet alloc] init];
@@ -27,7 +29,6 @@ typedef struct {
 
 -(instancetype)init {
     if ((self = [super init])) {
-
     }
     return self;
 }
@@ -111,6 +112,7 @@ executionUnits:(NSUInteger)executionUnits
     ExecutionContext* contexts = calloc(executionUnits, sizeof(ExecutionContext));
 
     for (NSUInteger i = 0; i < executionUnits; i++) {
+        memset(&contexts[i], 0, sizeof(ExecutionContext));
         contexts[i]._width = width;
         contexts[i]._height = height;
         contexts[i]._escapeRadius = escapeRadius;
@@ -166,30 +168,22 @@ executionUnits:(NSUInteger)executionUnits
     [source appendLine:@"uniform int iter;"];
 
     [source appendLine:@"void main() {"];
-
-    [source appendLine:@"vec2 z, c;"];
-    [source appendLine:@"c.x = 1.3333 * (gl_TexCoord[0].x - 0.5) * scale - center.x;"];
-    [source appendLine:@"c.y = (gl_TexCoord[0].y - 0.5) * scale - center.y;"];
-    [source appendLine:@"int i;"];
-    [source appendLine:@"z = c;"];
-    [source appendLine:@"for(i=0; i<iter; i++) {"];
-    [source appendLine:@"float x = (z.x * z.x - z.y * z.y) + c.x;"];
-    [source appendLine:@"float y = (z.y * z.x + z.x * z.y) + c.y;"];
-    [source appendLine:@"if((x * x + y * y) > 4.0) break;"];
-    [source appendLine:@"z.x = x;"];
-    [source appendLine:@"z.y = y;"];
-    [source appendLine:@"}"];
-    [source appendLine:@"gl_FragColor = texture1D(tex, (i == iter ? 0.0 : float(i)) / 100.0);"];
+    [source appendLine:@"  vec2 z, c;"];
+    [source appendLine:@"  c.x = 1.3333 * (gl_TexCoord[0].x - 0.5) * scale - center.x;"];
+    [source appendLine:@"  c.y = (gl_TexCoord[0].y - 0.5) * scale - center.y;"];
+    [source appendLine:@"  int i;"];
+    [source appendLine:@"  z = c;"];
+    [source appendLine:@"  for(i=0; i<iter; i++) {"];
+    [source appendLine:@"    float x = (z.x * z.x - z.y * z.y) + c.x;"];
+    [source appendLine:@"    float y = (z.y * z.x + z.x * z.y) + c.y;"];
+    [source appendLine:@"    if((x * x + y * y) > 4.0) break;"];
+    [source appendLine:@"    z.x = x;"];
+    [source appendLine:@"    z.y = y;"];
+    [source appendLine:@"  }"];
+    [source appendLine:@"  gl_FragColor = texture1D(tex, (i == iter ? 0.0 : float(i)) / 100.0);"];
     [source appendString:@"}"];
 
     return source;
-}
-
--(FractalCoordinate)convertCoordinates:(CGPoint)point {
-    FractalCoordinate fractalCoordinate;
-    fractalCoordinate.x = point.x;
-    fractalCoordinate.y = point.y;
-    return fractalCoordinate;
 }
 
 @end

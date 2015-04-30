@@ -10,7 +10,7 @@
 +(instancetype)quadWithTexture:(Texture*)texture width:(float)width height:(float)height;
 -(void)setVertexColour:(NSInteger)index colour:(VertexColor)colour;
 -(void)updateImage;
--(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha;
+-(void)renderWithShading:(NSObject<Shading>*)shading mvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha;
 -(Vertex*)vertex:(NSInteger)index;
 
 @property (nonatomic) Vertex* vertexData;

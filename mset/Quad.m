@@ -175,7 +175,7 @@
     return _visible;
 }
 
--(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
+-(void)renderWithShading:(NSObject<Shading>*)shading mvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
     if (![self hasVisibleArea]) {
         return;
     }
@@ -185,7 +185,7 @@
     self.quadRenderingState.texture = self.texture;
     self.quadRenderingState.mvpMatrix = mvpMatrix;
     self.quadRenderingState.alpha = alpha;
-    [self.quadRenderingState prepareToDraw];
+    [self.quadRenderingState prepareToDrawWithShading:shading];
     [self applyBlendMode:GL_SRC_ALPHA dstFactor:GL_ONE_MINUS_SRC_ALPHA];
 
     GLuint attribPosition = (GLuint) self.quadRenderingState.aPosition;

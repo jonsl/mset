@@ -77,17 +77,7 @@ static Real InitialRealWidth = 4;
         self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
         self.fractal = [MandelbrotSet mandelbrotSet];
-        // compute initial complex plane
-        Real rHalfExtent = 0.5 * InitialRealWidth;
-        Real iHalfExtent = 0.5 * InitialRealWidth / _aspect;
-        CPPoint cOrigin, rMaxiMin, rMiniMax;
-        cOrigin.r = InitialRealCentre - rHalfExtent;
-        cOrigin.i = -iHalfExtent;
-        rMaxiMin.r = cOrigin.r + InitialRealWidth;
-        rMaxiMin.i = -iHalfExtent;
-        rMiniMax.r = cOrigin.r;
-        rMiniMax.i = +iHalfExtent;
-        self.fractal.complexPlane = self.complexPlane = [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:rMaxiMin rMiniMax:rMiniMax];
+        [self initialiseComplexPlane];
 
         _recomputing = NO;
         _pendingCompute = YES;
@@ -98,6 +88,19 @@ static Real InitialRealWidth = 4;
     @finally {
 
     }
+}
+
+-(void)initialiseComplexPlane {
+    Real rHalfExtent = 0.5 * InitialRealWidth;
+    Real iHalfExtent = 0.5 * InitialRealWidth / _aspect;
+    CPPoint cOrigin, rMaxiMin, rMiniMax;
+    cOrigin.r = InitialRealCentre - rHalfExtent;
+    cOrigin.i = -iHalfExtent;
+    rMaxiMin.r = cOrigin.r + InitialRealWidth;
+    rMaxiMin.i = -iHalfExtent;
+    rMiniMax.r = cOrigin.r;
+    rMiniMax.i = +iHalfExtent;
+    self.fractal.complexPlane = self.complexPlane = [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:rMaxiMin rMiniMax:rMiniMax];
 }
 
 -(void)didMoveToParentViewController:(UIViewController*)parent {
@@ -148,8 +151,8 @@ static Real InitialRealWidth = 4;
     //    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:4096];
     PolynomialColourMap* newColourMap = [[PolynomialColourMap alloc] initWithSize:4096];
     [self.fractal compute:self.canvasQuad.texture.imageData
-                    width:_screenSize.width
-                   height:_screenSize.height
+                    width:(NSUInteger)_screenSize.width
+                   height:(NSUInteger)_screenSize.height
              escapeRadius:(NSInteger) 2
             maxIterations:(NSUInteger) MaxIterations
             //              colourMap:defaultColourTable
@@ -213,7 +216,7 @@ static Real InitialRealWidth = 4;
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLKMatrix4 mvpMatrix = GLKMatrix4Multiply(_projectionMatrix, self.modelViewMatrix);
-    [self.canvasQuad renderWithMvpMatrix:mvpMatrix alpha:1.f];
+    [self.canvasQuad renderWithShading:nil mvpMatrix:mvpMatrix alpha:1.f];
 }
 
 -(CGPoint)touchToCanvas:(CGPoint)touch {

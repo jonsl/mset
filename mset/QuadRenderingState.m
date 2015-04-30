@@ -25,12 +25,16 @@
     return self;
 }
 
--(void)prepareToDraw {
+-(void)prepareToDrawWithShading:(NSObject<Shading>*)shading {
     if (!self.program) {
         if (!self.program) {
-            NSString* vertexShader = [self vertexShader:_texture];
-            NSString* fragmentShader = [self fragmentShader:_texture];
-            self.program = [Program programWithVertexShader:vertexShader fragmentShader:fragmentShader];
+            if (shading) {
+                self.program = [Program programWithVertexShader:[shading vertexShader:_texture]
+                                                 fragmentShader:[shading fragmentShader:_texture]];
+            } else {
+                self.program = [Program programWithVertexShader:[self vertexShader:_texture]
+                                                 fragmentShader:[self fragmentShader:_texture]];
+            }
         }
     }
 

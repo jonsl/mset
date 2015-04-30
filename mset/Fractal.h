@@ -22,11 +22,7 @@ typedef struct {
 executionUnits:(NSUInteger)executionUnits
     updateDraw:(DrawBlock)updateDraw;
 
--(FractalCoordinate)convertCoordinates:(CGPoint)point;
-
 @property (nonatomic, strong) ComplexPlane* complexPlane;
-
-@optional
--(NSString*)fragmentShader;
+@property (nonatomic, strong) NSObject<Shading>* shader;
 
 @end

@@ -21,9 +21,10 @@
 // renderer
 #import "Program.h"
 #import "Texture.h"
-#import "RenderingState.h"
+#import "Shading.h"
 #import "QuadRenderingState.h"
 #import "Quad.h"
+#import "MandelBrotShader.h"
 // fractal
 #import "ColourMapping.h"
 #import "DefaultColourMap.h"

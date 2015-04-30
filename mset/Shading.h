@@ -3,10 +3,9 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@protocol RenderingState<NSObject>
+@protocol Shading<NSObject>
 
 @required
--(void)prepareToDraw;
 -(NSString*)vertexShader:(Texture*)texture;
 -(NSString*)fragmentShader:(Texture*)texture;
 
