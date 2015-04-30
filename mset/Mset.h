@@ -22,7 +22,6 @@
 #import "DisplayObject.h"
 #import "Program.h"
 #import "Texture.h"
-#import "Shading.h"
 #import "RenderingState.h"
 #import "Quad.h"
 // fractal

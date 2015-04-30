@@ -68,7 +68,6 @@
 		7852F7AD1EB6D5AEE29B0A91 /* Quad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Quad.h; sourceTree = "<group>"; };
 		7852F8A081DF55243454C0E9 /* ComplexPlane.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ComplexPlane.m; sourceTree = "<group>"; };
 		7852F96D778A6599D7702BB0 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
-		7852FBA305293337E6FD8784 /* Shading.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Shading.h; sourceTree = "<group>"; };
 		7852FC2153618F47957D913D /* Quad.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Quad.m; sourceTree = "<group>"; };
 		7852FDBD84053EAB75CC0700 /* DisplayObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DisplayObject.h; sourceTree = "<group>"; };
 		B1B1946033F99EE6BCF00731 /* PolynomialColourMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PolynomialColourMap.m; sourceTree = "<group>"; };
@@ -161,7 +160,6 @@
 				B1B198CE5251F54D818CB295 /* Texture.h */,
 				B1B19B6397B9191F2214BCAE /* Texture.m */,
 				7852F96D778A6599D7702BB0 /* Util.h */,
-				7852FBA305293337E6FD8784 /* Shading.h */,
 				7852FDBD84053EAB75CC0700 /* DisplayObject.h */,
 			);
 			path = mset;
