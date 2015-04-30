@@ -175,10 +175,12 @@ executionUnits:(NSUInteger)executionUnits
 
     [source appendLine:@"attribute vec4 aPosition;"];
     [source appendLine:@"attribute vec2 aTexCoords;"];
+    [source appendLine:@"uniform mat4 uMvpMatrix;"];
+    [source appendLine:@"uniform vec4 uAlpha;"];
     [source appendLine:@"varying lowp vec2 vTexCoords;"];
 
     [source appendLine:@"void main() {"];
-    [source appendLine:@"  gl_Position = aPosition;"];
+    [source appendLine:@"  gl_Position = uMvpMatrix * aPosition;"];
     [source appendLine:@"  vTexCoords  = aTexCoords;"];
     [source appendString:@"}"];
 
@@ -188,20 +190,20 @@ executionUnits:(NSUInteger)executionUnits
 -(NSString*)fragmentShader {
     NSMutableString* source = [NSMutableString string];
 
+    [source appendLine:@"uniform highp vec2 uCenter;"];
+    [source appendLine:@"uniform highp float uScale;"];
+    [source appendLine:@"uniform lowp sampler2D uTexture;"];
+    [source appendLine:@"uniform int uMaxIterations;"];
     [source appendLine:@"varying lowp vec2 vTexCoords;"];
-    [source appendLine:@"uniform lowp sampler2D tex;"];
-    [source appendLine:@"uniform highp vec2 center;"];
-    [source appendLine:@"uniform highp float scale;"];
-    [source appendLine:@"uniform int iter;"];
 
     [source appendLine:@"void main() {"];
     [source appendLine:@"  highp vec2 z;"];
     [source appendLine:@"  highp vec2 c;"];
-    [source appendLine:@"  c.x = 1.3333 * (vTexCoords.x - 0.5) * scale - center.x;"];
-    [source appendLine:@"  c.y = (vTexCoords.y - 0.5) * scale - center.y;"];
+    [source appendLine:@"  c.x = 1.3333 * (vTexCoords.x - 0.5) * uScale - uCenter.x;"];
+    [source appendLine:@"  c.y = (vTexCoords.y - 0.5) * uScale - uCenter.y;"];
     [source appendLine:@"  int i;"];
     [source appendLine:@"  z = c;"];
-    [source appendLine:@"  for(i=0; i<iter; i++) {"];
+    [source appendLine:@"  for(i=0; i<uMaxIterations; i++) {"];
     [source appendLine:@"    highp float x = (z.x * z.x - z.y * z.y) + c.x;"];
     [source appendLine:@"    highp float y = (z.y * z.x + z.x * z.y) + c.y;"];
     [source appendLine:@"    if((x * x + y * y) > 4.0) break;"];
@@ -209,9 +211,9 @@ executionUnits:(NSUInteger)executionUnits
     [source appendLine:@"    z.y = y;"];
     [source appendLine:@"  }"];
     [source appendLine:@"  lowp vec2 uv;"];
-    [source appendLine:@"  uv.x = (i == iter ? 0.0 : float(i)) / 100.0;"];
+    [source appendLine:@"  uv.x = (i == uMaxIterations ? 0.0 : float(i)) / 100.0;"];
     [source appendLine:@"  uv.y = 0.0;"];
-    [source appendLine:@"  gl_FragColor = texture2D(tex, uv);"];
+    [source appendLine:@"  gl_FragColor = texture2D(uTexture, uv);"];
     [source appendString:@"}"];
 
     return source;
