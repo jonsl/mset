@@ -5,10 +5,10 @@
 
 #import "Mset.h"
 
-@interface Quad ()
+@interface Quad()
 
 @property (strong, nonatomic) EAGLContext* context;
-@property (nonatomic, strong) QuadRenderingState* quadRenderingState;
+@property (nonatomic, strong) RenderingState* renderingState;
 
 @end
 
@@ -37,7 +37,7 @@
         _width = width;
         _height = height;
 
-        self.quadRenderingState = [[QuadRenderingState alloc] init];
+        self.renderingState = [[RenderingState alloc] init];
 
         _vertexData = calloc(4, sizeof(Vertex));
         VertexColor rgba = {colour, colour, colour, colour};
@@ -134,7 +134,7 @@
     }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferName);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long) sizeof(ushort) * numIndices, _indexData, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)sizeof(ushort) * numIndices, _indexData, GL_STATIC_DRAW);
 
     _syncRequired = YES;
 }
@@ -145,7 +145,7 @@
     }
     long numVertices = 4;
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferName);
-    glBufferData(GL_ARRAY_BUFFER, (long) sizeof(Vertex) * numVertices, _vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, (long)sizeof(Vertex) * numVertices, _vertexData, GL_STATIC_DRAW);
 
     _syncRequired = NO;
 #ifdef DEBUG
@@ -175,22 +175,30 @@
     return _visible;
 }
 
--(void)renderWithShading:(NSObject<Shading>*)shading mvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
+#pragma mark DisplayObject
+
+-(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
     if (![self hasVisibleArea]) {
         return;
     }
     if (_syncRequired) {
         [self syncBuffers];
     }
-    self.quadRenderingState.texture = self.texture;
-    self.quadRenderingState.mvpMatrix = mvpMatrix;
-    self.quadRenderingState.alpha = alpha;
-    [self.quadRenderingState prepareToDrawWithShading:shading];
+    self.renderingState.texture = self.texture;
+    self.renderingState.mvpMatrix = mvpMatrix;
+    self.renderingState.alpha = alpha;
+
+    [self.renderingState prepareToDrawWithVertexShader:nil fragmentShader:nil];
+
     [self applyBlendMode:GL_SRC_ALPHA dstFactor:GL_ONE_MINUS_SRC_ALPHA];
 
-    GLuint attribPosition = (GLuint) self.quadRenderingState.aPosition;
-    GLuint attribColor = (GLuint) self.quadRenderingState.aColour;
-    GLuint attribTexCoords = (GLuint) self.quadRenderingState.aTexCoords;
+    int aPosition = [self.renderingState.program getTrait:@"aPosition"];
+    int aColour = [self.renderingState.program getTrait:@"aColour"];
+    int aTexCoords = [self.renderingState.program getTrait:@"aTexCoords"];
+
+    GLuint attribPosition = (GLuint)aPosition;
+    GLuint attribColor = (GLuint)aColour;
+    GLuint attribTexCoords = (GLuint)aTexCoords;
 
     glEnableVertexAttribArray(attribPosition);
     glEnableVertexAttribArray(attribColor);
@@ -201,10 +209,10 @@
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferName);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferName);
 
-    glVertexAttribPointer(attribPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, x)));
-    glVertexAttribPointer(attribColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*) (offsetof(Vertex, colour)));
+    glVertexAttribPointer(attribPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, x)));
+    glVertexAttribPointer(attribColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)(offsetof(Vertex, colour)));
     if (_texture) {
-        glVertexAttribPointer(attribTexCoords, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (offsetof(Vertex, uv)));
+        glVertexAttribPointer(attribTexCoords, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, uv)));
     }
 
     int numIndices = 6;
@@ -224,7 +232,7 @@
     glGetIntegerv(GL_NUM_EXTENSIONS, &max);
     NSMutableSet* extensions = [NSMutableSet set];
     for (GLuint i = 0; i < max; i++) {
-        [extensions addObject:@( (char*) glGetStringi(GL_EXTENSIONS, i) )];
+        [extensions addObject:@( (char*)glGetStringi(GL_EXTENSIONS, i) )];
     }
     return [extensions containsObject:searchName];
 }

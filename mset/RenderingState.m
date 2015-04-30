@@ -1,5 +1,5 @@
 //
-//  QuadRenderingState.m
+//  RenderingState.m
 //  mandelbrot
 //
 //  Created by Jonathan Slater on 15/04/2015.
@@ -9,13 +9,7 @@
 #import "Mset.h"
 
 
-@interface QuadRenderingState ()
-
-@property (nonatomic, strong) Program* program;
-
-@end
-
-@implementation QuadRenderingState
+@implementation RenderingState
 
 -(instancetype)init {
     if ((self = [super init])) {
@@ -25,35 +19,41 @@
     return self;
 }
 
--(void)prepareToDrawWithShading:(NSObject<Shading>*)shading {
+-(void)prepareToDrawWithVertexShader:(NSString*)vertexShader fragmentShader:(NSString*)fragmentShader {
     if (!self.program) {
         if (!self.program) {
-            if (shading) {
-                self.program = [Program programWithVertexShader:[shading vertexShader:_texture]
-                                                 fragmentShader:[shading fragmentShader:_texture]];
-            } else {
-                self.program = [Program programWithVertexShader:[self vertexShader:_texture]
-                                                 fragmentShader:[self fragmentShader:_texture]];
+            NSString* vsh = vertexShader;
+            NSString* fsh = fragmentShader;
+            if (vsh == nil) {
+                vsh = [self vertexShader:_texture];
             }
+            if (fsh == nil) {
+                fsh = [self fragmentShader:_texture];
+            }
+            self.program = [Program programWithVertexShader:vsh fragmentShader:fsh];
         }
     }
 
-    _aPosition = [self.program getTrait:@"aPosition"];
-    _aColour = [self.program getTrait:@"aColour"];
-    _aTexCoords = [self.program getTrait:@"aTexCoords"];
-    _uMvpMatrix = [self.program getTrait:@"uMvpMatrix"];
-    _uAlpha = [self.program getTrait:@"uAlpha"];
-    _uTexture = [self.program getTrait:@"uTexture"];
+//    _aPosition = [self.program getTrait:@"aPosition"];
+//    _aColour = [self.program getTrait:@"aColour"];
+//    _aTexCoords = [self.program getTrait:@"aTexCoords"];
+//    _uMvpMatrix = [self.program getTrait:@"uMvpMatrix"];
+//    _uAlpha = [self.program getTrait:@"uAlpha"];
+//    _uTexture = [self.program getTrait:@"uTexture"];
+
 
     glUseProgram(self.program.name);
-    glUniformMatrix4fv(_uMvpMatrix, 1, NO, self.mvpMatrix.m);
+    int uMvpMatrix = [self.program getTrait:@"uMvpMatrix"];
+    glUniformMatrix4fv(uMvpMatrix, 1, NO, self.mvpMatrix.m);
 
-    glUniform4f(_uAlpha, 1.0f, 1.0f, 1.0f, _alpha);
+    int uAlpha = [self.program getTrait:@"uAlpha"];
+    glUniform4f(uAlpha, 1.0f, 1.0f, 1.0f, _alpha);
 
     if (self.texture) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, self.texture.name);
-        glUniform1i(_uTexture, 0);
+        int uTexture = [self.program getTrait:@"uTexture"];
+        glUniform1i(uTexture, 0);
     }
 #ifdef DEBUG
     GLenum glError = glGetError();

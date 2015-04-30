@@ -19,12 +19,12 @@
 #import "NSExtensions.h"
 #import "Configuration.h"
 // renderer
+#import "DisplayObject.h"
 #import "Program.h"
 #import "Texture.h"
 #import "Shading.h"
-#import "QuadRenderingState.h"
+#import "RenderingState.h"
 #import "Quad.h"
-#import "MandelBrotShader.h"
 // fractal
 #import "ColourMapping.h"
 #import "DefaultColourMap.h"

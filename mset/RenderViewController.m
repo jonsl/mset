@@ -10,8 +10,6 @@
 #import "Util.h"
 
 static float const ScreenWidth = 1024.f;
-static float const CanvasTextureSize = 1024.f;
-static NSInteger const MaxIterations = 1000;
 static Real InitialRealCentre = -0.5;
 static Real InitialRealWidth = 4;
 
@@ -22,7 +20,6 @@ static Real InitialRealWidth = 4;
 @property (nonatomic, strong) EAGLContext* eaglContext;
 @property (nonatomic, assign) GLKMatrix4 modelViewMatrix;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
-@property (nonatomic, strong) Quad* canvasQuad;
 @property (nonatomic, strong) ComplexPlane* complexPlane;
 
 @end
@@ -72,9 +69,6 @@ static Real InitialRealWidth = 4;
         _aspect = screenSize.width / screenSize.height;
         _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / _aspect);
         _projectionMatrix = GLKMatrix4MakeOrtho(0, _screenSize.width, 0, _screenSize.height, 0.f, 1.f);
-
-        Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
-        self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
         self.fractal = [MandelbrotSet mandelbrotSet];
         [self initialiseComplexPlane];
@@ -145,22 +139,7 @@ static Real InitialRealWidth = 4;
 -(void)compute {
     self.modelViewMatrix = GLKMatrix4Identity;
 
-    NSLog(@"recomputing with complex plane origin(%lf,%lf), rMiniMax(%lf,%lf), rMiniMax(%lf,%lf)", _complexPlane.origin.r, _complexPlane.origin.i,
-            _complexPlane.rMaxiMin.r, _complexPlane.rMaxiMin.i, _complexPlane.rMiniMax.r, _complexPlane.rMiniMax.i);
-    self.fractal.complexPlane = self.complexPlane;
-    //    DefaultColourMap* defaultColourTable = [[DefaultColourMap alloc] initWithSize:4096];
-    PolynomialColourMap* newColourMap = [[PolynomialColourMap alloc] initWithSize:4096];
-    [self.fractal compute:self.canvasQuad.texture.imageData
-                    width:(NSUInteger)_screenSize.width
-                   height:(NSUInteger)_screenSize.height
-             escapeRadius:(NSInteger) 2
-            maxIterations:(NSUInteger) MaxIterations
-            //              colourMap:defaultColourTable
-                colourMap:newColourMap
-           executionUnits:[Configuration sharedConfiguration].executionUnits
-               updateDraw:^() {
-                   [self.canvasQuad updateImage];
-               }];
+    [self.fractal updateWithComplexPlane:self.complexPlane screenSize:_screenSize];
 }
 
 -(CPPoint)canvasPointToComplexPlane:(CGPoint)position {
@@ -216,7 +195,7 @@ static Real InitialRealWidth = 4;
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLKMatrix4 mvpMatrix = GLKMatrix4Multiply(_projectionMatrix, self.modelViewMatrix);
-    [self.canvasQuad renderWithShading:nil mvpMatrix:mvpMatrix alpha:1.f];
+    [self.fractal renderWithMvpMatrix:mvpMatrix alpha:1.f];
 }
 
 -(CGPoint)touchToCanvas:(CGPoint)touch {

@@ -20,35 +20,41 @@ static NSString* RenderStrategyKey = @"RenderStrategy";
     dispatch_once(&onceToken, ^{
         configuration = [[self alloc] initWithSetType:MandelbrotFractal
                                        executionUnits:[[NSProcessInfo processInfo] activeProcessorCount]
-                                    executionStrategy:ThreadExecution];
+                                    executionStrategy:ThreadExecution
+                                       renderStrategy:CpuRender];
     });
     return configuration;
 }
 
 -(instancetype)initWithSetType:(FractalType)setType
                 executionUnits:(NSUInteger)executionUnits
-             executionStrategy:(ExecutionStrategy)executionStrategy {
+             executionStrategy:(ExecutionStrategy)executionStrategy
+                renderStrategy:(RenderStrategy)renderStrategy {
     if ((self = [super init])) {
-        self.setType = setType;
-        self.executionUnits = executionUnits;
-        self.executionStrategy = executionStrategy;
+        _setType = setType;
+        _executionUnits = executionUnits;
+        _executionStrategy = executionStrategy;
+        _renderStrategy = renderStrategy;
     }
     return self;
 }
 
 -(void)encodeWithCoder:(NSCoder*)encoder {
-    [encoder encodeObject:@(self.setType) forKey:SetTypeKey];
-    [encoder encodeObject:@(self.executionUnits) forKey:ExecutionUnitsKey];
-    [encoder encodeObject:@(self.executionStrategy) forKey:ExecutionStrategyKey];
+    [encoder encodeObject:@(_setType) forKey:SetTypeKey];
+    [encoder encodeObject:@(_executionUnits) forKey:ExecutionUnitsKey];
+    [encoder encodeObject:@(_executionStrategy) forKey:ExecutionStrategyKey];
+    [encoder encodeObject:@(_renderStrategy) forKey:RenderStrategyKey];
 }
 
 -(id)initWithCoder:(NSCoder*)decoder {
     FractalType setType = (FractalType)[[decoder decodeObjectForKey:SetTypeKey] integerValue];
     NSUInteger executionUnits = (NSUInteger)[[decoder decodeObjectForKey:ExecutionUnitsKey] integerValue];
     ExecutionStrategy executionStrategy = (ExecutionStrategy)[[decoder decodeObjectForKey:ExecutionStrategyKey] integerValue];
+    RenderStrategy renderStrategy = (RenderStrategy)[[decoder decodeObjectForKey:RenderStrategyKey] integerValue];
     return [self initWithSetType:setType
                   executionUnits:executionUnits
-               executionStrategy:executionStrategy];
+               executionStrategy:executionStrategy
+                  renderStrategy:renderStrategy];
 }
 
 @end

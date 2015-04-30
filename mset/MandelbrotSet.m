@@ -7,6 +7,9 @@
 #import <pthread.h>
 
 
+static NSInteger const MaxIterations = 1000;
+static float const CanvasTextureSize = 1024.f;
+
 typedef struct {
     NSUInteger _width, _height;
     NSInteger _escapeRadius;
@@ -18,10 +21,15 @@ typedef struct {
 } ExecutionContext;
 
 
+@interface MandelbrotSet()
+
+@property (nonatomic, strong) Quad* canvasQuad;
+
+@end
+
 @implementation MandelbrotSet
 
 @synthesize complexPlane = _complexPlane;
-@synthesize shader = _shader;
 
 +(MandelbrotSet*)mandelbrotSet {
     return [[MandelbrotSet alloc] init];
@@ -29,6 +37,8 @@ typedef struct {
 
 -(instancetype)init {
     if ((self = [super init])) {
+        Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
+        self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
     }
     return self;
 }
@@ -52,16 +62,16 @@ static inline float calculatePoint(Real cR, Real cI, NSInteger escapeRadius, NSU
         ++N;
     }
     if (renormaliseEscape && N < maxIterations) {
-        return (float) (N + 1 - logl(logl(sqrt(Zrsqr + Zisqr))) / logl(escapeRadius));
+        return (float)(N + 1 - logl(logl(sqrt(Zrsqr + Zisqr))) / logl(escapeRadius));
     } else {
-        return (float) N;
+        return (float)N;
     }
 }
 
 
 void* renderThread(void* arg) {
-    ExecutionContext* const ec = (ExecutionContext* const) arg;
-    NSInteger const colourEntries = ec->_colourTable.size / 3;
+    ExecutionContext* const ec = (ExecutionContext* const)arg;
+    size_t const colourEntries = ec->_colourTable.size / 3;
     Real const fX = 1.0 / ec->_width;
     Real const fY = 1.0 / ec->_height;
     for (NSUInteger y = ec->_startY; y < ec->_height; y += ec->_strideY) {
@@ -71,7 +81,7 @@ void* renderThread(void* arg) {
             Real cR = ec->_cOrigin.r + dX * (ec->_crMaxiMin.r - ec->_cOrigin.r) + dY * (ec->_crMiniMax.r - ec->_cOrigin.r);
             Real cI = ec->_cOrigin.i + dY * (ec->_crMiniMax.i - ec->_cOrigin.i) + dX * (ec->_crMaxiMin.i - ec->_cOrigin.i);
             float iterations = calculatePoint(cR, cI, ec->_escapeRadius, ec->_maxIterations, true);
-            NSInteger colorIndex = (NSInteger) (iterations / ec->_maxIterations * colourEntries);
+            NSInteger colorIndex = (NSInteger)(iterations / ec->_maxIterations * colourEntries);
 //            if (colorIndex >= colourEntries) {
 //                colorIndex = colourEntries-1;
 //            }
@@ -79,7 +89,7 @@ void* renderThread(void* arg) {
 //                colorIndex = 0;
 //            }
             NSUInteger ppos = 4 * (ec->_width * y + x);
-            if ((NSInteger) iterations == ec->_maxIterations) {
+            if ((NSInteger)iterations == ec->_maxIterations) {
                 ec->_rgba[ppos] = 0;
                 ec->_rgba[ppos + 1] = 0;
                 ec->_rgba[ppos + 2] = 0;
@@ -95,6 +105,46 @@ void* renderThread(void* arg) {
 }
 
 #pragma mark Fractal
+
+-(void)updateWithComplexPlane:(ComplexPlane*)complexPlane screenSize:(CGSize)screenSize {
+    self.complexPlane = complexPlane;
+    NSLog(@"recomputing with complex plane origin(%lf,%lf), rMiniMax(%lf,%lf), rMiniMax(%lf,%lf)", _complexPlane.origin.r, _complexPlane.origin.i,
+            _complexPlane.rMaxiMin.r, _complexPlane.rMaxiMin.i, _complexPlane.rMiniMax.r, _complexPlane.rMiniMax.i);
+
+    switch ([Configuration sharedConfiguration].renderStrategy) {
+        case CpuRender: {
+            PolynomialColourMap* newColourMap = [[PolynomialColourMap alloc] initWithSize:4096];
+            [self compute:self.canvasQuad.texture.imageData
+                    width:(NSUInteger)screenSize.width
+                   height:(NSUInteger)screenSize.height
+             escapeRadius:(NSInteger)2
+            maxIterations:(NSUInteger)MaxIterations
+                    //              colourMap:defaultColourTable
+                colourMap:newColourMap
+           executionUnits:[Configuration sharedConfiguration].executionUnits
+               updateDraw:^() {
+                   [self.canvasQuad updateImage];
+               }];
+            break;
+        };
+        case GpuRender: {
+
+        };
+    }
+}
+
+#pragma mark DisplayObject
+
+-(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
+    switch ([Configuration sharedConfiguration].renderStrategy) {
+        case CpuRender: {
+            [self.canvasQuad renderWithMvpMatrix:mvpMatrix alpha:1.f];
+        };
+        case GpuRender: {
+
+        };
+    }
+}
 
 -(void)compute:(unsigned char*)rgba
          width:(NSUInteger)width
@@ -130,7 +180,7 @@ executionUnits:(NSUInteger)executionUnits
     NSDate* executeStart = [NSDate date];
 
     for (NSUInteger i = 0; i < executionUnits; i++) {
-        int threadError = pthread_create(&threads[i], NULL, &renderThread, (void*) &contexts[i]);
+        int threadError = pthread_create(&threads[i], NULL, &renderThread, (void*)&contexts[i]);
 #ifdef DEBUG
         if (threadError != 0) {
             NSLog(@"pthread_create error: %d", threadError);
