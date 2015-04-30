@@ -24,6 +24,9 @@ typedef struct {
 @interface MandelbrotSet()
 
 @property (nonatomic, strong) Quad* canvasQuad;
+@property (nonatomic, strong) RenderingState* directRenderingState;
+@property (nonatomic, strong) NSString* directRenderingVertexShader;
+@property (nonatomic, strong) NSString* directRenderingFragmentShader;
 
 @end
 
@@ -104,48 +107,6 @@ void* renderThread(void* arg) {
     return NULL;
 }
 
-#pragma mark Fractal
-
--(void)updateWithComplexPlane:(ComplexPlane*)complexPlane screenSize:(CGSize)screenSize {
-    self.complexPlane = complexPlane;
-    NSLog(@"recomputing with complex plane origin(%lf,%lf), rMiniMax(%lf,%lf), rMiniMax(%lf,%lf)", _complexPlane.origin.r, _complexPlane.origin.i,
-            _complexPlane.rMaxiMin.r, _complexPlane.rMaxiMin.i, _complexPlane.rMiniMax.r, _complexPlane.rMiniMax.i);
-
-    switch ([Configuration sharedConfiguration].renderStrategy) {
-        case CpuRender: {
-            PolynomialColourMap* newColourMap = [[PolynomialColourMap alloc] initWithSize:4096];
-            [self compute:self.canvasQuad.texture.imageData
-                    width:(NSUInteger)screenSize.width
-                   height:(NSUInteger)screenSize.height
-             escapeRadius:(NSInteger)2
-            maxIterations:(NSUInteger)MaxIterations
-                    //              colourMap:defaultColourTable
-                colourMap:newColourMap
-           executionUnits:[Configuration sharedConfiguration].executionUnits
-               updateDraw:^() {
-                   [self.canvasQuad updateImage];
-               }];
-            break;
-        };
-        case GpuRender: {
-
-        };
-    }
-}
-
-#pragma mark DisplayObject
-
--(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
-    switch ([Configuration sharedConfiguration].renderStrategy) {
-        case CpuRender: {
-            [self.canvasQuad renderWithMvpMatrix:mvpMatrix alpha:1.f];
-        };
-        case GpuRender: {
-
-        };
-    }
-}
-
 -(void)compute:(unsigned char*)rgba
          width:(NSUInteger)width
         height:(NSUInteger)height
@@ -209,31 +170,107 @@ executionUnits:(NSUInteger)executionUnits
     }
 }
 
+-(NSString*)vertexShader {
+    NSMutableString* source = [NSMutableString string];
+
+    [source appendLine:@"attribute vec4 aPosition;"];
+    [source appendLine:@"attribute vec2 aTexCoords;"];
+    [source appendLine:@"varying lowp vec2 vTexCoords;"];
+
+    [source appendLine:@"void main() {"];
+    [source appendLine:@"  gl_Position = aPosition;"];
+    [source appendLine:@"  vTexCoords  = aTexCoords;"];
+    [source appendString:@"}"];
+
+    return source;
+}
+
 -(NSString*)fragmentShader {
     NSMutableString* source = [NSMutableString string];
 
-    [source appendLine:@"uniform sampler1D tex;"];
-    [source appendLine:@"uniform vec2 center;"];
-    [source appendLine:@"uniform float scale;"];
+    [source appendLine:@"varying lowp vec2 vTexCoords;"];
+    [source appendLine:@"uniform lowp sampler2D tex;"];
+    [source appendLine:@"uniform highp vec2 center;"];
+    [source appendLine:@"uniform highp float scale;"];
     [source appendLine:@"uniform int iter;"];
 
     [source appendLine:@"void main() {"];
-    [source appendLine:@"  vec2 z, c;"];
-    [source appendLine:@"  c.x = 1.3333 * (gl_TexCoord[0].x - 0.5) * scale - center.x;"];
-    [source appendLine:@"  c.y = (gl_TexCoord[0].y - 0.5) * scale - center.y;"];
+    [source appendLine:@"  highp vec2 z;"];
+    [source appendLine:@"  highp vec2 c;"];
+    [source appendLine:@"  c.x = 1.3333 * (vTexCoords.x - 0.5) * scale - center.x;"];
+    [source appendLine:@"  c.y = (vTexCoords.y - 0.5) * scale - center.y;"];
     [source appendLine:@"  int i;"];
     [source appendLine:@"  z = c;"];
     [source appendLine:@"  for(i=0; i<iter; i++) {"];
-    [source appendLine:@"    float x = (z.x * z.x - z.y * z.y) + c.x;"];
-    [source appendLine:@"    float y = (z.y * z.x + z.x * z.y) + c.y;"];
+    [source appendLine:@"    highp float x = (z.x * z.x - z.y * z.y) + c.x;"];
+    [source appendLine:@"    highp float y = (z.y * z.x + z.x * z.y) + c.y;"];
     [source appendLine:@"    if((x * x + y * y) > 4.0) break;"];
     [source appendLine:@"    z.x = x;"];
     [source appendLine:@"    z.y = y;"];
     [source appendLine:@"  }"];
-    [source appendLine:@"  gl_FragColor = texture1D(tex, (i == iter ? 0.0 : float(i)) / 100.0);"];
+    [source appendLine:@"  lowp vec2 uv;"];
+    [source appendLine:@"  uv.x = (i == iter ? 0.0 : float(i)) / 100.0;"];
+    [source appendLine:@"  uv.y = 0.0;"];
+    [source appendLine:@"  gl_FragColor = texture2D(tex, uv);"];
     [source appendString:@"}"];
 
     return source;
+}
+
+#pragma mark Fractal
+
+-(void)updateWithComplexPlane:(ComplexPlane*)complexPlane screenSize:(CGSize)screenSize {
+    self.complexPlane = complexPlane;
+    NSLog(@"recomputing with complex plane origin(%lf,%lf), rMiniMax(%lf,%lf), rMiniMax(%lf,%lf)", _complexPlane.origin.r, _complexPlane.origin.i,
+            _complexPlane.rMaxiMin.r, _complexPlane.rMaxiMin.i, _complexPlane.rMiniMax.r, _complexPlane.rMiniMax.i);
+
+    switch ([Configuration sharedConfiguration].renderStrategy) {
+        case CpuRender: {
+            PolynomialColourMap* newColourMap = [[PolynomialColourMap alloc] initWithSize:4096];
+            [self compute:self.canvasQuad.texture.imageData
+                    width:(NSUInteger)screenSize.width
+                   height:(NSUInteger)screenSize.height
+             escapeRadius:(NSInteger)2
+            maxIterations:(NSUInteger)MaxIterations
+                    //              colourMap:defaultColourTable
+                colourMap:newColourMap
+           executionUnits:[Configuration sharedConfiguration].executionUnits
+               updateDraw:^() {
+                   [self.canvasQuad updateImage];
+               }];
+            break;
+        };
+        case GpuRender: {
+            break;
+        };
+    }
+}
+
+#pragma mark DisplayObject
+
+-(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
+    switch ([Configuration sharedConfiguration].renderStrategy) {
+        case CpuRender: {
+            [self.canvasQuad renderWithMvpMatrix:mvpMatrix alpha:1.f];
+            break;
+        };
+        case GpuRender: {
+            if (!self.directRenderingState) {
+                self.directRenderingState = [[RenderingState alloc] init];
+            }
+            if (!self.directRenderingVertexShader) {
+                self.directRenderingVertexShader = [self vertexShader];
+            }
+            if (!self.directRenderingFragmentShader) {
+                self.directRenderingFragmentShader = [self fragmentShader];
+            }
+            self.directRenderingState.texture = nil;
+            self.directRenderingState.mvpMatrix = mvpMatrix;
+            self.directRenderingState.alpha = alpha;
+            [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader fragmentShader:self.directRenderingFragmentShader];
+            break;
+        };
+    }
 }
 
 @end

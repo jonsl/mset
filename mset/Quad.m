@@ -187,7 +187,6 @@
     self.renderingState.texture = self.texture;
     self.renderingState.mvpMatrix = mvpMatrix;
     self.renderingState.alpha = alpha;
-
     [self.renderingState prepareToDrawWithVertexShader:nil fragmentShader:nil];
 
     [self applyBlendMode:GL_SRC_ALPHA dstFactor:GL_ONE_MINUS_SRC_ALPHA];

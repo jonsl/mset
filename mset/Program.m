@@ -41,12 +41,17 @@
 
 -(void)compile {
     uint program = glCreateProgram();
-    uint vertexShader = [self compileShader:self.vertexShader type:GL_VERTEX_SHADER];
-    uint fragmentShader = [self compileShader:self.fragmentShader type:GL_FRAGMENT_SHADER];
 
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-
+    uint vertexShader;
+    if (self.vertexShader) {
+        vertexShader = [self compileShader:self.vertexShader type:GL_VERTEX_SHADER];
+        glAttachShader(program, vertexShader);
+    }
+    uint fragmentShader;
+    if (self.fragmentShader) {
+        fragmentShader = [self compileShader:self.fragmentShader type:GL_FRAGMENT_SHADER];
+        glAttachShader(program, fragmentShader);
+    }
     glLinkProgram(program);
 
 #ifdef DEBUG

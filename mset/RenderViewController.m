@@ -73,6 +73,8 @@ static Real InitialRealWidth = 4;
         self.fractal = [MandelbrotSet mandelbrotSet];
         [self initialiseComplexPlane];
 
+        [Configuration sharedConfiguration].renderStrategy = GpuRender;
+
         _recomputing = NO;
         _pendingCompute = YES;
     }
@@ -134,14 +136,6 @@ static Real InitialRealWidth = 4;
     return YES;
 }
 
-#pragma mark - GLKView and GLKViewController delegate methods
-
--(void)compute {
-    self.modelViewMatrix = GLKMatrix4Identity;
-
-    [self.fractal updateWithComplexPlane:self.complexPlane screenSize:_screenSize];
-}
-
 -(CPPoint)canvasPointToComplexPlane:(CGPoint)position {
     Real xLen = (Real) position.x / _screenSize.width;
     Real yLen = (Real) position.y / _screenSize.height;
@@ -171,6 +165,12 @@ static Real InitialRealWidth = 4;
 
 -(void)scheduleRecompute {
     _pendingCompute = YES;
+}
+
+-(void)compute {
+    self.modelViewMatrix = GLKMatrix4Identity;
+
+    [self.fractal updateWithComplexPlane:self.complexPlane screenSize:_screenSize];
 }
 
 -(void)update {

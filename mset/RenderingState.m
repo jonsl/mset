@@ -24,36 +24,31 @@
         if (!self.program) {
             NSString* vsh = vertexShader;
             NSString* fsh = fragmentShader;
-            if (vsh == nil) {
+            if (vsh == nil && fsh == nil) {
                 vsh = [self vertexShader:_texture];
-            }
-            if (fsh == nil) {
                 fsh = [self fragmentShader:_texture];
             }
             self.program = [Program programWithVertexShader:vsh fragmentShader:fsh];
         }
     }
 
-//    _aPosition = [self.program getTrait:@"aPosition"];
-//    _aColour = [self.program getTrait:@"aColour"];
-//    _aTexCoords = [self.program getTrait:@"aTexCoords"];
-//    _uMvpMatrix = [self.program getTrait:@"uMvpMatrix"];
-//    _uAlpha = [self.program getTrait:@"uAlpha"];
-//    _uTexture = [self.program getTrait:@"uTexture"];
-
-
     glUseProgram(self.program.name);
     int uMvpMatrix = [self.program getTrait:@"uMvpMatrix"];
-    glUniformMatrix4fv(uMvpMatrix, 1, NO, self.mvpMatrix.m);
-
+    if (uMvpMatrix != -1) {
+        glUniformMatrix4fv(uMvpMatrix, 1, NO, self.mvpMatrix.m);
+    }
     int uAlpha = [self.program getTrait:@"uAlpha"];
-    glUniform4f(uAlpha, 1.0f, 1.0f, 1.0f, _alpha);
+    if (uAlpha != -1) {
+        glUniform4f(uAlpha, 1.0f, 1.0f, 1.0f, _alpha);
+    }
 
     if (self.texture) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, self.texture.name);
         int uTexture = [self.program getTrait:@"uTexture"];
-        glUniform1i(uTexture, 0);
+        if (uTexture != -1) {
+            glUniform1i(uTexture, 0);
+        }
     }
 #ifdef DEBUG
     GLenum glError = glGetError();
