@@ -73,7 +73,7 @@ static Real InitialRealWidth = 4;
         self.fractal = [MandelbrotSet mandelbrotSet];
         [self initialiseComplexPlane];
 
-        [Configuration sharedConfiguration].renderStrategy = GpuRender;
+        [Configuration sharedConfiguration].renderStrategy = GpuRender;//CpuRender;
 
         _recomputing = NO;
         _pendingCompute = YES;

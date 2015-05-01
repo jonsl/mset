@@ -8,7 +8,7 @@
 #import <pthread.h>
 
 
-static NSInteger const MaxIterations = 1000;
+static NSInteger const MaxIterations = 128;
 static float const CanvasTextureSize = 1024.f;
 
 typedef struct {
@@ -255,7 +255,7 @@ executionUnits:(NSUInteger)executionUnits
     [source appendLine:@"    z.y = y;"];
     [source appendLine:@"  }"];
     [source appendLine:@"  lowp vec2 uv;"];
-    [source appendLine:@"  uv.x = (i == uMaxIterations ? 0.0 : float(i)) / 100.0;"];
+    [source appendLine:@"  uv.x = (i == uMaxIterations ? 0.0 : float(i)) / float(uMaxIterations);"];
     [source appendLine:@"  uv.y = 0.0;"];
     [source appendLine:@"  gl_FragColor = texture2D(uTexture, uv);"];
     [source appendString:@"}"];
@@ -320,7 +320,7 @@ executionUnits:(NSUInteger)executionUnits
                                                       fragmentShader:self.directRenderingFragmentShader];
             int uCentre = [self.directRenderingState.program getTrait:@"uCenter"];
             if (uCentre != -1) {
-                glUniform2f(uCentre, 0, 0);
+                glUniform2f(uCentre, +0.5, 0);
             }
             int uScale = [self.directRenderingState.program getTrait:@"uScale"];
             if (uScale != -1) {
@@ -328,7 +328,7 @@ executionUnits:(NSUInteger)executionUnits
             }
             int uMaxIterations = [self.directRenderingState.program getTrait:@"uMaxIterations"];
             if (uMaxIterations != -1) {
-                glUniform1i(uMaxIterations, 128);
+                glUniform1i(uMaxIterations, MaxIterations);
             }
             int aPosition = [self.directRenderingState.program getTrait:@"aPosition"];
             if (aPosition != -1) {

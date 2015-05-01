@@ -9,7 +9,7 @@
 #import "Mset.h"
 
 
-@interface GameViewController ()
+@interface GameViewController()
 
 @property (nonatomic, strong) RenderViewController* renderViewController;
 

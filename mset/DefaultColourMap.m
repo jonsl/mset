@@ -18,17 +18,17 @@
             int ppos = index * 3;
             Real c = 3.0 * log(index) / log(size - 1.0);
             if (c < 1) {
-                _rgb[ppos] = (unsigned char) (255 * c);
+                _rgb[ppos] = (unsigned char)(255 * c);
                 _rgb[ppos + 1] = 0;
                 _rgb[ppos + 2] = 0;
             } else if (c < 2) {
                 _rgb[ppos] = 255;
-                _rgb[ppos + 1] = (unsigned char) (255 * (c - 1));
+                _rgb[ppos + 1] = (unsigned char)(255 * (c - 1));
                 _rgb[ppos + 2] = 0;
             } else {
                 _rgb[ppos] = 255;
                 _rgb[ppos + 1] = 255;
-                _rgb[ppos + 2] = (unsigned char) (255 * (c - 2));
+                _rgb[ppos + 2] = (unsigned char)(255 * (c - 2));
             }
         }
         _size = size * 3 * sizeof(unsigned char);

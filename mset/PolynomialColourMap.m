@@ -17,10 +17,10 @@
         _rgb = calloc(size * 3, sizeof(unsigned char));
         for (int index = 0; index < size; ++index) {
             int ppos = index * 3;
-            double t = (double)index/(double)size;
-            _rgb[ppos] = (unsigned char)(5*(1-t)*t*t*t*255);
-            _rgb[ppos + 1] = (unsigned char)(15*(1-t)*(1-t)*t*t*255);
-            _rgb[ppos + 2] = (unsigned char)(8.5*(1-t)*(1-t)*(1-t)*t*255);
+            double t = (double)index / (double)size;
+            _rgb[ppos] = (unsigned char)(5 * (1 - t) * t * t * t * 255);
+            _rgb[ppos + 1] = (unsigned char)(15 * (1 - t) * (1 - t) * t * t * 255);
+            _rgb[ppos + 2] = (unsigned char)(8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
         }
         _size = size * 3 * sizeof(unsigned char);
     }
