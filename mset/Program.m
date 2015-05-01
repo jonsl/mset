@@ -6,7 +6,7 @@
 #import "Mset.h"
 
 
-@interface Program ()
+@interface Program()
 
 @property (nonatomic, strong) NSString* vertexShader;
 @property (nonatomic, strong) NSString* fragmentShader;
@@ -63,7 +63,7 @@
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char* log = malloc(sizeof(char) * (size_t) logLength);
+            char* log = malloc(sizeof(char) * (size_t)logLength);
             glGetProgramInfoLog(program, logLength, NULL, log);
             NSLog(@"Error linking program: %s", log);
             free(log);
@@ -100,7 +100,7 @@
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char* log = malloc(sizeof(char) * (size_t) logLength);
+            char* log = malloc(sizeof(char) * (size_t)logLength);
             glGetShaderInfoLog(shader, logLength, NULL, log);
             NSLog(@"Error compiling %@ shader: %s", type == GL_VERTEX_SHADER ? @"vertex" : @"fragment", log);
             free(log);

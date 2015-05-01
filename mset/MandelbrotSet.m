@@ -4,6 +4,7 @@
 //
 
 #import "Mset.h"
+#import "Util.h"
 #import <pthread.h>
 
 
@@ -20,6 +21,7 @@ typedef struct {
     CPPoint _cOrigin, _crMaxiMin, _crMiniMax;
 } ExecutionContext;
 
+static Vertex* baseShaderQuad;
 
 @interface MandelbrotSet()
 
@@ -44,9 +46,50 @@ typedef struct {
         Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
         self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
-        self.paletteTexture = [Texture textureWithImage:@"pal.png" scale:1.f];
+        baseShaderQuad = malloc(sizeof(Vertex) * 4);
+
+        baseShaderQuad[0].x.x = -1.f;
+        baseShaderQuad[0].x.y = -1.f;
+        baseShaderQuad[0].uv.x = 0.f;
+        baseShaderQuad[0].uv.y = 0.f;
+        baseShaderQuad[0].colour.r = 0xff;
+        baseShaderQuad[0].colour.g = 0xff;
+        baseShaderQuad[0].colour.b = 0xff;
+        baseShaderQuad[0].colour.a = 0xff;
+
+        baseShaderQuad[1].x.x = -1.f;
+        baseShaderQuad[1].x.y = +1.f;
+        baseShaderQuad[1].uv.x = 0.f;
+        baseShaderQuad[1].uv.y = 1.f;
+        baseShaderQuad[1].colour.r = 0xff;
+        baseShaderQuad[1].colour.g = 0xff;
+        baseShaderQuad[1].colour.b = 0xff;
+        baseShaderQuad[1].colour.a = 0xff;
+
+        baseShaderQuad[2].x.x = +1.f;
+        baseShaderQuad[2].x.y = -1.f;
+        baseShaderQuad[2].uv.x = 1.f;
+        baseShaderQuad[2].uv.y = 0.f;
+        baseShaderQuad[2].colour.r = 0xff;
+        baseShaderQuad[2].colour.g = 0xff;
+        baseShaderQuad[2].colour.b = 0xff;
+        baseShaderQuad[2].colour.a = 0xff;
+
+        baseShaderQuad[3].x.x = +1.f;
+        baseShaderQuad[3].x.y = +1.f;
+        baseShaderQuad[3].uv.x = 1.f;
+        baseShaderQuad[3].uv.y = 1.f;
+        baseShaderQuad[3].colour.r = 0xff;
+        baseShaderQuad[3].colour.g = 0xff;
+        baseShaderQuad[3].colour.b = 0xff;
+        baseShaderQuad[3].colour.a = 0xff;
     }
     return self;
+}
+
+-(void)dealloc {
+    free(baseShaderQuad);
+    baseShaderQuad = 0;
 }
 
 // return: number of iterations to diverge from (x, y), or -1 if convergent
@@ -176,14 +219,12 @@ executionUnits:(NSUInteger)executionUnits
 -(NSString*)vertexShader {
     NSMutableString* source = [NSMutableString string];
 
-    [source appendLine:@"attribute vec4 aPosition;"];
+    [source appendLine:@"attribute vec2 aPosition;"];
     [source appendLine:@"attribute vec2 aTexCoords;"];
-    [source appendLine:@"uniform mat4 uMvpMatrix;"];
-    [source appendLine:@"uniform vec4 uAlpha;"];
     [source appendLine:@"varying lowp vec2 vTexCoords;"];
 
     [source appendLine:@"void main() {"];
-    [source appendLine:@"  gl_Position = uMvpMatrix * aPosition;"];
+    [source appendLine:@"  gl_Position = vec4(aPosition, 0., 1.);"];
     [source appendLine:@"  vTexCoords  = aTexCoords;"];
     [source appendString:@"}"];
 
@@ -269,10 +310,38 @@ executionUnits:(NSUInteger)executionUnits
             if (!self.directRenderingFragmentShader) {
                 self.directRenderingFragmentShader = [self fragmentShader];
             }
-            self.directRenderingState.texture = nil;
+            if (!self.paletteTexture) {
+                self.paletteTexture = [Texture textureWithImage:@"pal.png" scale:1.f];
+            }
+            self.directRenderingState.texture = self.paletteTexture;
             self.directRenderingState.mvpMatrix = mvpMatrix;
             self.directRenderingState.alpha = alpha;
-            [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader fragmentShader:self.directRenderingFragmentShader];
+            [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader
+                                                      fragmentShader:self.directRenderingFragmentShader];
+            int uCentre = [self.directRenderingState.program getTrait:@"uCenter"];
+            if (uCentre != -1) {
+                glUniform2f(uCentre, 0, 0);
+            }
+            int uScale = [self.directRenderingState.program getTrait:@"uScale"];
+            if (uScale != -1) {
+                glUniform1f(uScale, 4);
+            }
+            int uMaxIterations = [self.directRenderingState.program getTrait:@"uMaxIterations"];
+            if (uMaxIterations != -1) {
+                glUniform1i(uMaxIterations, 128);
+            }
+            int aPosition = [self.directRenderingState.program getTrait:@"aPosition"];
+            if (aPosition != -1) {
+                glEnableVertexAttribArray((GLuint)aPosition);
+                glVertexAttribPointer((GLuint)aPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)baseShaderQuad + (offsetof(Vertex, x)));
+            }
+            int aTexture = [self.directRenderingState.program getTrait:@"aTexCoords"];
+            if (aTexture != -1) {
+                glEnableVertexAttribArray((GLuint)aTexture);
+                glVertexAttribPointer((GLuint)aTexture, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)baseShaderQuad + (offsetof(Vertex, uv)));
+            }
+            // Draw
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             break;
         };
     }
