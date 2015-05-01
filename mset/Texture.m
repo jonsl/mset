@@ -6,24 +6,57 @@
 #import "Mset.h"
 
 
-@implementation Texture
+typedef void (^DrawingBlock)(CGContextRef context);
 
-+(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale {
-    return [[Texture alloc] initWithWidth:width height:height scale:scale];
+@implementation Texture {
+    DrawingBlock _drawingBlock;
 }
 
--(instancetype)initWithWidth:(float)width height:(float)height scale:(float)scale {
++(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale {
+    return [[Texture alloc] initWithWidth:width height:height scale:scale drawingBlock:nil];
+}
+
++(instancetype)textureWithImage:(NSString*)path scale:(float)scale {
+    NSString *directory = [path stringByDeletingLastPathComponent];
+    NSString *file = [path lastPathComponent];
+    NSString* fullPath = [[NSBundle mainBundle] pathForResource:file ofType:nil inDirectory:directory];
+    NSData* data = [[NSData alloc] initWithContentsOfFile:fullPath];
+    UIImage* image = [[UIImage alloc] initWithData:data];
+    return [[Texture alloc] initWithWidth:image.size.width height:image.size.height scale:image.scale drawingBlock:^(CGContextRef context) {
+        [image drawAtPoint:CGPointMake(0, 0)];
+    }];
+}
+
+-(instancetype)initWithWidth:(float)width height:(float)height scale:(float)scale drawingBlock:(DrawingBlock)drawingBlock {
     if ((self = [super init])) {
         // only textures with sidelengths that are powers of 2 support all OpenGL ES features.
         NSUInteger width2 = nextPowerOfTwo(width * scale);
         NSUInteger height2 = nextPowerOfTwo(height * scale);
         NSUInteger const bytesPerPixel = 4;
         _imageData = calloc(width2 * height2 * bytesPerPixel, sizeof(uint8_t));
+
+        CGColorSpaceRef cgColorSpace = CGColorSpaceCreateDeviceRGB();
+        CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast;
+
+        CGContextRef context = CGBitmapContextCreate(_imageData, width2, height2, 8,
+                bytesPerPixel * width2, cgColorSpace, bitmapInfo);
+        CGColorSpaceRelease(cgColorSpace);
+
+        // UIKit referential is upside down - we flip it and apply the scale factor
+        CGContextTranslateCTM(context, 0.0f, height2);
+        CGContextScaleCTM(context, scale, -scale);
+        if (drawingBlock) {
+            UIGraphicsPushContext(context);
+            drawingBlock(context);
+            UIGraphicsPopContext();
+        }
+
         [self createGlTexture:_imageData width:width2 height:height2 numMipmaps:0];
 
         _width = width2;
         _height = height2;
         _scale = scale;
+        _drawingBlock = drawingBlock;
 
         // invoke setters
         self.repeat = NO;
@@ -52,12 +85,12 @@
     NSAssert(_name != 0, @"invalid texture name");
     glBindTexture(GL_TEXTURE_2D, _name);
 
-    int levelWidth = (int) width;
-    int levelHeight = (int) height;
-    unsigned char* levelData = (unsigned char*) imgData;
+    int levelWidth = (int)width;
+    int levelHeight = (int)height;
+    unsigned char* levelData = (unsigned char*)imgData;
     for (int level = 0; level <= numMipmaps; ++level) {
         int size = levelWidth * levelHeight * bitsPerPixel / 8;
-        glTexImage2D(GL_TEXTURE_2D, level, (GLint) glTexFormat, levelWidth, levelHeight,
+        glTexImage2D(GL_TEXTURE_2D, level, (GLint)glTexFormat, levelWidth, levelHeight,
                 0, glTexFormat, glTexType, levelData);
         levelData += size;
         levelWidth /= 2;
@@ -72,7 +105,7 @@
 #endif
 }
 
--(void)replace {
+-(void)replaceImageData {
     glBindTexture(GL_TEXTURE_2D, _name);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, (GLsizei)_width, (GLsizei)_height, GL_RGBA, GL_UNSIGNED_BYTE, _imageData);
 #ifdef DEBUG

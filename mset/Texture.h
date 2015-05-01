@@ -10,7 +10,8 @@ typedef enum TextureFilter {
 @interface Texture : NSObject
 
 +(instancetype)textureWithWidth:(float)width height:(float)height scale:(float)scale;
--(void)replace;
++(instancetype)textureWithImage:(NSString*)path scale:(float)scale;
+-(void)replaceImageData;
 
 @property (nonatomic) unsigned char* imageData;
 @property (nonatomic, readonly) NSUInteger width;

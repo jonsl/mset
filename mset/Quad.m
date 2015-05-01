@@ -168,7 +168,7 @@
 }
 
 -(void)updateImage {
-    [self.texture replace];
+    [self.texture replaceImageData];
 }
 
 -(BOOL)hasVisibleArea {

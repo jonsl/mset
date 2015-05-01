@@ -5,7 +5,6 @@
 
 #import "Util.h"
 
-typedef void (^DrawBlock)();
 
 @protocol Fractal<DisplayObject>
 

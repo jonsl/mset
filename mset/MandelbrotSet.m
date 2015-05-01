@@ -24,6 +24,7 @@ typedef struct {
 @interface MandelbrotSet()
 
 @property (nonatomic, strong) Quad* canvasQuad;
+@property (nonatomic, strong) Texture* paletteTexture;
 @property (nonatomic, strong) RenderingState* directRenderingState;
 @property (nonatomic, strong) NSString* directRenderingVertexShader;
 @property (nonatomic, strong) NSString* directRenderingFragmentShader;
@@ -42,6 +43,8 @@ typedef struct {
     if ((self = [super init])) {
         Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
         self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
+
+        self.paletteTexture = [Texture textureWithImage:@"pal.png" scale:1.f];
     }
     return self;
 }
@@ -114,7 +117,7 @@ void* renderThread(void* arg) {
  maxIterations:(NSUInteger)maxIterations
      colourMap:(NSObject<ColourMapping>*)colourMap
 executionUnits:(NSUInteger)executionUnits
-    updateDraw:(DrawBlock)updateDraw {
+    updateDraw:(void (^)())updateDraw {
     if (_complexPlane == nil) {
         [NSException raise:ExceptionLogicError format:@"invalid fractalDescriptor"];
     }
