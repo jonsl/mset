@@ -53,7 +53,7 @@ static Real InitialRealWidth = 4;
     GLKView* view = (GLKView*) self.view;
     view.context = self.eaglContext;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
-    self.preferredFramesPerSecond = 60;
+    self.preferredFramesPerSecond = 30;
 
     _initialPosition = CGPointMake(0, 0);
     _initialScale = 1.f;

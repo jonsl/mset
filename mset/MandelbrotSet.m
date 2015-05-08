@@ -8,7 +8,7 @@
 #import <pthread.h>
 
 
-static NSInteger const MaxIterations = 128;
+static NSInteger const MaxIterations = 256;
 static float const CanvasTextureSize = 1024.f;
 
 typedef struct {
@@ -47,9 +47,11 @@ static Vertex* baseShaderQuad;
         self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
         baseShaderQuad = malloc(sizeof(Vertex) * 4);
+        
+        float scale = 1.f;
 
-        baseShaderQuad[0].x.x = -1.f;
-        baseShaderQuad[0].x.y = -1.f;
+        baseShaderQuad[0].x.x = -1.f * scale;
+        baseShaderQuad[0].x.y = -1.f * scale;
         baseShaderQuad[0].uv.x = 0.f;
         baseShaderQuad[0].uv.y = 0.f;
         baseShaderQuad[0].colour.r = 0xff;
@@ -57,17 +59,16 @@ static Vertex* baseShaderQuad;
         baseShaderQuad[0].colour.b = 0xff;
         baseShaderQuad[0].colour.a = 0xff;
 
-        baseShaderQuad[1].x.x = -1.f;
-        baseShaderQuad[1].x.y = +1.f;
+        baseShaderQuad[1].x.x = -1.f * scale;
+        baseShaderQuad[1].x.y = +1.f * scale;
         baseShaderQuad[1].uv.x = 0.f;
         baseShaderQuad[1].uv.y = 1.f;
         baseShaderQuad[1].colour.r = 0xff;
         baseShaderQuad[1].colour.g = 0xff;
         baseShaderQuad[1].colour.b = 0xff;
         baseShaderQuad[1].colour.a = 0xff;
-
-        baseShaderQuad[2].x.x = +1.f;
-        baseShaderQuad[2].x.y = -1.f;
+        baseShaderQuad[2].x.x = +1.f * scale;
+        baseShaderQuad[2].x.y = -1.f * scale;
         baseShaderQuad[2].uv.x = 1.f;
         baseShaderQuad[2].uv.y = 0.f;
         baseShaderQuad[2].colour.r = 0xff;
@@ -75,8 +76,8 @@ static Vertex* baseShaderQuad;
         baseShaderQuad[2].colour.b = 0xff;
         baseShaderQuad[2].colour.a = 0xff;
 
-        baseShaderQuad[3].x.x = +1.f;
-        baseShaderQuad[3].x.y = +1.f;
+        baseShaderQuad[3].x.x = +1.f * scale;
+        baseShaderQuad[3].x.y = +1.f * scale;
         baseShaderQuad[3].uv.x = 1.f;
         baseShaderQuad[3].uv.y = 1.f;
         baseShaderQuad[3].colour.r = 0xff;
@@ -236,28 +237,35 @@ executionUnits:(NSUInteger)executionUnits
 
     [source appendLine:@"uniform highp vec2 uCenter;"];
     [source appendLine:@"uniform highp float uScale;"];
-    [source appendLine:@"uniform lowp sampler2D uTexture;"];
+    [source appendLine:@"uniform highp float uRotation;"];
+//    [source appendLine:@"uniform lowp sampler2D uTexture;"];
     [source appendLine:@"uniform int uMaxIterations;"];
     [source appendLine:@"varying lowp vec2 vTexCoords;"];
 
     [source appendLine:@"void main() {"];
-    [source appendLine:@"  highp vec2 z;"];
+    [source appendLine:@"  const mediump vec3 colourPhase = vec3(5,7,11)/80.0;"];
+    [source appendLine:@"  const mediump vec3 colourPhaseStart = vec3(1);"];
     [source appendLine:@"  highp vec2 c;"];
-    [source appendLine:@"  c.x = 1.3333 * (vTexCoords.x - 0.5) * uScale - uCenter.x;"];
-    [source appendLine:@"  c.y = (vTexCoords.y - 0.5) * uScale - uCenter.y;"];
-    [source appendLine:@"  int i;"];
-    [source appendLine:@"  z = c;"];
-    [source appendLine:@"  for(i=0; i<uMaxIterations; i++) {"];
-    [source appendLine:@"    highp float x = (z.x * z.x - z.y * z.y) + c.x;"];
-    [source appendLine:@"    highp float y = (z.y * z.x + z.x * z.y) + c.y;"];
-    [source appendLine:@"    if((x * x + y * y) > 4.0) break;"];
+    [source appendLine:@"  highp vec2 r;"];
+    [source appendLine:@"  c = (vTexCoords - 0.5) * uScale - uCenter;"];
+    [source appendLine:@"  c.y /= 1.33333;"];
+    [source appendLine:@"  r = c * cos(uRotation) + vec2(1,-1) * sin(uRotation) * c.yx;"];
+    [source appendLine:@"  highp vec2 z = r;"];
+    [source appendLine:@"  int N;"];
+    [source appendLine:@"  for(N=0; N<uMaxIterations; N++) {"];
+    [source appendLine:@"    highp float x = (z.x * z.x - z.y * z.y) + r.x;"];
+    [source appendLine:@"    highp float y = (z.y * z.x + z.x * z.y) + r.y;"];
+    [source appendLine:@"    if (dot(x,x)+dot(y,y) > 4.) break;"];
     [source appendLine:@"    z.x = x;"];
     [source appendLine:@"    z.y = y;"];
     [source appendLine:@"  }"];
     [source appendLine:@"  lowp vec2 uv;"];
-    [source appendLine:@"  uv.x = (i == uMaxIterations ? 0.0 : float(i)) / float(uMaxIterations);"];
-    [source appendLine:@"  uv.y = 0.0;"];
-    [source appendLine:@"  gl_FragColor = texture2D(uTexture, uv);"];
+//    [source appendLine:@"  uv.x = (float(N) - log2(log2(sqrt(z.x * z.x - z.y * z.y))) / log(2.0)) / float(uMaxIterations);"];
+//    [source appendLine:@"  uv.x = pow(sin(colourPhase.xyz * float(iterations) + colourPhaseStart)*.5+.5,vec3(1.5));"];
+//    [source appendLine:@"  uv.x = (N == uMaxIterations ? 0.0 : float(N)) / float(uMaxIterations);"];
+//    [source appendLine:@"  uv.y = 0.0;"];
+    [source appendLine:@"  gl_FragColor = vec4(pow(sin(colourPhase.xyz * float(N) + colourPhaseStart)*.5+.5,vec3(1.5)), 1.);"];
+//    [source appendLine:@"  gl_FragColor = texture2D(uTexture, uv);"];
     [source appendString:@"}"];
 
     return source;
@@ -267,8 +275,8 @@ executionUnits:(NSUInteger)executionUnits
 
 -(void)updateWithComplexPlane:(ComplexPlane*)complexPlane screenSize:(CGSize)screenSize {
     self.complexPlane = complexPlane;
-    NSLog(@"recomputing with complex plane origin(%lf,%lf), rMiniMax(%lf,%lf), rMiniMax(%lf,%lf)", _complexPlane.origin.r, _complexPlane.origin.i,
-            _complexPlane.rMaxiMin.r, _complexPlane.rMaxiMin.i, _complexPlane.rMiniMax.r, _complexPlane.rMiniMax.i);
+//    NSLog(@"recomputing with complex plane origin(%lf,%lf), rMiniMax(%lf,%lf), rMiniMax(%lf,%lf)", _complexPlane.origin.r, _complexPlane.origin.i,
+//            _complexPlane.rMaxiMin.r, _complexPlane.rMaxiMin.i, _complexPlane.rMiniMax.r, _complexPlane.rMiniMax.i);
 
     switch ([Configuration sharedConfiguration].renderStrategy) {
         case CpuRender: {
@@ -310,14 +318,18 @@ executionUnits:(NSUInteger)executionUnits
             if (!self.directRenderingFragmentShader) {
                 self.directRenderingFragmentShader = [self fragmentShader];
             }
-            if (!self.paletteTexture) {
-                self.paletteTexture = [Texture textureWithImage:@"pal.png" scale:1.f];
-            }
-            self.directRenderingState.texture = self.paletteTexture;
+//            if (!self.paletteTexture) {
+//                self.paletteTexture = [Texture textureWithImage:@"pal.png" scale:1.f];
+//            }
+            self.directRenderingState.texture = nil;//self.paletteTexture;
             self.directRenderingState.mvpMatrix = mvpMatrix;
             self.directRenderingState.alpha = alpha;
             [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader
                                                       fragmentShader:self.directRenderingFragmentShader];
+//            int uMvpMatrix = [self.directRenderingState.program getTrait:@"uMvpMatrix"];
+//            if (uMvpMatrix != -1) {
+//                glUniformMatrix4fv(uMvpMatrix, 1, NO, mvpMatrix.m);
+//            }
             int uCentre = [self.directRenderingState.program getTrait:@"uCenter"];
             if (uCentre != -1) {
                 glUniform2f(uCentre, +0.5, 0);
@@ -325,6 +337,10 @@ executionUnits:(NSUInteger)executionUnits
             int uScale = [self.directRenderingState.program getTrait:@"uScale"];
             if (uScale != -1) {
                 glUniform1f(uScale, 4);
+            }
+            int uRotation = [self.directRenderingState.program getTrait:@"uRotation"];
+            if (uRotation != -1) {
+                glUniform1f(uRotation, 0);
             }
             int uMaxIterations = [self.directRenderingState.program getTrait:@"uMaxIterations"];
             if (uMaxIterations != -1) {
