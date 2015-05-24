@@ -172,7 +172,7 @@ static Real InitialRealWidth = 4;
 -(void)update {
     if (_pendingCompute) {
         _pendingCompute = NO;
-        self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix), _translateMatrix), self.modelViewMatrix);
+        self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(_translateMatrix, GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix)), self.modelViewMatrix);
         [self screenToComplexPlane];
 
         _translateMatrix = GLKMatrix4Identity;
@@ -194,20 +194,16 @@ static Real InitialRealWidth = 4;
     _translateMatrix = GLKMatrix4Translate(GLKMatrix4Identity, _initialPosition.x, _initialPosition.y, 0.0);
     _scaleMatrix = GLKMatrix4Scale(GLKMatrix4Identity, _initialScale, _initialScale, 1.0);
     _rotateMatrix = GLKMatrix4Rotate(GLKMatrix4Identity, _initialRotation, 0.0, 0.0, 1.0);
-    self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix), _translateMatrix), GLKMatrix4Identity);
+    self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(_translateMatrix, GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix)), GLKMatrix4Identity);
 
     _scaleMatrix = GLKMatrix4Identity;
     _rotateMatrix = GLKMatrix4Identity;
     _translateMatrix = GLKMatrix4Identity;
 }
 
--(void)translate:(CGPoint)location {
-//    CPPoint cp = [self screenPointToComplexPlane:pt];
-//    NSLog(@"pt, cp = (%f,%f) : (%lf,%lf)", location.x, location.y, cp.r, cp.i);
-//    CPPoint pt = [self touchToComplexPlane:location];
-//    NSLog(@"pt = {%lf, %lf}", pt.r, pt.i);
-//    _translateMatrix = GLKMatrix4Translate(_translateMatrix, -cp.r, -cp.i, 0.0);
-//
+-(void)translateWithTranslation:(CGPoint)translation {
+    _translateMatrix = GLKMatrix4Translate(_translateMatrix, translation.x, translation.y, 0.0);
+
     [self scheduleRecompute];
 }
 
@@ -227,16 +223,13 @@ static Real InitialRealWidth = 4;
     [self scheduleRecompute];
 }
 
--(void)translateEnded {
-//    [self scheduleRecompute];
+-(void)translateEndedWithTranslation:(CGPoint)translation {
 }
 
--(void)rotateEnded {
-//    [self scheduleRecompute];
+-(void)rotateEndedWithCentre:(CGPoint)centre radians:(CGFloat)radians {
 }
 
--(void)scaleEnded {
-//    [self scheduleRecompute];
+-(void)scaleEndedWithCentre:(CGPoint)centre scale:(CGFloat)scale {
 }
 
 @end

@@ -8,11 +8,11 @@
 
 @interface RenderViewController : GLKViewController
 
--(void)translate:(CGPoint)location;
+-(void)translateWithTranslation:(CGPoint)translation;
 -(void)rotateWithCentre:(CGPoint)centre radians:(CGFloat)radians;
 -(void)scaleWithCentre:(CGPoint)centre scale:(CGFloat)scale;
--(void)translateEnded;
--(void)rotateEnded;
--(void)scaleEnded;
+-(void)translateEndedWithTranslation:(CGPoint)translation;
+-(void)rotateEndedWithCentre:(CGPoint)centre radians:(CGFloat)radians;;
+-(void)scaleEndedWithCentre:(CGPoint)centre scale:(CGFloat)scale;;
 
 @end

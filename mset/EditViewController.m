@@ -65,33 +65,33 @@
 -(void)panGestureRecognizer:(UIPanGestureRecognizer*)recognizer {
     CGPoint translation = [recognizer translationInView:self.renderViewController.view];
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
-        [self.renderViewController translate:translation];
+        [self.renderViewController translateWithTranslation:translation];
         // no accumulation
         [recognizer setTranslation:CGPointZero inView:self.renderViewController.view];
     } else if (recognizer.state == UIGestureRecognizerStateEnded) {
-        [self.renderViewController translateEnded];
+        [self.renderViewController translateEndedWithTranslation:translation];
     }
 }
 
 -(void)rotationGestureRecognizer:(UIRotationGestureRecognizer*)recognizer {
-    CGPoint locationInView = [recognizer locationInView:self.renderViewController.view];
+    CGPoint centre = [recognizer locationInView:self.renderViewController.view];
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
-        [self.renderViewController rotateWithCentre:locationInView radians:recognizer.rotation];
+        [self.renderViewController rotateWithCentre:centre radians:recognizer.rotation];
         // no accumulation
         recognizer.rotation = 0.f;
     } else if (recognizer.state == UIGestureRecognizerStateEnded) {
-        [self.renderViewController rotateEnded];
+        [self.renderViewController rotateEndedWithCentre:centre radians:recognizer.rotation];
     }
 }
 
 -(void)pinchGestureRecognizer:(UIPinchGestureRecognizer*)recognizer {
-    CGPoint locationInView = [recognizer locationInView:self.renderViewController.view];
+    CGPoint centre = [recognizer locationInView:self.renderViewController.view];
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
-        [self.renderViewController scaleWithCentre:locationInView scale:recognizer.scale];
+        [self.renderViewController scaleWithCentre:centre scale:recognizer.scale];
         // no accumulation
         recognizer.scale = 1.f;
     } else if (recognizer.state == UIGestureRecognizerStateEnded) {
-        [self.renderViewController scaleEnded];
+        [self.renderViewController scaleEndedWithCentre:centre scale:recognizer.scale];
     }
 }
 
