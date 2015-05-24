@@ -19,7 +19,6 @@ static Real InitialRealWidth = 4;
 @property (nonatomic, strong) EAGLContext* eaglContext;
 @property (nonatomic, assign) GLKMatrix4 modelViewMatrix;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
-@property (nonatomic, strong) ComplexPlane* complexPlane;
 
 @end
 
@@ -89,7 +88,7 @@ static Real InitialRealWidth = 4;
     rMaxiMin.i = -iHalfExtent;
     rMiniMax.r = cOrigin.r;
     rMiniMax.i = +iHalfExtent;
-    self.fractal.complexPlane = self.complexPlane = [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:rMaxiMin rMiniMax:rMiniMax];
+    self.fractal.complexPlane = [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:rMaxiMin rMiniMax:rMiniMax];
 }
 
 -(void)didMoveToParentViewController:(UIViewController*)parent {
@@ -129,44 +128,41 @@ static Real InitialRealWidth = 4;
     return YES;
 }
 
--(void)screenToComplexPlane {
+-(ComplexPlane*)createComplexPlaneWithInverseModelViewMatrix:(GLKMatrix4)inverseModelViewMatrix {
     // un-transform full size screen coordinates to get new screen
-    bool isInvertible;
-    GLKMatrix4 screenMatrix = GLKMatrix4Invert(self.modelViewMatrix, &isInvertible);
-    if (!isInvertible) {
-        [NSException raise:ExceptionLogicError format:@"modelViewMatrix not invertible"];
-    }
-    GLKVector4 vOrigin = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(0, 0, 0, 1.f));
-    GLKVector4 vCrMaxiMin = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(_screenSize.width, 0, 0, 1.f));
-    GLKVector4 vCrMiniMax = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(0, _screenSize.height, 0, 1.f));
+    GLKVector4 vOrigin = GLKMatrix4MultiplyVector4(inverseModelViewMatrix, GLKVector4Make(0, 0, 0, 1.f));
+    GLKVector4 vCrMaxiMin = GLKMatrix4MultiplyVector4(inverseModelViewMatrix, GLKVector4Make(_screenSize.width, 0, 0, 1.f));
+    GLKVector4 vCrMiniMax = GLKMatrix4MultiplyVector4(inverseModelViewMatrix, GLKVector4Make(0, _screenSize.height, 0, 1.f));
     // convert to complex plane
     CPPoint cOrigin = [self.fractal.complexPlane screenPointToComplexPlane:CGPointMake(vOrigin.x, vOrigin.y) screenSize:_screenSize];
     CPPoint crMaxiMin = [self.fractal.complexPlane screenPointToComplexPlane:CGPointMake(vCrMaxiMin.x, vCrMaxiMin.y) screenSize:_screenSize];
     CPPoint crMiniMax = [self.fractal.complexPlane screenPointToComplexPlane:CGPointMake(vCrMiniMax.x, vCrMiniMax.y) screenSize:_screenSize];
-    self.complexPlane = [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:crMaxiMin rMiniMax:crMiniMax];
+    return [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:crMaxiMin rMiniMax:crMiniMax];
 }
 
 -(void)scheduleRecompute {
     _pendingCompute = YES;
 }
 
--(void)compute {
-    self.modelViewMatrix = GLKMatrix4Identity;
-
-    [self.fractal updateWithComplexPlane:self.complexPlane screenSize:_screenSize];
-}
-
 -(void)update {
     if (_pendingCompute) {
         _pendingCompute = NO;
         self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(_translateMatrix, GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix)), self.modelViewMatrix);
-        [self screenToComplexPlane];
+        bool isInvertible;
+        GLKMatrix4 inverseModelViewMatrix = GLKMatrix4Invert(self.modelViewMatrix, &isInvertible);
+        if (!isInvertible) {
+            [NSException raise:ExceptionLogicError format:@"modelViewMatrix not invertible"];
+        }
+        ComplexPlane* complexPlane = [self createComplexPlaneWithInverseModelViewMatrix:inverseModelViewMatrix];
 
+        // reset matrices
         _translateMatrix = GLKMatrix4Identity;
         _rotateMatrix = GLKMatrix4Identity;
         _scaleMatrix = GLKMatrix4Identity;
+        self.modelViewMatrix = GLKMatrix4Identity;
 
-        [self compute];
+        // update fractal with new complex plane
+        self.fractal.complexPlane = complexPlane;
     }
 }
 
