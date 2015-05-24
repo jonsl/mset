@@ -15,7 +15,7 @@ static Real InitialRealWidth = 4;
 
 @interface RenderViewController()
 
-@property (nonatomic, strong) GestureViewController* gameViewController;
+@property (nonatomic, strong) EditViewController* editViewController;
 @property (nonatomic, strong) EAGLContext* eaglContext;
 @property (nonatomic, assign) GLKMatrix4 modelViewMatrix;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
@@ -24,7 +24,6 @@ static Real InitialRealWidth = 4;
 @end
 
 @implementation RenderViewController {
-    GLKMatrix4 _projectionMatrix;
     CGSize _screenSize;
     CGFloat _aspect;
 
@@ -66,7 +65,6 @@ static Real InitialRealWidth = 4;
 
         _aspect = screenSize.width / screenSize.height;
         _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / _aspect);
-        _projectionMatrix = GLKMatrix4MakeOrtho(0, _screenSize.width, 0, _screenSize.height, 0.f, 1.f);
 
         self.fractal = [MandelbrotSet mandelbrotSet];
         [self initialiseComplexPlane];
@@ -95,8 +93,8 @@ static Real InitialRealWidth = 4;
 }
 
 -(void)didMoveToParentViewController:(UIViewController*)parent {
-    if ([parent isKindOfClass:[GestureViewController class]]) {
-        self.gameViewController = (GestureViewController*)parent;
+    if ([parent isKindOfClass:[EditViewController class]]) {
+        self.editViewController = (EditViewController*)parent;
     }
 }
 
@@ -148,6 +146,9 @@ static Real InitialRealWidth = 4;
     // un-transform full size screen coordinates to get new screen
     bool isInvertible;
     GLKMatrix4 screenMatrix = GLKMatrix4Invert(self.modelViewMatrix, &isInvertible);
+    if (!isInvertible) {
+        [NSException raise:ExceptionLogicError format:@"modelViewMatrix not invertible"];
+    }
     GLKVector4 vOrigin = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(0, 0, 0, 1.f));
     GLKVector4 vCrMaxiMin = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(_screenSize.width, 0, 0, 1.f));
     GLKVector4 vCrMiniMax = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(0, _screenSize.height, 0, 1.f));

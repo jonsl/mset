@@ -1,5 +1,5 @@
 //
-//  GestureViewController.m
+//  EditViewController.m
 //  mset
 //
 //  Created by Jonathan Slater on 16/04/2015.
@@ -9,13 +9,13 @@
 #import "Mset.h"
 
 
-@interface GestureViewController()
+@interface EditViewController()
 
 @property (nonatomic, strong) RenderViewController* renderViewController;
 
 @end
 
-@implementation GestureViewController
+@implementation EditViewController
 
 -(void)viewDidLoad {
     [super viewDidLoad];

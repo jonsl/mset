@@ -29,7 +29,7 @@
 #import "Fractal.h"
 #import "MandelbrotSet.h"
 // controllers
-#import "GestureViewController.h"
+#import "EditViewController.h"
 #import "RenderViewController.h"
 
 #endif

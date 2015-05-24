@@ -11,7 +11,7 @@
 		1A78417E1AE79B6F00B1E994 /* RenderViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1A78417C1AE79B6F00B1E994 /* RenderViewController.xib */; };
 		1ABD28C81ADFB83B00ADBE75 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28C71ADFB83B00ADBE75 /* main.m */; };
 		1ABD28CB1ADFB83B00ADBE75 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28CA1ADFB83B00ADBE75 /* AppDelegate.m */; };
-		1ABD28D21ADFB83B00ADBE75 /* GestureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28D11ADFB83B00ADBE75 /* GestureViewController.m */; };
+		1ABD28D21ADFB83B00ADBE75 /* EditViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABD28D11ADFB83B00ADBE75 /* EditViewController.m */; };
 		1ABD28D51ADFB83B00ADBE75 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1ABD28D31ADFB83B00ADBE75 /* Main.storyboard */; };
 		1ABD28D71ADFB83B00ADBE75 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1ABD28D61ADFB83B00ADBE75 /* Images.xcassets */; };
 		1ABD28DA1ADFB83B00ADBE75 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1ABD28D81ADFB83B00ADBE75 /* LaunchScreen.xib */; };
@@ -46,8 +46,8 @@
 		1ABD28C71ADFB83B00ADBE75 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		1ABD28C91ADFB83B00ADBE75 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1ABD28CA1ADFB83B00ADBE75 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		1ABD28D01ADFB83B00ADBE75 /* GestureViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GestureViewController.h; sourceTree = "<group>"; };
-		1ABD28D11ADFB83B00ADBE75 /* GestureViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GestureViewController.m; sourceTree = "<group>"; };
+		1ABD28D01ADFB83B00ADBE75 /* EditViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EditViewController.h; sourceTree = "<group>"; };
+		1ABD28D11ADFB83B00ADBE75 /* EditViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EditViewController.m; sourceTree = "<group>"; };
 		1ABD28D41ADFB83B00ADBE75 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		1ABD28D61ADFB83B00ADBE75 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		1ABD28D91ADFB83B00ADBE75 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
@@ -125,8 +125,8 @@
 				B1B19930662819024C4F41E4 /* Configuration.h */,
 				B1B19BCA584567D8BDA77FC0 /* Configuration.m */,
 				B1B194DB8999B6530B8134C2 /* Fractal.h */,
-				1ABD28D01ADFB83B00ADBE75 /* GestureViewController.h */,
-				1ABD28D11ADFB83B00ADBE75 /* GestureViewController.m */,
+				1ABD28D01ADFB83B00ADBE75 /* EditViewController.h */,
+				1ABD28D11ADFB83B00ADBE75 /* EditViewController.m */,
 				1ABD28D61ADFB83B00ADBE75 /* Images.xcassets */,
 				1ABD28D81ADFB83B00ADBE75 /* LaunchScreen.xib */,
 				1ABD28D31ADFB83B00ADBE75 /* Main.storyboard */,
@@ -285,7 +285,7 @@
 				1ABD28F81ADFBEFC00ADBE75 /* NSExtensions.m in Sources */,
 				1ABD28CB1ADFB83B00ADBE75 /* AppDelegate.m in Sources */,
 				1A78417D1AE79B6F00B1E994 /* RenderViewController.m in Sources */,
-				1ABD28D21ADFB83B00ADBE75 /* GestureViewController.m in Sources */,
+				1ABD28D21ADFB83B00ADBE75 /* EditViewController.m in Sources */,
 				1ABD28C81ADFB83B00ADBE75 /* main.m in Sources */,
 				B1B19B561102711171B0EB61 /* Texture.m in Sources */,
 				7852F973FA343BD1473FE379 /* Quad.m in Sources */,
