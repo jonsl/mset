@@ -89,13 +89,10 @@ static Vertex* baseShaderQuad;
 -(void)updateQuad {
     baseShaderQuad[0].uv.x = (CGFloat)_complexPlane.origin.r;
     baseShaderQuad[0].uv.y = (CGFloat)_complexPlane.origin.i;
-
     baseShaderQuad[1].uv.x = (CGFloat)_complexPlane.rMiniMax.r;
     baseShaderQuad[1].uv.y = (CGFloat)_complexPlane.rMiniMax.i;
-
     baseShaderQuad[2].uv.x = (CGFloat)_complexPlane.rMaxiMin.r;
     baseShaderQuad[2].uv.y = (CGFloat)_complexPlane.rMaxiMin.i;
-
     baseShaderQuad[3].uv.x = (CGFloat)(_complexPlane.rMiniMax.r + _complexPlane.rMaxiMin.r - _complexPlane.origin.r);
     baseShaderQuad[3].uv.y = (CGFloat)(_complexPlane.rMiniMax.i + _complexPlane.rMaxiMin.i - _complexPlane.origin.i);
 }

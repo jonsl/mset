@@ -7,16 +7,10 @@ typedef enum FractalType {
     MandelbrotFractal, JuliaFractal
 } FractalType;
 
-typedef enum ExecutionStrategy {
-    ThreadExecution, DispatchExecution, OperationExecution, ShaderExecution
-} ExecutionStrategy;
-
 @interface Configuration : NSObject<NSCoding>
 
 +(instancetype)sharedConfiguration;
 
 @property (nonatomic, assign) FractalType setType;
-@property (nonatomic, assign) NSUInteger executionUnits;
-@property (nonatomic, assign) ExecutionStrategy executionStrategy;
 
 @end
