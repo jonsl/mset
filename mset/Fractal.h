@@ -3,9 +3,6 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-#import "Util.h"
-
-
 @protocol Fractal<DisplayObject>
 
 @required
