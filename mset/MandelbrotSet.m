@@ -6,15 +6,12 @@
 #import "Mset.h"
 
 
-static NSInteger const MaxIterations = 256;
-static float const CanvasTextureSize = 1024.f;
+static NSInteger const DEFAULT_ITERATIONS = 256;
 
 static Vertex* baseShaderQuad;
 
 @interface MandelbrotSet()
 
-@property (nonatomic, strong) Quad* canvasQuad;
-@property (nonatomic, strong) Texture* paletteTexture;
 @property (nonatomic, strong) RenderingState* directRenderingState;
 @property (nonatomic, strong) NSString* directRenderingVertexShader;
 @property (nonatomic, strong) NSString* directRenderingFragmentShader;
@@ -31,9 +28,6 @@ static Vertex* baseShaderQuad;
 
 -(instancetype)init {
     if ((self = [super init])) {
-        Texture* canvasTexture = [Texture textureWithWidth:CanvasTextureSize height:CanvasTextureSize scale:1];
-        self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
-
         baseShaderQuad = malloc(sizeof(Vertex) * 4);
 
         baseShaderQuad[0].x.x = -1.f;
@@ -165,14 +159,14 @@ static Vertex* baseShaderQuad;
     if (!self.directRenderingFragmentShader) {
         self.directRenderingFragmentShader = [self fragmentShader];
     }
-    self.directRenderingState.texture = nil;//self.paletteTexture;
+    self.directRenderingState.texture = nil;
     self.directRenderingState.mvpMatrix = mvpMatrix;
     self.directRenderingState.alpha = alpha;
     [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader
                                               fragmentShader:self.directRenderingFragmentShader];
     int uMaxIterations = [self.directRenderingState.program getTrait:@"uMaxIterations"];
     if (uMaxIterations != -1) {
-        glUniform1i(uMaxIterations, MaxIterations);
+        glUniform1i(uMaxIterations, DEFAULT_ITERATIONS);
     }
     int aPosition = [self.directRenderingState.program getTrait:@"aPosition"];
     if (aPosition != -1) {
