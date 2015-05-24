@@ -1,5 +1,5 @@
 //
-//  GameViewController.m
+//  GestureViewController.m
 //  mset
 //
 //  Created by Jonathan Slater on 16/04/2015.
@@ -9,13 +9,13 @@
 #import "Mset.h"
 
 
-@interface GameViewController()
+@interface GestureViewController()
 
 @property (nonatomic, strong) RenderViewController* renderViewController;
 
 @end
 
-@implementation GameViewController
+@implementation GestureViewController
 
 -(void)viewDidLoad {
     [super viewDidLoad];
@@ -64,10 +64,11 @@
 
 -(void)panGestureRecognizer:(UIPanGestureRecognizer*)recognizer {
     CGPoint translation = [recognizer translationInView:self.renderViewController.view];
-    [self.renderViewController translate:translation];
-    // no accumulation
-    [recognizer setTranslation:CGPointZero inView:self.renderViewController.view];
-    if (recognizer.state == UIGestureRecognizerStateEnded) {
+    if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
+        [self.renderViewController translate:translation];
+        // no accumulation
+        [recognizer setTranslation:CGPointZero inView:self.renderViewController.view];
+    } else if (recognizer.state == UIGestureRecognizerStateEnded) {
         [self.renderViewController translateEnded];
     }
 }
@@ -75,11 +76,10 @@
 -(void)rotationGestureRecognizer:(UIRotationGestureRecognizer*)recognizer {
     CGPoint locationInView = [recognizer locationInView:self.renderViewController.view];
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
-        [self.renderViewController rotate:locationInView radians:recognizer.rotation];
+        [self.renderViewController rotateWithCentre:locationInView radians:recognizer.rotation];
         // no accumulation
         recognizer.rotation = 0.f;
-    }
-    if (recognizer.state == UIGestureRecognizerStateEnded) {
+    } else if (recognizer.state == UIGestureRecognizerStateEnded) {
         [self.renderViewController rotateEnded];
     }
 }
@@ -87,11 +87,10 @@
 -(void)pinchGestureRecognizer:(UIPinchGestureRecognizer*)recognizer {
     CGPoint locationInView = [recognizer locationInView:self.renderViewController.view];
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
-        [self.renderViewController scale:locationInView scale:recognizer.scale];
+        [self.renderViewController scaleWithCentre:locationInView scale:recognizer.scale];
         // no accumulation
         recognizer.scale = 1.f;
-    }
-    if (recognizer.state == UIGestureRecognizerStateEnded) {
+    } else if (recognizer.state == UIGestureRecognizerStateEnded) {
         [self.renderViewController scaleEnded];
     }
 }
