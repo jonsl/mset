@@ -6,8 +6,6 @@
 #import "Mset.h"
 
 
-static NSInteger const DEFAULT_ITERATIONS = 256;
-
 static Vertex* baseShaderQuad;
 
 @interface MandelbrotSet()
@@ -111,31 +109,27 @@ static Vertex* baseShaderQuad;
 
     [source appendLine:@"uniform int uMaxIterations;"];
     [source appendLine:@"varying highp vec2 vTexCoords;"];
-    [source appendLine:@"const mediump vec3 colourPhase = vec3(5,7,11)/80.0;"];
-    [source appendLine:@"const mediump vec3 colourPhaseStart = vec3(1);"];
+//    [source appendLine:@"const mediump vec3 colourPhase = vec3(5,7,11)/80.0;"];
+//    [source appendLine:@"const mediump vec3 colourPhaseStart = vec3(1);"];
 
     [source appendLine:@"highp float mandel() {"];
     [source appendLine:@"  highp vec2 c = vTexCoords;"];
     [source appendLine:@"  highp vec2 z = c;"];
-    [source appendLine:@"  int n;"];
-    [source appendLine:@"  for(n=0; n<uMaxIterations; n++) {"];
-//    [source appendLine:@"    z = vec2( z.x*z.x - z.y*z.y, 2.*z.x*z.y ) + c;"];
-//    [source appendLine:@"    if( dot(z,z)>4. ) {"];
-//    [source appendLine:@"      return(float(n) + 1. - log(log(length(vec2(z.x, z.x))))/log(2.));"];
-//    [source appendLine:@"    }"];
-    [source appendLine:@"    highp float x = (z.x * z.x - z.y * z.y) + c.x;"];
-    [source appendLine:@"    highp float y = (z.y * z.x + z.x * z.y) + c.y;"];
-    [source appendLine:@"    if (dot(x,x)+dot(y,y) > 4.) break;"];
-    [source appendLine:@"    z.x = x;"];
-    [source appendLine:@"    z.y = y;"];
+    [source appendLine:@"  highp float l = 0.;"];
+    [source appendLine:@"  for(int n=0; n<uMaxIterations; n++) {"];
+    [source appendLine:@"    z = vec2( z.x*z.x - z.y*z.y, 2.*z.x*z.y ) + c;"];
+    [source appendLine:@"    if( dot(z,z)>(256.*256.) ) {"];
+    [source appendLine:@"      return l - log2(log2(dot(z, z))) + 4.;"];
+    [source appendLine:@"    }"];
+    [source appendLine:@"    l += 1.;"];
     [source appendLine:@"  }"];
-    [source appendLine:@"  return float(n);"];
+    [source appendLine:@"  return 0.;"];
     [source appendLine:@"}"];
 
     [source appendLine:@"void main() {"];
     [source appendLine:@"  highp float n = mandel();"];
-    [source appendLine:@"  gl_FragColor = vec4(pow(sin(colourPhase.xyz * n + colourPhaseStart)*.5+.5,vec3(1.5)), 1.);"];
-//    [source appendLine:@"  gl_FragColor = vec4((-cos(0.025*n)+1.0)/2.0, (-cos(0.08*n)+1.0)/2.0, (-cos(0.12*n)+1.0)/2.0, 1.);"];
+//    [source appendLine:@"  gl_FragColor = vec4(pow(sin(colourPhase.xyz * n + colourPhaseStart)*.5+.5,vec3(1.5)), 1.);"];
+    [source appendLine:@"  gl_FragColor = vec4((-cos(0.025*n)+1.0)/2.0, (-cos(0.08*n)+1.0)/2.0, (-cos(0.12*n)+1.0)/2.0, 1.);"];
     [source appendString:@"}"];
 
     return source;
@@ -149,7 +143,14 @@ static Vertex* baseShaderQuad;
 
 #pragma mark DisplayObject
 
--(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix alpha:(float)alpha {
+-(void)renderWithMaxIterations:(NSInteger)maxIterations {
+
+
+    int range[2], precision;
+    glGetShaderPrecisionFormat(GL_FRAGMENT_SHADER, GL_HIGH_INT, range, &precision);
+
+
+
     if (!self.directRenderingState) {
         self.directRenderingState = [[RenderingState alloc] init];
     }
@@ -160,13 +161,11 @@ static Vertex* baseShaderQuad;
         self.directRenderingFragmentShader = [self fragmentShader];
     }
     self.directRenderingState.texture = nil;
-    self.directRenderingState.mvpMatrix = mvpMatrix;
-    self.directRenderingState.alpha = alpha;
     [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader
                                               fragmentShader:self.directRenderingFragmentShader];
     int uMaxIterations = [self.directRenderingState.program getTrait:@"uMaxIterations"];
     if (uMaxIterations != -1) {
-        glUniform1i(uMaxIterations, DEFAULT_ITERATIONS);
+        glUniform1i(uMaxIterations, (GLint)maxIterations);
     }
     int aPosition = [self.directRenderingState.program getTrait:@"aPosition"];
     if (aPosition != -1) {

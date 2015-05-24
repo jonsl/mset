@@ -64,12 +64,13 @@
 
 -(void)panGestureRecognizer:(UIPanGestureRecognizer*)recognizer {
     CGPoint translation = [recognizer translationInView:self.renderViewController.view];
+    CGPoint velocity = [recognizer velocityInView:self.renderViewController.view];
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
-        [self.renderViewController translateWithTranslation:translation];
+        [self.renderViewController translateWithTranslation:translation veclocity:velocity];
         // no accumulation
         [recognizer setTranslation:CGPointZero inView:self.renderViewController.view];
     } else if (recognizer.state == UIGestureRecognizerStateEnded) {
-        [self.renderViewController translateEndedWithTranslation:translation];
+        [self.renderViewController translateEndedWithTranslation:translation veclocity:velocity];
     }
 }
 

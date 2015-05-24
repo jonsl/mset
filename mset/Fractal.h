@@ -3,10 +3,10 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
-@protocol Fractal<DisplayObject>
+@protocol Fractal<NSObject>
 
 @required
--(void)updateWithComplexPlane:(ComplexPlane*)complexPlane screenSize:(CGSize)screenSize;
+-(void)renderWithMaxIterations:(NSInteger)maxIterations;
 
 @property (nonatomic, strong) ComplexPlane* complexPlane;
 

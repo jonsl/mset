@@ -11,7 +11,10 @@
 static float const ScreenWidth = 1024.f;
 static Real InitialRealCentre = -0.5;
 static Real InitialRealWidth = 4;
+static NSInteger const DEFAULT_MAX_ITERATIONS = 256;
 
+static Real MinFrameTime = 1.0 / 20.0;
+static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
 
 @interface RenderViewController()
 
@@ -29,12 +32,16 @@ static Real InitialRealWidth = 4;
     BOOL _pendingCompute;
 
     GLKMatrix4 _translateMatrix;
+    CGPoint _translateVelocity;
     GLKMatrix4 _scaleMatrix;
     GLKMatrix4 _rotateMatrix;
 
     CGPoint _initialPosition;
     CGFloat _initialScale;
     CGFloat _initialRotation;
+
+    NSInteger _maxIterations;
+    NSInteger _lastIterationDelta;
 }
 
 -(void)viewDidLoad {
@@ -64,6 +71,9 @@ static Real InitialRealWidth = 4;
 
         _aspect = screenSize.width / screenSize.height;
         _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / _aspect);
+
+        _maxIterations = DEFAULT_MAX_ITERATIONS;
+        _lastIterationDelta = DEFAULT_MAX_ITERATIONS >> 1;
 
         self.fractal = [MandelbrotSet mandelbrotSet];
         [self initialiseComplexPlane];
@@ -140,14 +150,14 @@ static Real InitialRealWidth = 4;
     return [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:crMaxiMin rMiniMax:crMiniMax];
 }
 
--(void)scheduleRecompute {
-    _pendingCompute = YES;
-}
-
 -(void)update {
     if (_pendingCompute) {
         _pendingCompute = NO;
+
+        // update modelViewMatrix
         self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(_translateMatrix, GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix)), self.modelViewMatrix);
+
+        // compute new complex plane
         bool isInvertible;
         GLKMatrix4 inverseModelViewMatrix = GLKMatrix4Invert(self.modelViewMatrix, &isInvertible);
         if (!isInvertible) {
@@ -167,10 +177,21 @@ static Real InitialRealWidth = 4;
 }
 
 -(void)glkView:(GLKView*)view drawInRect:(CGRect)rect {
+//    NSTimeInterval timeInterval = self.timeSinceLastUpdate;
+//    if (timeInterval > (MinFrameTime + FrameTimeEpsilon)) {
+//        _maxIterations -= _lastIterationDelta;
+//        _lastIterationDelta = _maxIterations / 2;
+//    } else if (timeInterval < (MinFrameTime - FrameTimeEpsilon)) {
+//        _maxIterations += _lastIterationDelta;
+//        _lastIterationDelta = _maxIterations / 2;
+//    } else {
+////        NSLog(@"_maxIterations = %d", _maxIterations);
+//    }
+
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    [self.fractal renderWithMvpMatrix:self.modelViewMatrix alpha:1.f];
+    [self.fractal renderWithMaxIterations:_maxIterations];
 }
 
 -(void)initialiseMatrices {
@@ -184,10 +205,11 @@ static Real InitialRealWidth = 4;
     _translateMatrix = GLKMatrix4Identity;
 }
 
--(void)translateWithTranslation:(CGPoint)translation {
+-(void)translateWithTranslation:(CGPoint)translation veclocity:(CGPoint)velocity {
     _translateMatrix = GLKMatrix4Translate(_translateMatrix, translation.x, translation.y, 0.0);
+    _translateVelocity = velocity;
 
-    [self scheduleRecompute];
+    _pendingCompute = YES;
 }
 
 -(void)rotateWithCentre:(CGPoint)centre radians:(CGFloat)radians {
@@ -195,7 +217,7 @@ static Real InitialRealWidth = 4;
     _rotateMatrix = GLKMatrix4Rotate(_rotateMatrix, radians, 0.0, 0.0, 1.0);
     _rotateMatrix = GLKMatrix4Translate(_rotateMatrix, -centre.x, -centre.y, 0.0);
 
-    [self scheduleRecompute];
+    _pendingCompute = YES;
 }
 
 -(void)scaleWithCentre:(CGPoint)centre scale:(CGFloat)scale {
@@ -203,10 +225,10 @@ static Real InitialRealWidth = 4;
     _scaleMatrix = GLKMatrix4Scale(_scaleMatrix, scale, scale, 1.0);
     _scaleMatrix = GLKMatrix4Translate(_scaleMatrix, -centre.x, -centre.y, 0.0);
 
-    [self scheduleRecompute];
+    _pendingCompute = YES;
 }
 
--(void)translateEndedWithTranslation:(CGPoint)translation {
+-(void)translateEndedWithTranslation:(CGPoint)translation veclocity:(CGPoint)velocity {
 }
 
 -(void)rotateEndedWithCentre:(CGPoint)centre radians:(CGFloat)radians {
