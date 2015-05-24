@@ -21,18 +21,16 @@
 
 -(void)prepareToDrawWithVertexShader:(NSString*)vertexShader fragmentShader:(NSString*)fragmentShader {
     if (!self.program) {
-        if (!self.program) {
-            NSString* vsh = vertexShader;
-            NSString* fsh = fragmentShader;
-            if (vsh == nil && fsh == nil) {
-                vsh = [self vertexShader:_texture];
-                fsh = [self fragmentShader:_texture];
-            }
-            self.program = [Program programWithVertexShader:vsh fragmentShader:fsh];
+        NSString* vsh = vertexShader;
+        NSString* fsh = fragmentShader;
+        if (vsh == nil || fsh == nil) {
+            vsh = [self vertexShader:_texture];
+            fsh = [self fragmentShader:_texture];
         }
+        self.program = [Program programWithVertexShader:vsh fragmentShader:fsh];
     }
-
     glUseProgram(self.program.name);
+
     int uMvpMatrix = [self.program getTrait:@"uMvpMatrix"];
     if (uMvpMatrix != -1) {
         glUniformMatrix4fv(uMvpMatrix, 1, NO, self.mvpMatrix.m);
@@ -41,7 +39,6 @@
     if (uAlpha != -1) {
         glUniform4f(uAlpha, 1.0f, 1.0f, 1.0f, _alpha);
     }
-
     if (self.texture) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, self.texture.name);

@@ -69,7 +69,6 @@
     [recognizer setTranslation:CGPointZero inView:self.renderViewController.view];
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         [self.renderViewController translateEnded];
-        NSLog(@"panGestureRecognizer ended");
     }
 }
 
@@ -78,11 +77,10 @@
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
         [self.renderViewController rotate:locationInView radians:recognizer.rotation];
         // no accumulation
-        [recognizer setRotation:0.f];
+        recognizer.rotation = 0.f;
     }
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         [self.renderViewController rotateEnded];
-        NSLog(@"rotationGestureRecognizer ended");
     }
 }
 
@@ -91,11 +89,10 @@
     if ([recognizer state] == UIGestureRecognizerStateBegan || [recognizer state] == UIGestureRecognizerStateChanged) {
         [self.renderViewController scale:locationInView scale:recognizer.scale];
         // no accumulation
-        [recognizer setScale:1.f];
+        recognizer.scale = 1.f;
     }
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         [self.renderViewController scaleEnded];
-        NSLog(@"pinchGestureRecognizer ended");
     }
 }
 

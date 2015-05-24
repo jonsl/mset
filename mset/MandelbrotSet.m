@@ -47,11 +47,9 @@ static Vertex* baseShaderQuad;
         self.canvasQuad = [Quad quadWithTexture:canvasTexture width:canvasTexture.width height:canvasTexture.height];
 
         baseShaderQuad = malloc(sizeof(Vertex) * 4);
-        
-        float scale = 1.f;
 
-        baseShaderQuad[0].x.x = -1.f * scale;
-        baseShaderQuad[0].x.y = -1.f * scale;
+        baseShaderQuad[0].x.x = -1.f;
+        baseShaderQuad[0].x.y = -1.f;
         baseShaderQuad[0].uv.x = 0.f;
         baseShaderQuad[0].uv.y = 0.f;
         baseShaderQuad[0].colour.r = 0xff;
@@ -59,16 +57,17 @@ static Vertex* baseShaderQuad;
         baseShaderQuad[0].colour.b = 0xff;
         baseShaderQuad[0].colour.a = 0xff;
 
-        baseShaderQuad[1].x.x = -1.f * scale;
-        baseShaderQuad[1].x.y = +1.f * scale;
+        baseShaderQuad[1].x.x = -1.f;
+        baseShaderQuad[1].x.y = +1.f;
         baseShaderQuad[1].uv.x = 0.f;
         baseShaderQuad[1].uv.y = 1.f;
         baseShaderQuad[1].colour.r = 0xff;
         baseShaderQuad[1].colour.g = 0xff;
         baseShaderQuad[1].colour.b = 0xff;
         baseShaderQuad[1].colour.a = 0xff;
-        baseShaderQuad[2].x.x = +1.f * scale;
-        baseShaderQuad[2].x.y = -1.f * scale;
+
+        baseShaderQuad[2].x.x = +1.f;
+        baseShaderQuad[2].x.y = -1.f;
         baseShaderQuad[2].uv.x = 1.f;
         baseShaderQuad[2].uv.y = 0.f;
         baseShaderQuad[2].colour.r = 0xff;
@@ -76,8 +75,8 @@ static Vertex* baseShaderQuad;
         baseShaderQuad[2].colour.b = 0xff;
         baseShaderQuad[2].colour.a = 0xff;
 
-        baseShaderQuad[3].x.x = +1.f * scale;
-        baseShaderQuad[3].x.y = +1.f * scale;
+        baseShaderQuad[3].x.x = +1.f;
+        baseShaderQuad[3].x.y = +1.f;
         baseShaderQuad[3].uv.x = 1.f;
         baseShaderQuad[3].uv.y = 1.f;
         baseShaderQuad[3].colour.r = 0xff;
@@ -91,6 +90,26 @@ static Vertex* baseShaderQuad;
 -(void)dealloc {
     free(baseShaderQuad);
     baseShaderQuad = 0;
+}
+
+-(void)setComplexPlane:(ComplexPlane*)complexPlane {
+    _complexPlane = complexPlane;
+
+    [self updateQuad];
+}
+
+-(void)updateQuad {
+    baseShaderQuad[0].uv.x = (CGFloat)_complexPlane.origin.r;
+    baseShaderQuad[0].uv.y = (CGFloat)_complexPlane.origin.i;
+
+    baseShaderQuad[1].uv.x = (CGFloat)_complexPlane.rMiniMax.r;
+    baseShaderQuad[1].uv.y = (CGFloat)_complexPlane.rMiniMax.i;
+
+    baseShaderQuad[2].uv.x = (CGFloat)_complexPlane.rMaxiMin.r;
+    baseShaderQuad[2].uv.y = (CGFloat)_complexPlane.rMaxiMin.i;
+
+    baseShaderQuad[3].uv.x = (CGFloat)(_complexPlane.rMiniMax.r + _complexPlane.rMaxiMin.r - _complexPlane.origin.r);
+    baseShaderQuad[3].uv.y = (CGFloat)(_complexPlane.rMiniMax.i + _complexPlane.rMaxiMin.i - _complexPlane.origin.i);
 }
 
 // return: number of iterations to diverge from (x, y), or -1 if convergent
@@ -222,7 +241,7 @@ executionUnits:(NSUInteger)executionUnits
 
     [source appendLine:@"attribute vec2 aPosition;"];
     [source appendLine:@"attribute vec2 aTexCoords;"];
-    [source appendLine:@"varying lowp vec2 vTexCoords;"];
+    [source appendLine:@"varying highp vec2 vTexCoords;"];
 
     [source appendLine:@"void main() {"];
     [source appendLine:@"  gl_Position = vec4(aPosition, 0., 1.);"];
@@ -238,33 +257,46 @@ executionUnits:(NSUInteger)executionUnits
     [source appendLine:@"uniform highp vec2 uCenter;"];
     [source appendLine:@"uniform highp float uScale;"];
     [source appendLine:@"uniform highp float uRotation;"];
+    [source appendLine:@"uniform highp mat4 uMvpMatrix;"];
 //    [source appendLine:@"uniform lowp sampler2D uTexture;"];
     [source appendLine:@"uniform int uMaxIterations;"];
-    [source appendLine:@"varying lowp vec2 vTexCoords;"];
-
-    [source appendLine:@"void main() {"];
+    [source appendLine:@"varying highp vec2 vTexCoords;"];
     [source appendLine:@"  const mediump vec3 colourPhase = vec3(5,7,11)/80.0;"];
     [source appendLine:@"  const mediump vec3 colourPhaseStart = vec3(1);"];
-    [source appendLine:@"  highp vec2 c;"];
-    [source appendLine:@"  highp vec2 r;"];
-    [source appendLine:@"  c = (vTexCoords - 0.5) * uScale - uCenter;"];
-    [source appendLine:@"  c.y /= 1.33333;"];
-    [source appendLine:@"  r = c * cos(uRotation) + vec2(1,-1) * sin(uRotation) * c.yx;"];
-    [source appendLine:@"  highp vec2 z = r;"];
-    [source appendLine:@"  int N;"];
-    [source appendLine:@"  for(N=0; N<uMaxIterations; N++) {"];
-    [source appendLine:@"    highp float x = (z.x * z.x - z.y * z.y) + r.x;"];
-    [source appendLine:@"    highp float y = (z.y * z.x + z.x * z.y) + r.y;"];
+
+    [source appendLine:@"highp float mandel() {"];
+//    [source appendLine:@"  highp vec2 c;"];
+    [source appendLine:@"  highp vec2 c = vTexCoords;"];
+//    [source appendLine:@"  c = (vTexCoords -0.5) * uScale - uCenter;"];
+//    [source appendLine:@"  c = vTexCoords;"];
+//    [source appendLine:@"  c.y /= 1.33333;"];
+//    [source appendLine:@"  r = c * cos(uRotation) + vec2(1,-1) * sin(uRotation) * c.yx;"];
+//    [source appendLine:@"  r = (vec4(c.xy,0.,1.) * uMvpMatrix).xy;"];
+//    [source appendLine:@"  r = vTexCoords;"];
+    [source appendLine:@"  highp vec2 z = c;"];
+    [source appendLine:@"  int n;"];
+    [source appendLine:@"  for(n=0; n<uMaxIterations; n++) {"];
+//    [source appendLine:@"    z = vec2( z.x*z.x - z.y*z.y, 2.*z.x*z.y ) + c;"];
+//    [source appendLine:@"    if( dot(z,z)>4. ) {"];
+//    [source appendLine:@"      return(float(n) + 1. - log(log(length(vec2(z.x, z.x))))/log(2.));"];
+//    [source appendLine:@"    }"];
+    [source appendLine:@"    highp float x = (z.x * z.x - z.y * z.y) + c.x;"];
+    [source appendLine:@"    highp float y = (z.y * z.x + z.x * z.y) + c.y;"];
     [source appendLine:@"    if (dot(x,x)+dot(y,y) > 4.) break;"];
     [source appendLine:@"    z.x = x;"];
     [source appendLine:@"    z.y = y;"];
     [source appendLine:@"  }"];
-    [source appendLine:@"  lowp vec2 uv;"];
+    [source appendLine:@"  return float(n);"];
+    [source appendLine:@"}"];
+    [source appendLine:@"void main() {"];
+    [source appendLine:@"  highp float n = mandel();"];
+//    [source appendLine:@"  lowp vec2 uv;"];
 //    [source appendLine:@"  uv.x = (float(N) - log2(log2(sqrt(z.x * z.x - z.y * z.y))) / log(2.0)) / float(uMaxIterations);"];
 //    [source appendLine:@"  uv.x = pow(sin(colourPhase.xyz * float(iterations) + colourPhaseStart)*.5+.5,vec3(1.5));"];
 //    [source appendLine:@"  uv.x = (N == uMaxIterations ? 0.0 : float(N)) / float(uMaxIterations);"];
 //    [source appendLine:@"  uv.y = 0.0;"];
-    [source appendLine:@"  gl_FragColor = vec4(pow(sin(colourPhase.xyz * float(N) + colourPhaseStart)*.5+.5,vec3(1.5)), 1.);"];
+    [source appendLine:@"  gl_FragColor = vec4(pow(sin(colourPhase.xyz * n + colourPhaseStart)*.5+.5,vec3(1.5)), 1.);"];
+//    [source appendLine:@"  gl_FragColor = vec4((-cos(0.025*n)+1.0)/2.0, (-cos(0.08*n)+1.0)/2.0, (-cos(0.12*n)+1.0)/2.0, 1.);"];
 //    [source appendLine:@"  gl_FragColor = texture2D(uTexture, uv);"];
     [source appendString:@"}"];
 
@@ -326,13 +358,13 @@ executionUnits:(NSUInteger)executionUnits
             self.directRenderingState.alpha = alpha;
             [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader
                                                       fragmentShader:self.directRenderingFragmentShader];
-//            int uMvpMatrix = [self.directRenderingState.program getTrait:@"uMvpMatrix"];
-//            if (uMvpMatrix != -1) {
-//                glUniformMatrix4fv(uMvpMatrix, 1, NO, mvpMatrix.m);
-//            }
+            int uMvpMatrix = [self.directRenderingState.program getTrait:@"uMvpMatrix"];
+            if (uMvpMatrix != -1) {
+                glUniformMatrix4fv(uMvpMatrix, 1, NO, mvpMatrix.m);
+            }
             int uCentre = [self.directRenderingState.program getTrait:@"uCenter"];
             if (uCentre != -1) {
-                glUniform2f(uCentre, +0.5, 0);
+                glUniform2f(uCentre, mvpMatrix.m[12], mvpMatrix.m[13]);
             }
             int uScale = [self.directRenderingState.program getTrait:@"uScale"];
             if (uScale != -1) {
