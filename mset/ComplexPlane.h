@@ -6,6 +6,7 @@
 @interface ComplexPlane : NSObject
 
 +(ComplexPlane*)complexPlaneWithOrigin:(CPPoint)origin rMaxiMin:(CPPoint)rMaxiMin rMiniMax:(CPPoint)rMiniMax;
+-(CPPoint)screenPointToComplexPlane:(CGPoint)position screenSize:(CGSize)screenSize;
 
 @property (nonatomic, readonly) CPPoint origin;
 @property (nonatomic, readonly) CPPoint rMaxiMin;

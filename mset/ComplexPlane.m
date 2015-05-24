@@ -21,4 +21,17 @@
     return self;
 }
 
+-(CPPoint)screenPointToComplexPlane:(CGPoint)position screenSize:(CGSize)screenSize {
+    Real xLen = (Real)position.x / screenSize.width;
+    Real yLen = (Real)position.y / screenSize.height;
+    CPPoint pp;
+    pp.r = self.origin.r
+            + xLen * (self.rMaxiMin.r - self.origin.r)
+            + yLen * (self.rMiniMax.r - self.origin.r);
+    pp.i = self.origin.i
+            + yLen * (self.rMiniMax.i - self.origin.i)
+            + xLen * (self.rMaxiMin.i - self.origin.i);
+    return pp;
+}
+
 @end

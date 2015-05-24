@@ -129,19 +129,6 @@ static Real InitialRealWidth = 4;
     return YES;
 }
 
--(CPPoint)screenPointToComplexPlane:(CGPoint)position {
-    Real xLen = (Real)position.x / _screenSize.width;
-    Real yLen = (Real)position.y / _screenSize.height;
-    CPPoint pp;
-    pp.r = self.fractal.complexPlane.origin.r
-            + xLen * (self.fractal.complexPlane.rMaxiMin.r - self.fractal.complexPlane.origin.r)
-            + yLen * (self.fractal.complexPlane.rMiniMax.r - self.fractal.complexPlane.origin.r);
-    pp.i = self.fractal.complexPlane.origin.i
-            + yLen * (self.fractal.complexPlane.rMiniMax.i - self.fractal.complexPlane.origin.i)
-            + xLen * (self.fractal.complexPlane.rMaxiMin.i - self.fractal.complexPlane.origin.i);
-    return pp;
-}
-
 -(void)screenToComplexPlane {
     // un-transform full size screen coordinates to get new screen
     bool isInvertible;
@@ -153,9 +140,9 @@ static Real InitialRealWidth = 4;
     GLKVector4 vCrMaxiMin = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(_screenSize.width, 0, 0, 1.f));
     GLKVector4 vCrMiniMax = GLKMatrix4MultiplyVector4(screenMatrix, GLKVector4Make(0, _screenSize.height, 0, 1.f));
     // convert to complex plane
-    CPPoint cOrigin = [self screenPointToComplexPlane:CGPointMake(vOrigin.x, vOrigin.y)];
-    CPPoint crMaxiMin = [self screenPointToComplexPlane:CGPointMake(vCrMaxiMin.x, vCrMaxiMin.y)];
-    CPPoint crMiniMax = [self screenPointToComplexPlane:CGPointMake(vCrMiniMax.x, vCrMiniMax.y)];
+    CPPoint cOrigin = [self.fractal.complexPlane screenPointToComplexPlane:CGPointMake(vOrigin.x, vOrigin.y) screenSize:_screenSize];
+    CPPoint crMaxiMin = [self.fractal.complexPlane screenPointToComplexPlane:CGPointMake(vCrMaxiMin.x, vCrMaxiMin.y) screenSize:_screenSize];
+    CPPoint crMiniMax = [self.fractal.complexPlane screenPointToComplexPlane:CGPointMake(vCrMiniMax.x, vCrMiniMax.y) screenSize:_screenSize];
     self.complexPlane = [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:crMaxiMin rMiniMax:crMiniMax];
 }
 

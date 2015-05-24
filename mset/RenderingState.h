@@ -6,6 +6,9 @@
 //  Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
+@class Program;
+@class Texture;
+
 @interface RenderingState : NSObject
 
 -(void)prepareToDrawWithVertexShader:(NSString*)vertexShader fragmentShader:(NSString*)fragmentShader;
