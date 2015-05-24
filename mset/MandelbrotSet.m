@@ -31,7 +31,7 @@ static Vertex* baseShaderQuad;
         baseShaderQuad = malloc(sizeof(Vertex) * 4);
 
         baseShaderQuad[0].x.x = -1.f;
-        baseShaderQuad[0].x.y = -1.f;
+        baseShaderQuad[0].x.y = +1.f;
         baseShaderQuad[0].uv.x = 0.f;
         baseShaderQuad[0].uv.y = 0.f;
         baseShaderQuad[0].colour.r = 0xff;
@@ -40,7 +40,7 @@ static Vertex* baseShaderQuad;
         baseShaderQuad[0].colour.a = 0xff;
 
         baseShaderQuad[1].x.x = -1.f;
-        baseShaderQuad[1].x.y = +1.f;
+        baseShaderQuad[1].x.y = -1.f;
         baseShaderQuad[1].uv.x = 0.f;
         baseShaderQuad[1].uv.y = 1.f;
         baseShaderQuad[1].colour.r = 0xff;
@@ -49,7 +49,7 @@ static Vertex* baseShaderQuad;
         baseShaderQuad[1].colour.a = 0xff;
 
         baseShaderQuad[2].x.x = +1.f;
-        baseShaderQuad[2].x.y = -1.f;
+        baseShaderQuad[2].x.y = +1.f;
         baseShaderQuad[2].uv.x = 1.f;
         baseShaderQuad[2].uv.y = 0.f;
         baseShaderQuad[2].colour.r = 0xff;
@@ -58,7 +58,7 @@ static Vertex* baseShaderQuad;
         baseShaderQuad[2].colour.a = 0xff;
 
         baseShaderQuad[3].x.x = +1.f;
-        baseShaderQuad[3].x.y = +1.f;
+        baseShaderQuad[3].x.y = -1.f;
         baseShaderQuad[3].uv.x = 1.f;
         baseShaderQuad[3].uv.y = 1.f;
         baseShaderQuad[3].colour.r = 0xff;
