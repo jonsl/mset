@@ -148,6 +148,11 @@ static Vertex* baseShaderQuad;
 
     int range[2], precision;
     glGetShaderPrecisionFormat(GL_FRAGMENT_SHADER, GL_HIGH_INT, range, &precision);
+//    double min= floor(log2(range[0]));
+//    double max= floor(log2(range[1]));
+    NSLog(@"min: %f, max: %f", pow(2, range[0]), pow(2, range[1]));
+    
+    NSInteger sizeof_double = sizeof(double);
 
 
 
