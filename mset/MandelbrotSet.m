@@ -184,10 +184,9 @@ static Vertex* baseShaderQuad;
     self.directRenderingState.texture = nil;
     [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader
                                               fragmentShader:self.directRenderingFragmentShader];
-    int uMaxIterations = [self.directRenderingState.program getTrait:@"uMaxIterations"];
-    if (uMaxIterations != -1) {
-        glUniform1i(uMaxIterations, (GLint)iterations);
-    }
+
+    [self.directRenderingState.program setTrait:@"uMaxIterations" intValue:iterations];
+
     int aPosition = [self.directRenderingState.program getTrait:@"aPosition"];
     if (aPosition != -1) {
         glEnableVertexAttribArray((GLuint)aPosition);
@@ -198,7 +197,7 @@ static Vertex* baseShaderQuad;
         glEnableVertexAttribArray((GLuint)aTexture);
         glVertexAttribPointer((GLuint)aTexture, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)baseShaderQuad + (offsetof(Vertex, uv)));
     }
-    // Draw
+    // draw strip
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 

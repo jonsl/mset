@@ -49,9 +49,7 @@
     }
 #ifdef DEBUG
     GLenum glError = glGetError();
-    if (glError != GL_NO_ERROR) {
-        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
-    }
+    NSAssert(glError == GL_NO_ERROR, @"glError is %d", glError);
 #endif
 }
 

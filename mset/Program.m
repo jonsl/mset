@@ -40,16 +40,18 @@
 }
 
 -(void)compile {
-    uint program = glCreateProgram();
+    GLuint program = glCreateProgram();
 
-    uint vertexShader;
+    GLuint vertexShader;
     if (self.vertexShader) {
         vertexShader = [self compileShader:self.vertexShader type:GL_VERTEX_SHADER];
+        NSAssert(vertexShader != 0, @"compilation failed for vertex shader");
         glAttachShader(program, vertexShader);
     }
-    uint fragmentShader;
+    GLuint fragmentShader;
     if (self.fragmentShader) {
         fragmentShader = [self compileShader:self.fragmentShader type:GL_FRAGMENT_SHADER];
+        NSAssert(vertexShader != 0, @"compilation failed for fragment shader");
         glAttachShader(program, fragmentShader);
     }
     glLinkProgram(program);
@@ -63,12 +65,13 @@
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char* log = malloc(sizeof(char) * (size_t)logLength);
+            char* log = malloc(sizeof(char) * (size_t) logLength);
             glGetProgramInfoLog(program, logLength, NULL, log);
             NSLog(@"Error linking program: %s", log);
             free(log);
         }
     }
+    NSAssert(linked, @"link failed for program");
 #endif
 
     glDetachShader(program, vertexShader);
@@ -80,8 +83,8 @@
     _name = program;
 }
 
--(uint)compileShader:(NSString*)source type:(GLenum)type {
-    uint shader = glCreateShader(type);
+-(GLuint)compileShader:(NSString*)source type:(GLenum)type {
+    GLuint shader = glCreateShader(type);
     if (!shader) {
         return shader;
     }
@@ -100,7 +103,7 @@
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
         if (logLength) {
-            char* log = malloc(sizeof(char) * (size_t)logLength);
+            char* log = malloc(sizeof(char) * (size_t) logLength);
             glGetShaderInfoLog(shader, logLength, NULL, log);
             NSLog(@"Error compiling %@ shader: %s", type == GL_VERTEX_SHADER ? @"vertex" : @"fragment", log);
             free(log);
@@ -123,28 +126,20 @@
     for (GLuint i = 0; i < numTraits; ++i) {
         glGetActiveUniform(_name, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
         NSString* name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
-        if (self.traitMap[name] == nil) {
-            self.traitMap[name] = @(glGetUniformLocation(_name, rawName));
-        } else {
-            [NSException raise:ExceptionLogicError format:@"shader uniform collision '%@' in program %d", name, _name];
-        }
+        NSAssert(self.traitMap[name] == nil, @"shader uniform collision '%@' in program %d", name, _name);
+        self.traitMap[name] = @(glGetUniformLocation(_name, rawName));
     }
     // attributes
     glGetProgramiv(_name, GL_ACTIVE_ATTRIBUTES, &numTraits);
     for (GLuint i = 0; i < numTraits; ++i) {
         glGetActiveAttrib(_name, i, MAX_NAME_LENGTH, NULL, NULL, NULL, rawName);
         NSString* name = [[NSString alloc] initWithCString:rawName encoding:NSUTF8StringEncoding];
-        if (self.traitMap[name] == nil) {
-            self.traitMap[name] = @(glGetAttribLocation(_name, rawName));
-        } else {
-            [NSException raise:ExceptionLogicError format:@"shader attribute collision '%@' in program %d", name, _name];
-        }
+        NSAssert(self.traitMap[name] == nil, @"shader attribute collision '%@' in program %d", name, _name);
+        self.traitMap[name] = @(glGetAttribLocation(_name, rawName));
     }
 #ifdef DEBUG
     GLenum glError = glGetError();
-    if (glError != GL_NO_ERROR) {
-        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
-    }
+    NSAssert(glError == GL_NO_ERROR, @"glError is %d", glError);
 #endif
 }
 

@@ -129,9 +129,7 @@
     glGenBuffers(1, &_vertexBufferName);
     glGenBuffers(1, &_indexBufferName);
 
-    if (!_vertexBufferName || !_indexBufferName) {
-        [NSException raise:ExceptionLogicError format:@"could not create vertex buffers"];
-    }
+    NSAssert(_vertexBufferName && _indexBufferName, @"could not create vertex buffers");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferName);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, (long)sizeof(ushort) * numIndices, _indexData, GL_STATIC_DRAW);
@@ -150,9 +148,7 @@
     _syncRequired = NO;
 #ifdef DEBUG
     GLenum glError = glGetError();
-    if (glError != GL_NO_ERROR) {
-        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
-    }
+    NSAssert(glError == GL_NO_ERROR, @"glError is %d", glError);
 #endif
 }
 
@@ -161,9 +157,7 @@
     glBlendFunc(srcFactor, dstFactor);
 #ifdef DEBUG
     GLenum glError = glGetError();
-    if (glError != GL_NO_ERROR) {
-        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
-    }
+    NSAssert(glError == GL_NO_ERROR, @"glError is %d", glError);
 #endif
 }
 
@@ -218,9 +212,7 @@
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
 #ifdef DEBUG
     GLenum glError = glGetError();
-    if (glError != GL_NO_ERROR) {
-        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
-    }
+    NSAssert(glError == GL_NO_ERROR, @"glError is %d", glError);
 #endif
 }
 

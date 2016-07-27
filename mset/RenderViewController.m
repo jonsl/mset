@@ -48,7 +48,7 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
     double _initialScale;
     double _initialRotation;
 
-    NSInteger _maxIterations;
+    GLint _maxIterations;
     NSInteger _lastIterationDelta;
 }
 
@@ -56,9 +56,7 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
     [super viewDidLoad];
 
     self.eaglContext = [self createBestEAGLContext];
-    if (self.eaglContext == nil) {
-        [NSException raise:ExceptionLogicError format:@"invalid OpenGL ES Context"];
-    }
+    NSAssert(self.eaglContext != nil, @"invalid OpenGL ES Context");
     [EAGLContext setCurrentContext:self.eaglContext];
 
     GLKView* view = (GLKView*) self.view;
@@ -149,11 +147,11 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
     return YES;
 }
 
--(ComplexPlane*)createComplexPlaneWithInverseModelViewMatrix:(Matrix4)inverseModelViewMatrix {
+-(ComplexPlane*)createComplexPlaneWithInverseModelViewMatrix:(Matrix4)inverseModelMatrix {
     // un-transform full size screen coordinates to get new screen
-    Vector4 vOrigin = matrix4MultiplyVector4(inverseModelViewMatrix, vector4Make(0, 0, 0, 1.));
-    Vector4 vCrMaxiMin = matrix4MultiplyVector4(inverseModelViewMatrix, vector4Make(_screenSize.width, 0, 0, 1.));
-    Vector4 vCrMiniMax = matrix4MultiplyVector4(inverseModelViewMatrix, vector4Make(0, _screenSize.height, 0, 1.));
+    Vector4 vOrigin = matrix4MultiplyVector4(inverseModelMatrix, vector4Make(0, 0, 0, 1.));
+    Vector4 vCrMaxiMin = matrix4MultiplyVector4(inverseModelMatrix, vector4Make(_screenSize.width, 0, 0, 1.));
+    Vector4 vCrMiniMax = matrix4MultiplyVector4(inverseModelMatrix, vector4Make(0, _screenSize.height, 0, 1.));
     // convert to complex plane
     Point2 cOrigin = [self.fractal.complexPlane screenPointToComplexPlane:point2Make(vOrigin.x, vOrigin.y) screenSize:_screenSize];
     Point2 crMaxiMin = [self.fractal.complexPlane screenPointToComplexPlane:point2Make(vCrMaxiMin.x, vCrMaxiMin.y) screenSize:_screenSize];
@@ -171,9 +169,7 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
         // compute new complex plane
         bool isInvertible;
         Matrix4 inverseModelMatrix = matrix4Invert(self.modelMatrix, &isInvertible);
-        if (!isInvertible) {
-            [NSException raise:ExceptionLogicError format:@"modelViewMatrix not invertible"];
-        }
+        NSAssert(isInvertible, @"modelViewMatrix not invertible");
         ComplexPlane* complexPlane = [self createComplexPlaneWithInverseModelViewMatrix:inverseModelMatrix];
 
         // reset matrices

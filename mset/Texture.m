@@ -99,9 +99,7 @@ typedef void (^DrawingBlock)(CGContextRef context);
     glBindTexture(GL_TEXTURE_2D, 0);
 #ifdef DEBUG
     GLenum glError = glGetError();
-    if (glError != GL_NO_ERROR) {
-        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
-    }
+    NSAssert(glError == GL_NO_ERROR, @"glError is %d", glError);
 #endif
 }
 
@@ -110,9 +108,7 @@ typedef void (^DrawingBlock)(CGContextRef context);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, (GLsizei)_width, (GLsizei)_height, GL_RGBA, GL_UNSIGNED_BYTE, _imageData);
 #ifdef DEBUG
     GLenum glError = glGetError();
-    if (glError != GL_NO_ERROR) {
-        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
-    }
+    NSAssert(glError == GL_NO_ERROR, @"glError is %d", glError);
 #endif
 }
 
@@ -123,9 +119,7 @@ typedef void (^DrawingBlock)(CGContextRef context);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
 #ifdef DEBUG
     GLenum glError = glGetError();
-    if (glError != GL_NO_ERROR) {
-        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
-    }
+    NSAssert(glError == GL_NO_ERROR, @"glError is %d", glError);
 #endif
 }
 
@@ -146,9 +140,7 @@ typedef void (^DrawingBlock)(CGContextRef context);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 #ifdef DEBUG
     GLenum glError = glGetError();
-    if (glError != GL_NO_ERROR) {
-        [NSException raise:ExceptionLogicError format:@"glError is %d", glError];
-    }
+    NSAssert(glError == GL_NO_ERROR, @"glError is %d", glError);
 #endif
 }
 
