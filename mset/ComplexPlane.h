@@ -3,13 +3,15 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
+#import "point2.h"
+
 @interface ComplexPlane : NSObject
 
-+(ComplexPlane*)complexPlaneWithOrigin:(CPPoint)origin rMaxiMin:(CPPoint)rMaxiMin rMiniMax:(CPPoint)rMiniMax;
--(CPPoint)screenPointToComplexPlane:(CGPoint)position screenSize:(CGSize)screenSize;
++(ComplexPlane*)complexPlaneWithOrigin:(Point2)origin rMaxiMin:(Point2)rMaxiMin rMiniMax:(Point2)rMiniMax;
+-(Point2)screenPointToComplexPlane:(Point2)position screenSize:(CGSize)screenSize;
 
-@property (nonatomic, readonly) CPPoint origin;
-@property (nonatomic, readonly) CPPoint rMaxiMin;
-@property (nonatomic, readonly) CPPoint rMiniMax;
+@property (nonatomic, readonly) Point2 origin;
+@property (nonatomic, readonly) Point2 rMaxiMin;
+@property (nonatomic, readonly) Point2 rMiniMax;
 
 @end

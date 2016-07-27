@@ -7,20 +7,22 @@
 //
 
 #import "Mset.h"
+#import "matrix4.h"
 
 static float const ScreenWidth = 1024.f;
 static Real InitialRealCentre = -0.5;
 static Real InitialRealWidth = 4;
 static NSInteger const DEFAULT_MAX_ITERATIONS = 256;
+static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
 
-static Real MinFrameTime = 1.0 / 20.0;
-static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
+//static Real MinFrameTime = 1.0 / 20.0;
+//static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
 
 @interface RenderViewController()
 
 @property (nonatomic, strong) EditViewController* editViewController;
 @property (nonatomic, strong) EAGLContext* eaglContext;
-@property (nonatomic, assign) GLKMatrix4 modelViewMatrix;
+@property (nonatomic, assign) Matrix4 modelMatrix;
 @property (nonatomic, strong) NSObject<Fractal>* fractal;
 
 @end
@@ -28,17 +30,23 @@ static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
 @implementation RenderViewController {
     CGSize _screenSize;
     CGFloat _aspect;
+    int _w, _h, _frameCounter;
+    NSDate* _frameStartTime;
 
     BOOL _pendingCompute;
 
-    GLKMatrix4 _translateMatrix;
-    CGPoint _translateVelocity;
-    GLKMatrix4 _scaleMatrix;
-    GLKMatrix4 _rotateMatrix;
+    GLKMatrix4 _projectionMatrix;
 
-    CGPoint _initialPosition;
-    CGFloat _initialScale;
-    CGFloat _initialRotation;
+    Matrix4 _translateMatrix;
+    CGPoint _translateVelocity;
+    Matrix4 _scaleMatrix;
+    Matrix4 _rotateMatrix;
+
+    double _radius;
+
+    Point2 _initialPosition;
+    double _initialScale;
+    double _initialRotation;
 
     NSInteger _maxIterations;
     NSInteger _lastIterationDelta;
@@ -53,45 +61,48 @@ static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
     }
     [EAGLContext setCurrentContext:self.eaglContext];
 
-    GLKView* view = (GLKView*)self.view;
+    GLKView* view = (GLKView*) self.view;
     view.context = self.eaglContext;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     self.preferredFramesPerSecond = 30;
 
-    _initialPosition = CGPointMake(0, 0);
-    _initialScale = 1.f;
-    _initialRotation = 0.f;
+    _initialPosition = point2Make(0, 0);
+    _initialScale = 1.;
+    _initialRotation = 0.;
 
     [self initialiseMatrices];
 
-    @try {
-        CGRect screenBounds = [[UIScreen mainScreen] bounds];
-        CGFloat screenScale = [[UIScreen mainScreen] scale];
-        CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
+    CGRect screenBounds = [[UIScreen mainScreen] bounds];
+    CGFloat screenScale = [[UIScreen mainScreen] scale];
+    CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
 
-        _aspect = screenSize.width / screenSize.height;
-        _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / _aspect);
+    _aspect = screenSize.width / screenSize.height;
+    _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / _aspect);
 
-        _maxIterations = DEFAULT_MAX_ITERATIONS;
-        _lastIterationDelta = DEFAULT_MAX_ITERATIONS >> 1;
+    _w = (int) _screenSize.width;
+    _h = (int) _screenSize.height;
 
-        self.fractal = [MandelbrotSet mandelbrotSet];
-        [self initialiseComplexPlane];
+    _projectionMatrix = GLKMatrix4MakeOrtho(0.f, _w, 0.f, _h, 0.f, 1.f);
 
-        _pendingCompute = YES;
-    }
-    @catch (NSException* ex) {
-        NSLog(@"exception: '%@', reason: '%@'", ex.name, ex.reason);
-    }
-    @finally {
+    _aspect = screenSize.width / screenSize.height;
+    _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / _aspect);
 
-    }
+    _maxIterations = DEFAULT_MAX_ITERATIONS;
+    _lastIterationDelta = DEFAULT_MAX_ITERATIONS >> 1;
+
+    self.fractal = [MandelbrotSet mandelbrotSetWithWidth:_w height:_h];
+
+    [self initialiseComplexPlane];
+
+    _pendingCompute = YES;
+
+    _frameStartTime = [NSDate date];
 }
 
 -(void)initialiseComplexPlane {
     Real rHalfExtent = 0.5 * InitialRealWidth;
     Real iHalfExtent = 0.5 * InitialRealWidth / _aspect;
-    CPPoint cOrigin, rMaxiMin, rMiniMax;
+    Point2 cOrigin, rMaxiMin, rMiniMax;
     cOrigin.r = InitialRealCentre - rHalfExtent;
     cOrigin.i = -iHalfExtent;
     rMaxiMin.r = cOrigin.r + InitialRealWidth;
@@ -103,7 +114,7 @@ static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
 
 -(void)didMoveToParentViewController:(UIViewController*)parent {
     if ([parent isKindOfClass:[EditViewController class]]) {
-        self.editViewController = (EditViewController*)parent;
+        self.editViewController = (EditViewController*) parent;
     }
 }
 
@@ -138,15 +149,15 @@ static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
     return YES;
 }
 
--(ComplexPlane*)createComplexPlaneWithInverseModelViewMatrix:(GLKMatrix4)inverseModelViewMatrix {
+-(ComplexPlane*)createComplexPlaneWithInverseModelViewMatrix:(Matrix4)inverseModelViewMatrix {
     // un-transform full size screen coordinates to get new screen
-    GLKVector4 vOrigin = GLKMatrix4MultiplyVector4(inverseModelViewMatrix, GLKVector4Make(0, 0, 0, 1.f));
-    GLKVector4 vCrMaxiMin = GLKMatrix4MultiplyVector4(inverseModelViewMatrix, GLKVector4Make(_screenSize.width, 0, 0, 1.f));
-    GLKVector4 vCrMiniMax = GLKMatrix4MultiplyVector4(inverseModelViewMatrix, GLKVector4Make(0, _screenSize.height, 0, 1.f));
+    Vector4 vOrigin = matrix4MultiplyVector4(inverseModelViewMatrix, vector4Make(0, 0, 0, 1.));
+    Vector4 vCrMaxiMin = matrix4MultiplyVector4(inverseModelViewMatrix, vector4Make(_screenSize.width, 0, 0, 1.));
+    Vector4 vCrMiniMax = matrix4MultiplyVector4(inverseModelViewMatrix, vector4Make(0, _screenSize.height, 0, 1.));
     // convert to complex plane
-    CPPoint cOrigin = [self.fractal.complexPlane screenPointToComplexPlane:CGPointMake(vOrigin.x, vOrigin.y) screenSize:_screenSize];
-    CPPoint crMaxiMin = [self.fractal.complexPlane screenPointToComplexPlane:CGPointMake(vCrMaxiMin.x, vCrMaxiMin.y) screenSize:_screenSize];
-    CPPoint crMiniMax = [self.fractal.complexPlane screenPointToComplexPlane:CGPointMake(vCrMiniMax.x, vCrMiniMax.y) screenSize:_screenSize];
+    Point2 cOrigin = [self.fractal.complexPlane screenPointToComplexPlane:point2Make(vOrigin.x, vOrigin.y) screenSize:_screenSize];
+    Point2 crMaxiMin = [self.fractal.complexPlane screenPointToComplexPlane:point2Make(vCrMaxiMin.x, vCrMaxiMin.y) screenSize:_screenSize];
+    Point2 crMiniMax = [self.fractal.complexPlane screenPointToComplexPlane:point2Make(vCrMiniMax.x, vCrMiniMax.y) screenSize:_screenSize];
     return [ComplexPlane complexPlaneWithOrigin:cOrigin rMaxiMin:crMaxiMin rMiniMax:crMiniMax];
 }
 
@@ -155,21 +166,21 @@ static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
         _pendingCompute = NO;
 
         // update modelViewMatrix
-        self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(_translateMatrix, GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix)), self.modelViewMatrix);
+        self.modelMatrix = matrix4Multiply(matrix4Multiply(_translateMatrix, matrix4Multiply(_scaleMatrix, _rotateMatrix)), self.modelMatrix);
 
         // compute new complex plane
         bool isInvertible;
-        GLKMatrix4 inverseModelViewMatrix = GLKMatrix4Invert(self.modelViewMatrix, &isInvertible);
+        Matrix4 inverseModelMatrix = matrix4Invert(self.modelMatrix, &isInvertible);
         if (!isInvertible) {
             [NSException raise:ExceptionLogicError format:@"modelViewMatrix not invertible"];
         }
-        ComplexPlane* complexPlane = [self createComplexPlaneWithInverseModelViewMatrix:inverseModelViewMatrix];
+        ComplexPlane* complexPlane = [self createComplexPlaneWithInverseModelViewMatrix:inverseModelMatrix];
 
         // reset matrices
-        _translateMatrix = GLKMatrix4Identity;
-        _rotateMatrix = GLKMatrix4Identity;
-        _scaleMatrix = GLKMatrix4Identity;
-        self.modelViewMatrix = GLKMatrix4Identity;
+        _translateMatrix = g_matrix4Identity;
+        _rotateMatrix = g_matrix4Identity;
+        _scaleMatrix = g_matrix4Identity;
+        self.modelMatrix = g_matrix4Identity;
 
         // update fractal with new complex plane
         self.fractal.complexPlane = complexPlane;
@@ -177,53 +188,55 @@ static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
 }
 
 -(void)glkView:(GLKView*)view drawInRect:(CGRect)rect {
-//    NSTimeInterval timeInterval = self.timeSinceLastUpdate;
-//    if (timeInterval > (MinFrameTime + FrameTimeEpsilon)) {
-//        _maxIterations -= _lastIterationDelta;
-//        _lastIterationDelta = _maxIterations / 2;
-//    } else if (timeInterval < (MinFrameTime - FrameTimeEpsilon)) {
-//        _maxIterations += _lastIterationDelta;
-//        _lastIterationDelta = _maxIterations / 2;
-//    } else {
-////        NSLog(@"_maxIterations = %d", _maxIterations);
-//    }
-
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    [self.fractal renderWithMaxIterations:_maxIterations];
+    [self.fractal renderWithMvpMatrix:_projectionMatrix
+                       fragmentShader:@"singleFloatMandel"
+                           renderMode:RenderModeSinglePrecision
+                           iterations:_maxIterations
+                               radius:_radius
+                         frameCounter:_frameCounter];
+
+    // update fps
+    if (!(++_frameCounter % FPS_FRAME_UPDATE_COUNT)) {
+        NSTimeInterval timeInterval = [_frameStartTime timeIntervalSinceNow];
+        double fps = -FPS_FRAME_UPDATE_COUNT / timeInterval;
+        NSLog(@"fps: %lf", fps);
+        _frameStartTime = [NSDate date];
+    }
 }
 
 -(void)initialiseMatrices {
-    _translateMatrix = GLKMatrix4Translate(GLKMatrix4Identity, _initialPosition.x, _initialPosition.y, 0.0);
-    _scaleMatrix = GLKMatrix4Scale(GLKMatrix4Identity, _initialScale, _initialScale, 1.0);
-    _rotateMatrix = GLKMatrix4Rotate(GLKMatrix4Identity, _initialRotation, 0.0, 0.0, 1.0);
-    self.modelViewMatrix = GLKMatrix4Multiply(GLKMatrix4Multiply(_translateMatrix, GLKMatrix4Multiply(_scaleMatrix, _rotateMatrix)), GLKMatrix4Identity);
+    _translateMatrix = matrix4Translate(g_matrix4Identity, (double) _initialPosition.x, (double) _initialPosition.y, 0.0);
+    _scaleMatrix = matrix4Scale(g_matrix4Identity, (double) _initialScale, _initialScale, 1.0);
+    _rotateMatrix = matrix4Rotate(g_matrix4Identity, _initialRotation, 0.0, 0.0, 1.0);
+    self.modelMatrix = matrix4Multiply(matrix4Multiply(_translateMatrix, matrix4Multiply(_scaleMatrix, _rotateMatrix)), g_matrix4Identity);
 
-    _scaleMatrix = GLKMatrix4Identity;
-    _rotateMatrix = GLKMatrix4Identity;
-    _translateMatrix = GLKMatrix4Identity;
+    _scaleMatrix = g_matrix4Identity;
+    _rotateMatrix = g_matrix4Identity;
+    _translateMatrix = g_matrix4Identity;
 }
 
 -(void)translateWithTranslation:(CGPoint)translation veclocity:(CGPoint)velocity {
-    _translateMatrix = GLKMatrix4Translate(_translateMatrix, translation.x, translation.y, 0.0);
+    _translateMatrix = matrix4Translate(_translateMatrix, translation.x, translation.y, 0.0);
     _translateVelocity = velocity;
 
     _pendingCompute = YES;
 }
 
 -(void)rotateWithCentre:(CGPoint)centre radians:(CGFloat)radians {
-    _rotateMatrix = GLKMatrix4Translate(_rotateMatrix, centre.x, centre.y, 0.0);
-    _rotateMatrix = GLKMatrix4Rotate(_rotateMatrix, radians, 0.0, 0.0, 1.0);
-    _rotateMatrix = GLKMatrix4Translate(_rotateMatrix, -centre.x, -centre.y, 0.0);
+    _rotateMatrix = matrix4Translate(_rotateMatrix, centre.x, centre.y, 0.0);
+    _rotateMatrix = matrix4Rotate(_rotateMatrix, radians, 0.0, 0.0, 1.0);
+    _rotateMatrix = matrix4Translate(_rotateMatrix, -centre.x, -centre.y, 0.0);
 
     _pendingCompute = YES;
 }
 
 -(void)scaleWithCentre:(CGPoint)centre scale:(CGFloat)scale {
-    _scaleMatrix = GLKMatrix4Translate(_scaleMatrix, centre.x, centre.y, 0.0);
-    _scaleMatrix = GLKMatrix4Scale(_scaleMatrix, scale, scale, 1.0);
-    _scaleMatrix = GLKMatrix4Translate(_scaleMatrix, -centre.x, -centre.y, 0.0);
+    _scaleMatrix = matrix4Translate(_scaleMatrix, centre.x, centre.y, 0.0);
+    _scaleMatrix = matrix4Scale(_scaleMatrix, scale, scale, 1.0);
+    _scaleMatrix = matrix4Translate(_scaleMatrix, -centre.x, -centre.y, 0.0);
 
     _pendingCompute = YES;
 }

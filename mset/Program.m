@@ -155,4 +155,28 @@
     return -1;
 }
 
+-(int)setTrait:(NSString*)name intValue:(GLint)intValue {
+    int pos = [self getTrait:name];
+    if (pos != -1) {
+        glUniform1i(pos, intValue);
+    }
+    return pos;
+}
+
+-(int)setTrait:(NSString*)name floatValue:(GLfloat)floatValue {
+    int pos = [self getTrait:name];
+    if (pos != -1) {
+        glUniform1f(pos, floatValue);
+    }
+    return pos;
+}
+
+-(int)setTrait:(NSString*)name v0:(GLfloat)v0 v1:(GLfloat)v1 {
+    int pos = [self getTrait:name];
+    if (pos != -1) {
+        glUniform2f(pos, v0, v1);
+    }
+    return pos;
+}
+
 @end

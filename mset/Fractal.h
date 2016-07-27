@@ -3,10 +3,23 @@
 // Copyright (c) 2015 Jonathan Slater. All rights reserved.
 //
 
+typedef NS_ENUM(NSInteger, RenderMode) {
+    RenderModeSinglePrecision = 1,
+    RenderModeDoublePrecision
+};
+
 @protocol Fractal<NSObject>
 
 @required
--(void)renderWithMaxIterations:(NSInteger)maxIterations;
+
+-(instancetype)initWithWidth:(NSInteger)width height:(NSInteger)height;
+
+-(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix
+            fragmentShader:(NSString*)fragmentShader
+                renderMode:(RenderMode)renderMode
+                iterations:(GLint)iterations
+                    radius:(double)radius
+              frameCounter:(NSInteger)frameCounter;
 
 @property (nonatomic, strong) ComplexPlane* complexPlane;
 

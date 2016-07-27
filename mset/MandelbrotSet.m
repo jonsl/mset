@@ -20,16 +20,16 @@ static Vertex* baseShaderQuad;
 
 @synthesize complexPlane = _complexPlane;
 
-+(MandelbrotSet*)mandelbrotSet {
-    return [[MandelbrotSet alloc] init];
++(MandelbrotSet*)mandelbrotSetWithWidth:(NSInteger)width height:(NSInteger)height {
+    return [[MandelbrotSet alloc] initWithWidth:width height:height];
 }
 
--(instancetype)init {
+-(instancetype)initWithWidth:(NSInteger)width height:(NSInteger)height {
     if ((self = [super init])) {
         baseShaderQuad = malloc(sizeof(Vertex) * 4);
 
-        baseShaderQuad[0].x.x = -1.f;
-        baseShaderQuad[0].x.y = +1.f;
+        baseShaderQuad[0].x.x = 0.f;
+        baseShaderQuad[0].x.y = height;
         baseShaderQuad[0].uv.x = 0.f;
         baseShaderQuad[0].uv.y = 0.f;
         baseShaderQuad[0].colour.r = 0xff;
@@ -37,28 +37,28 @@ static Vertex* baseShaderQuad;
         baseShaderQuad[0].colour.b = 0xff;
         baseShaderQuad[0].colour.a = 0xff;
 
-        baseShaderQuad[1].x.x = -1.f;
-        baseShaderQuad[1].x.y = -1.f;
+        baseShaderQuad[1].x.x = 0.f;
+        baseShaderQuad[1].x.y = 0.f;
         baseShaderQuad[1].uv.x = 0.f;
-        baseShaderQuad[1].uv.y = 1.f;
+        baseShaderQuad[1].uv.y = height;
         baseShaderQuad[1].colour.r = 0xff;
         baseShaderQuad[1].colour.g = 0xff;
         baseShaderQuad[1].colour.b = 0xff;
         baseShaderQuad[1].colour.a = 0xff;
 
-        baseShaderQuad[2].x.x = +1.f;
-        baseShaderQuad[2].x.y = +1.f;
-        baseShaderQuad[2].uv.x = 1.f;
+        baseShaderQuad[2].x.x = width;
+        baseShaderQuad[2].x.y = height;
+        baseShaderQuad[2].uv.x = width;
         baseShaderQuad[2].uv.y = 0.f;
         baseShaderQuad[2].colour.r = 0xff;
         baseShaderQuad[2].colour.g = 0xff;
         baseShaderQuad[2].colour.b = 0xff;
         baseShaderQuad[2].colour.a = 0xff;
 
-        baseShaderQuad[3].x.x = +1.f;
-        baseShaderQuad[3].x.y = -1.f;
-        baseShaderQuad[3].uv.x = 1.f;
-        baseShaderQuad[3].uv.y = 1.f;
+        baseShaderQuad[3].x.x = width;
+        baseShaderQuad[3].x.y = 0.f;
+        baseShaderQuad[3].uv.x = width;
+        baseShaderQuad[3].uv.y = height;
         baseShaderQuad[3].colour.r = 0xff;
         baseShaderQuad[3].colour.g = 0xff;
         baseShaderQuad[3].colour.b = 0xff;
@@ -92,18 +92,20 @@ static Vertex* baseShaderQuad;
 -(NSString*)vertexShader {
     NSMutableString* source = [NSMutableString string];
 
+    [source appendLine:@"uniform mat4 uMvpMatrix;"];
     [source appendLine:@"attribute vec2 aPosition;"];
     [source appendLine:@"attribute vec2 aTexCoords;"];
     [source appendLine:@"varying highp vec2 vTexCoords;"];
 
     [source appendLine:@"void main() {"];
-    [source appendLine:@"  gl_Position = vec4(aPosition, 0., 1.);"];
+    [source appendLine:@"  gl_Position = uMvpMatrix * vec4(aPosition, 0., 1.);"];
     [source appendLine:@"  vTexCoords  = aTexCoords;"];
     [source appendString:@"}"];
 
     return source;
 }
 
+/*
 -(NSString*)fragmentShader {
     NSMutableString* source = [NSMutableString string];
 
@@ -134,6 +136,16 @@ static Vertex* baseShaderQuad;
 
     return source;
 }
+*/
+
+-(NSString*)fragmentShaderFromFile:(NSString*)fileName {
+    NSString* path = [[NSBundle mainBundle] pathForResource:fileName ofType:@"fsh"];
+    NSAssert(path != nil, @"invalid shader file path");
+    NSError* error = nil;
+    NSString* content = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&error];
+    NSAssert(error == nil, @"invalid shader file content");
+    return content;
+}
 
 #pragma mark Fractal
 
@@ -143,34 +155,38 @@ static Vertex* baseShaderQuad;
 
 #pragma mark DisplayObject
 
--(void)renderWithMaxIterations:(NSInteger)maxIterations {
+-(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix
+            fragmentShader:(NSString*)fragmentShader
+                renderMode:(RenderMode)renderMode
+                iterations:(GLint)iterations
+                    radius:(double)radius
+              frameCounter:(NSInteger)frameCounter {
 
-
-    int range[2], precision;
-    glGetShaderPrecisionFormat(GL_FRAGMENT_SHADER, GL_HIGH_INT, range, &precision);
-//    double min= floor(log2(range[0]));
-//    double max= floor(log2(range[1]));
-    NSLog(@"min: %f, max: %f", pow(2, range[0]), pow(2, range[1]));
-    
-    NSInteger sizeof_double = sizeof(double);
-
-
+//    int range[2], precision;
+//    glGetShaderPrecisionFormat(GL_FRAGMENT_SHADER, GL_HIGH_INT, range, &precision);
+////    double min= floor(log2(range[0]));
+////    double max= floor(log2(range[1]));
+//    NSLog(@"min: %f, max: %f", pow(2, range[0]), pow(2, range[1]));
+//
+//    NSInteger sizeof_double = sizeof(double);
 
     if (!self.directRenderingState) {
         self.directRenderingState = [[RenderingState alloc] init];
     }
+    self.directRenderingState.mvpMatrix = mvpMatrix;
+
     if (!self.directRenderingVertexShader) {
         self.directRenderingVertexShader = [self vertexShader];
     }
     if (!self.directRenderingFragmentShader) {
-        self.directRenderingFragmentShader = [self fragmentShader];
+        self.directRenderingFragmentShader = [self fragmentShaderFromFile:fragmentShader];
     }
     self.directRenderingState.texture = nil;
     [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader
                                               fragmentShader:self.directRenderingFragmentShader];
     int uMaxIterations = [self.directRenderingState.program getTrait:@"uMaxIterations"];
     if (uMaxIterations != -1) {
-        glUniform1i(uMaxIterations, (GLint)maxIterations);
+        glUniform1i(uMaxIterations, (GLint)iterations);
     }
     int aPosition = [self.directRenderingState.program getTrait:@"aPosition"];
     if (aPosition != -1) {

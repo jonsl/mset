@@ -25,10 +25,6 @@ typedef struct {
 } Vertex;
 
 typedef struct {
-    Real r, i;
-} CPPoint;
-
-typedef struct {
     unsigned char* rgb;
     size_t size;
 } ColourLookup;
