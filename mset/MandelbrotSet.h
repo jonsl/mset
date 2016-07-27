@@ -5,6 +5,6 @@
 
 @interface MandelbrotSet : NSObject<Fractal>
 
-+(MandelbrotSet*)mandelbrotSetWithWidth:(NSInteger)width height:(NSInteger)height;
++(MandelbrotSet*)mandelbrotSetWithWidth:(CGFloat)width height:(CGFloat)height;
 
 @end

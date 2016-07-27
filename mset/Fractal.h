@@ -12,7 +12,7 @@ typedef NS_ENUM(NSInteger, RenderMode) {
 
 @required
 
--(instancetype)initWithWidth:(NSInteger)width height:(NSInteger)height;
+-(instancetype)initWithWidth:(CGFloat)width height:(CGFloat)height;
 
 -(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix
             fragmentShader:(NSString*)fragmentShader

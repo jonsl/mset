@@ -20,11 +20,11 @@ static Vertex* baseShaderQuad;
 
 @synthesize complexPlane = _complexPlane;
 
-+(MandelbrotSet*)mandelbrotSetWithWidth:(NSInteger)width height:(NSInteger)height {
++(MandelbrotSet*)mandelbrotSetWithWidth:(CGFloat)width height:(CGFloat)height {
     return [[MandelbrotSet alloc] initWithWidth:width height:height];
 }
 
--(instancetype)initWithWidth:(NSInteger)width height:(NSInteger)height {
+-(instancetype)initWithWidth:(CGFloat)width height:(CGFloat)height {
     if ((self = [super init])) {
         baseShaderQuad = malloc(sizeof(Vertex) * 4);
 
@@ -92,14 +92,14 @@ static Vertex* baseShaderQuad;
 -(NSString*)vertexShader {
     NSMutableString* source = [NSMutableString string];
 
-    [source appendLine:@"uniform mat4 uMvpMatrix;"];
-    [source appendLine:@"attribute vec2 aPosition;"];
-    [source appendLine:@"attribute vec2 aTexCoords;"];
-    [source appendLine:@"varying highp vec2 vTexCoords;"];
+    [source appendLine:@"uniform mat4 u_mvpMatrix;"];
+    [source appendLine:@"attribute vec2 a_position;"];
+    [source appendLine:@"attribute vec2 a_texCoords;"];
+    [source appendLine:@"varying highp vec2 v_texCoords;"];
 
     [source appendLine:@"void main() {"];
-    [source appendLine:@"  gl_Position = uMvpMatrix * vec4(aPosition, 0., 1.);"];
-    [source appendLine:@"  vTexCoords  = aTexCoords;"];
+    [source appendLine:@"  gl_Position = u_mvpMatrix * vec4(a_position, 0., 1.);"];
+    [source appendLine:@"  v_texCoords  = a_texCoords;"];
     [source appendString:@"}"];
 
     return source;
@@ -109,16 +109,16 @@ static Vertex* baseShaderQuad;
 -(NSString*)fragmentShader {
     NSMutableString* source = [NSMutableString string];
 
-    [source appendLine:@"uniform int uMaxIterations;"];
-    [source appendLine:@"varying highp vec2 vTexCoords;"];
+    [source appendLine:@"uniform int u_iterations;"];
+    [source appendLine:@"varying highp vec2 v_texCoords;"];
 //    [source appendLine:@"const mediump vec3 colourPhase = vec3(5,7,11)/80.0;"];
 //    [source appendLine:@"const mediump vec3 colourPhaseStart = vec3(1);"];
 
     [source appendLine:@"highp float mandel() {"];
-    [source appendLine:@"  highp vec2 c = vTexCoords;"];
+    [source appendLine:@"  highp vec2 c = v_texCoords;"];
     [source appendLine:@"  highp vec2 z = c;"];
     [source appendLine:@"  highp float l = 0.;"];
-    [source appendLine:@"  for(int n=0; n<uMaxIterations; n++) {"];
+    [source appendLine:@"  for(int n=0; n<u_iterations; n++) {"];
     [source appendLine:@"    z = vec2( z.x*z.x - z.y*z.y, 2.*z.x*z.y ) + c;"];
     [source appendLine:@"    if( dot(z,z)>(256.*256.) ) {"];
     [source appendLine:@"      return l - log2(log2(dot(z, z))) + 4.;"];
@@ -185,14 +185,14 @@ static Vertex* baseShaderQuad;
     [self.directRenderingState prepareToDrawWithVertexShader:self.directRenderingVertexShader
                                               fragmentShader:self.directRenderingFragmentShader];
 
-    [self.directRenderingState.program setTrait:@"uMaxIterations" intValue:iterations];
+    [self.directRenderingState.program setTrait:@"u_iterations" intValue:iterations];
 
-    int aPosition = [self.directRenderingState.program getTrait:@"aPosition"];
+    int aPosition = [self.directRenderingState.program getTrait:@"a_position"];
     if (aPosition != -1) {
         glEnableVertexAttribArray((GLuint)aPosition);
         glVertexAttribPointer((GLuint)aPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)baseShaderQuad + (offsetof(Vertex, x)));
     }
-    int aTexture = [self.directRenderingState.program getTrait:@"aTexCoords"];
+    int aTexture = [self.directRenderingState.program getTrait:@"a_texCoords"];
     if (aTexture != -1) {
         glEnableVertexAttribArray((GLuint)aTexture);
         glVertexAttribPointer((GLuint)aTexture, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)baseShaderQuad + (offsetof(Vertex, uv)));

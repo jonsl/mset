@@ -31,18 +31,18 @@
     }
     glUseProgram(self.program.name);
 
-    int uMvpMatrix = [self.program getTrait:@"uMvpMatrix"];
+    int uMvpMatrix = [self.program getTrait:@"u_mvpMatrix"];
     if (uMvpMatrix != -1) {
         glUniformMatrix4fv(uMvpMatrix, 1, NO, self.mvpMatrix.m);
     }
-    int uAlpha = [self.program getTrait:@"uAlpha"];
+    int uAlpha = [self.program getTrait:@"u_alpha"];
     if (uAlpha != -1) {
         glUniform4f(uAlpha, 1.0f, 1.0f, 1.0f, _alpha);
     }
     if (self.texture) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, self.texture.name);
-        int uTexture = [self.program getTrait:@"uTexture"];
+        int uTexture = [self.program getTrait:@"u_texture"];
         if (uTexture != -1) {
             glUniform1i(uTexture, 0);
         }
@@ -57,23 +57,23 @@
     BOOL hasTexture = texture != nil;
     NSMutableString* source = [NSMutableString string];
 
-    [source appendLine:@"attribute vec4 aPosition;"];
-    [source appendLine:@"attribute vec4 aColour;"];
+    [source appendLine:@"attribute vec4 a_position;"];
+    [source appendLine:@"attribute vec4 a_colour;"];
     if (hasTexture) {
-        [source appendLine:@"attribute vec2 aTexCoords;"];
+        [source appendLine:@"attribute vec2 a_texCoords;"];
     }
-    [source appendLine:@"uniform mat4 uMvpMatrix;"];
-    [source appendLine:@"uniform vec4 uAlpha;"];
-    [source appendLine:@"varying lowp vec4 vColour;"];
+    [source appendLine:@"uniform mat4 u_mvpMatrix;"];
+    [source appendLine:@"uniform vec4 u_alpha;"];
+    [source appendLine:@"varying lowp vec4 v_colour;"];
     if (hasTexture) {
-        [source appendLine:@"varying lowp vec2 vTexCoords;"];
+        [source appendLine:@"varying lowp vec2 v_texCoords;"];
     }
 
     [source appendLine:@"void main() {"];
-    [source appendLine:@"  gl_Position = uMvpMatrix * aPosition;"];
-    [source appendLine:@"  vColour = aColour * uAlpha;"];
+    [source appendLine:@"  gl_Position = u_mvpMatrix * a_position;"];
+    [source appendLine:@"  v_colour = a_colour * u_alpha;"];
     if (hasTexture) {
-        [source appendLine:@"  vTexCoords  = aTexCoords;"];
+        [source appendLine:@"  v_texCoords  = a_texCoords;"];
     }
     [source appendString:@"}"];
 
@@ -84,17 +84,17 @@
     BOOL hasTexture = texture != nil;
     NSMutableString* source = [NSMutableString string];
 
-    [source appendLine:@"varying lowp vec4 vColour;"];
+    [source appendLine:@"varying lowp vec4 v_colour;"];
     if (hasTexture) {
-        [source appendLine:@"varying lowp vec2 vTexCoords;"];
-        [source appendLine:@"uniform lowp sampler2D uTexture;"];
+        [source appendLine:@"varying lowp vec2 v_texCoords;"];
+        [source appendLine:@"uniform lowp sampler2D u_texture;"];
     }
 
     [source appendLine:@"void main() {"];
     if (hasTexture) {
-        [source appendLine:@"  gl_FragColor = texture2D(uTexture, vTexCoords) * vColour;"];
+        [source appendLine:@"  gl_FragColor = texture2D(u_texture, v_texCoords) * v_colour;"];
     } else {
-        [source appendLine:@"  gl_FragColor = vColour;"];
+        [source appendLine:@"  gl_FragColor = v_colour;"];
     }
     [source appendString:@"}"];
 

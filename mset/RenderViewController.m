@@ -9,9 +9,9 @@
 #import "Mset.h"
 #import "matrix4.h"
 
-static float const ScreenWidth = 1024.f;
-static Real InitialRealCentre = -0.5;
-static Real InitialRealWidth = 4;
+static float const kScreenWidth = 1024.f;
+static Real kInitialRealCentre = -0.5;
+static Real kInitialRealWidth = 4;
 static NSInteger const DEFAULT_MAX_ITERATIONS = 256;
 static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
 
@@ -30,7 +30,8 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
 @implementation RenderViewController {
     CGSize _screenSize;
     CGFloat _aspect;
-    int _w, _h, _frameCounter;
+
+    NSInteger _frameCounter;
     NSDate* _frameStartTime;
 
     BOOL _pendingCompute;
@@ -75,20 +76,17 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
     CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
 
     _aspect = screenSize.width / screenSize.height;
-    _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / _aspect);
+    _screenSize = CGSizeMake(kScreenWidth, kScreenWidth / _aspect);
 
-    _w = (int) _screenSize.width;
-    _h = (int) _screenSize.height;
-
-    _projectionMatrix = GLKMatrix4MakeOrtho(0.f, _w, 0.f, _h, 0.f, 1.f);
+    _projectionMatrix = GLKMatrix4MakeOrtho(0.f, _screenSize.width, 0.f, _screenSize.height, 0.f, 1.f);
 
     _aspect = screenSize.width / screenSize.height;
-    _screenSize = CGSizeMake(ScreenWidth, ScreenWidth / _aspect);
+    _screenSize = CGSizeMake(kScreenWidth, kScreenWidth / _aspect);
 
     _maxIterations = DEFAULT_MAX_ITERATIONS;
     _lastIterationDelta = DEFAULT_MAX_ITERATIONS >> 1;
 
-    self.fractal = [MandelbrotSet mandelbrotSetWithWidth:_w height:_h];
+    self.fractal = [MandelbrotSet mandelbrotSetWithWidth:_screenSize.width height:_screenSize.height];
 
     [self initialiseComplexPlane];
 
@@ -98,12 +96,12 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
 }
 
 -(void)initialiseComplexPlane {
-    Real rHalfExtent = 0.5 * InitialRealWidth;
-    Real iHalfExtent = 0.5 * InitialRealWidth / _aspect;
+    Real rHalfExtent = 0.5 * kInitialRealWidth;
+    Real iHalfExtent = 0.5 * kInitialRealWidth / _aspect;
     Point2 cOrigin, rMaxiMin, rMiniMax;
-    cOrigin.r = InitialRealCentre - rHalfExtent;
+    cOrigin.r = kInitialRealCentre - rHalfExtent;
     cOrigin.i = -iHalfExtent;
-    rMaxiMin.r = cOrigin.r + InitialRealWidth;
+    rMaxiMin.r = cOrigin.r + kInitialRealWidth;
     rMaxiMin.i = -iHalfExtent;
     rMiniMax.r = cOrigin.r;
     rMiniMax.i = +iHalfExtent;
@@ -204,8 +202,8 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
 }
 
 -(void)initialiseMatrices {
-    _translateMatrix = matrix4Translate(g_matrix4Identity, (double) _initialPosition.x, (double) _initialPosition.y, 0.0);
-    _scaleMatrix = matrix4Scale(g_matrix4Identity, (double) _initialScale, _initialScale, 1.0);
+    _translateMatrix = matrix4Translate(g_matrix4Identity, _initialPosition.x, _initialPosition.y, 0.0);
+    _scaleMatrix = matrix4Scale(g_matrix4Identity, _initialScale, _initialScale, 1.0);
     _rotateMatrix = matrix4Rotate(g_matrix4Identity, _initialRotation, 0.0, 0.0, 1.0);
     self.modelMatrix = matrix4Multiply(matrix4Multiply(_translateMatrix, matrix4Multiply(_scaleMatrix, _rotateMatrix)), g_matrix4Identity);
 

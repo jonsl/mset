@@ -1,14 +1,15 @@
 
-uniform int uMaxIterations;
-varying highp vec2 vTexCoords;
+uniform int u_iterations;
+
+varying highp vec2 v_texCoords;
 
 highp float mandel() {
 
-	highp vec2 c = vTexCoords;
+	highp vec2 c = v_texCoords;
 	highp vec2 z = c;
 	highp float l = 0.;
 
-	for (int n=0; n<uMaxIterations; n++) {
+	for (int n=0; n<u_iterations; n++) {
 
 		z = vec2( z.x*z.x - z.y*z.y, 2.*z.x*z.y ) + c;
 

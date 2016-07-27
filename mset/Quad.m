@@ -185,9 +185,9 @@
 
     [self applyBlendMode:GL_SRC_ALPHA dstFactor:GL_ONE_MINUS_SRC_ALPHA];
 
-    int aPosition = [self.renderingState.program getTrait:@"aPosition"];
-    int aColour = [self.renderingState.program getTrait:@"aColour"];
-    int aTexCoords = [self.renderingState.program getTrait:@"aTexCoords"];
+    int aPosition = [self.renderingState.program getTrait:@"a_position"];
+    int aColour = [self.renderingState.program getTrait:@"a_colour"];
+    int aTexCoords = [self.renderingState.program getTrait:@"a_texCoords"];
 
     GLuint attribPosition = (GLuint)aPosition;
     GLuint attribColor = (GLuint)aColour;
