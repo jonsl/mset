@@ -17,6 +17,8 @@ typedef NS_ENUM(NSInteger, RenderMode) {
 -(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix
             fragmentShader:(NSString*)fragmentShader
                 renderMode:(RenderMode)renderMode
+                     width:(CGFloat)width
+                    height:(CGFloat)height
                 iterations:(GLint)iterations
                     radius:(double)radius
               frameCounter:(NSInteger)frameCounter;

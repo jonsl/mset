@@ -1,11 +1,15 @@
 
 uniform int u_iterations;
+uniform highp float u_cr;
+uniform highp float u_ci;
+uniform highp float u_dcr;
+uniform highp float u_dci;
 
 varying highp vec2 v_texCoords;
 
 highp float mandel() {
 
-	highp vec2 c = v_texCoords;
+	highp vec2 c = vec2(u_cr, u_ci) + v_texCoords * vec2(u_dcr, u_dci);
 	highp vec2 z = c;
 	highp float l = 0.;
 

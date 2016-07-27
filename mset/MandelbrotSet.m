@@ -75,7 +75,7 @@ static Vertex* baseShaderQuad;
 -(void)setComplexPlane:(ComplexPlane*)complexPlane {
     _complexPlane = complexPlane;
 
-    [self updateQuad];
+//    [self updateQuad];
 }
 
 -(void)updateQuad {
@@ -158,6 +158,8 @@ static Vertex* baseShaderQuad;
 -(void)renderWithMvpMatrix:(GLKMatrix4)mvpMatrix
             fragmentShader:(NSString*)fragmentShader
                 renderMode:(RenderMode)renderMode
+                     width:(CGFloat)width
+                    height:(CGFloat)height
                 iterations:(GLint)iterations
                     radius:(double)radius
               frameCounter:(NSInteger)frameCounter {
@@ -186,6 +188,16 @@ static Vertex* baseShaderQuad;
                                               fragmentShader:self.directRenderingFragmentShader];
 
     [self.directRenderingState.program setTrait:@"u_iterations" intValue:iterations];
+
+    double cr = self.complexPlane.origin.r;
+    double ci = self.complexPlane.origin.i;
+    double dcr = (self.complexPlane.rMaxiMin.r - self.complexPlane.origin.r) / (double)width;
+    double dci = (self.complexPlane.rMiniMax.i - self.complexPlane.origin.i) / (double)height;
+
+    [self.directRenderingState.program setTrait:@"u_cr" floatValue:(float)cr];
+    [self.directRenderingState.program setTrait:@"u_ci" floatValue:(float)ci];
+    [self.directRenderingState.program setTrait:@"u_dcr" floatValue:(float)dcr];
+    [self.directRenderingState.program setTrait:@"u_dci" floatValue:(float)dci];
 
     int aPosition = [self.directRenderingState.program getTrait:@"a_position"];
     if (aPosition != -1) {

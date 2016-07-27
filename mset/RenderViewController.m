@@ -15,9 +15,6 @@ static Real kInitialRealWidth = 4;
 static NSInteger const DEFAULT_MAX_ITERATIONS = 256;
 static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
 
-//static Real MinFrameTime = 1.0 / 20.0;
-//static Real FrameTimeEpsilon = 1.0 / 20.0 - 1.0 / 22.0;
-
 @interface RenderViewController()
 
 @property (nonatomic, strong) EditViewController* editViewController;
@@ -39,7 +36,7 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
     GLKMatrix4 _projectionMatrix;
 
     Matrix4 _translateMatrix;
-    CGPoint _translateVelocity;
+    Point2 _translateVelocity;
     Matrix4 _scaleMatrix;
     Matrix4 _rotateMatrix;
 
@@ -188,6 +185,8 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
     [self.fractal renderWithMvpMatrix:_projectionMatrix
                        fragmentShader:@"singleFloatMandel"
                            renderMode:RenderModeSinglePrecision
+                                width:_screenSize.width
+                               height:_screenSize.height
                            iterations:_maxIterations
                                radius:_radius
                          frameCounter:_frameCounter];
@@ -214,15 +213,15 @@ static NSInteger const FPS_FRAME_UPDATE_COUNT = 50;
 
 -(void)translateWithTranslation:(CGPoint)translation veclocity:(CGPoint)velocity {
     _translateMatrix = matrix4Translate(_translateMatrix, translation.x, translation.y, 0.0);
-    _translateVelocity = velocity;
+    _translateVelocity = point2Make(velocity.x, velocity.y);
 
     _pendingCompute = YES;
 }
 
 -(void)rotateWithCentre:(CGPoint)centre radians:(CGFloat)radians {
-    _rotateMatrix = matrix4Translate(_rotateMatrix, centre.x, centre.y, 0.0);
-    _rotateMatrix = matrix4Rotate(_rotateMatrix, radians, 0.0, 0.0, 1.0);
-    _rotateMatrix = matrix4Translate(_rotateMatrix, -centre.x, -centre.y, 0.0);
+//    _rotateMatrix = matrix4Translate(_rotateMatrix, centre.x, centre.y, 0.0);
+//    _rotateMatrix = matrix4Rotate(_rotateMatrix, radians, 0.0, 0.0, 1.0);
+//    _rotateMatrix = matrix4Translate(_rotateMatrix, -centre.x, -centre.y, 0.0);
 
     _pendingCompute = YES;
 }
